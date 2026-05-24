@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(php --version)",
+      "Bash(composer --version)",
+      "Bash(npm --version)",
+      "PowerShell(php --version)",
+      "PowerShell(composer --version)",
+      "PowerShell(node --version)",
+      "PowerShell(npm --version)",
+      "mcp__ssh-manager__ssh_list_servers",
+      "mcp__ssh-manager__ssh_execute",
+      "PowerShell(ssh-keyscan -H github.com 2>$null | Out-File -Append -Encoding utf8 \"$env:USERPROFILE\\\\.ssh\\\\known_hosts\"; Write-Host \"Done\")",
+      "PowerShell($env:GIT_SSH_COMMAND = \"ssh -o StrictHostKeyChecking=accept-new\"; cd \"C:\\\\Users\\\\hp\\\\Desktop\\\\New folder\\\\Real Project\\\\lost-cards\"; git push origin main 2>&1)",
+      "mcp__ssh-manager__ssh_sync",
+      "mcp__ssh-manager__ssh_upload"
+    ]
+  }
+}

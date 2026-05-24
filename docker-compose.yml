@@ -1,0 +1,72 @@
+services:
+  # ─── MySQL ──────────────────────────────────────────────
+  db:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: lostcards
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # ─── PHP / Laravel ──────────────────────────────────────
+  backend:
+    image: php:8.3-cli
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - ./backend:/var/www
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    command: >
+      sh -c "
+        apt-get update -q && apt-get install -y --no-install-recommends curl unzip libpq-dev libonig-dev &&
+        docker-php-ext-install pdo_mysql mbstring &&
+        curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer &&
+        composer install --no-interaction --prefer-dist &&
+        cp -n .env.example .env || true &&
+        sed -i 's/DB_HOST=127.0.0.1/DB_HOST=db/' .env &&
+        sed -i 's/DB_PASSWORD=/DB_PASSWORD=secret/' .env &&
+        php artisan key:generate --force &&
+        php artisan migrate --seed --force &&
+        php artisan serve --host=0.0.0.0 --port=8000
+      "
+    environment:
+      DB_HOST: db
+      DB_DATABASE: lostcards
+      DB_USERNAME: root
+      DB_PASSWORD: secret
+
+  # ─── React / Vite ───────────────────────────────────────
+  frontend:
+    image: node:24-alpine
+    restart: unless-stopped
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+    ports:
+      - "3000:3000"
+    command: sh -c "npm install && npm run dev -- --host"
+    depends_on:
+      - backend
+
+  # ─── Mailpit (test emails) ──────────────────────────────
+  mailpit:
+    image: axllent/mailpit
+    restart: unless-stopped
+    ports:
+      - "1025:1025"   # SMTP
+      - "8025:8025"   # Web UI
+
+volumes:
+  db_data:

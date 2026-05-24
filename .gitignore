@@ -1,0 +1,18 @@
+# Backend
+backend/vendor/
+backend/.env
+backend/storage/app/
+backend/storage/logs/
+backend/bootstrap/cache/
+backend/.phpunit.result.cache
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.env.local
+frontend/.env.production
+
+# System
+.DS_Store
+Thumbs.db
+*.log

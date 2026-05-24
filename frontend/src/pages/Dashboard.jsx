@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { getPosts, markRecovered, deletePost } from '../api/posts'
 import { useAuth } from '../context/AuthContext'
-import { PlusCircle, Wallet, CheckCircle, Trash2, Eye, Search, Sparkles, X } from 'lucide-react'
+import { PlusCircle, Wallet, CheckCircle, Trash2, Eye, Search, Sparkles, X, Bell, User, Shield, ChevronRight } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import toast from 'react-hot-toast'
@@ -127,6 +127,18 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {/* Quick actions */}
+      <section className="mb-6 animate-slide-up" style={{ animationDelay: '230ms' }}>
+        <h2 className="font-semibold text-gray-800 text-sm mb-3 flex items-center gap-1.5">⚡ Actions rapides</h2>
+        <div className="grid grid-cols-2 gap-2.5">
+          <QuickAction to="/alerts"  icon={<Bell size={18} />}  label="Mes alertes"  desc="Soyez notifié" color="from-blue-500 to-blue-600" />
+          <QuickAction to="/profile" icon={<User size={18} />} label="Mon profil"   desc="Statut & infos" color="from-purple-500 to-purple-600" />
+          {user?.role === 'admin' && (
+            <QuickAction to="/admin" icon={<Shield size={18} />} label="Administration" desc="Tableau admin" color="from-red-500 to-red-600" wide />
+          )}
+        </div>
+      </section>
+
       {/* Search results OR Recent posts */}
       <section className="mb-6 animate-slide-up" style={{ animationDelay: '260ms' }}>
         <div className="flex items-center justify-between mb-3">
@@ -218,5 +230,23 @@ export default function Dashboard() {
         </div>
       </section>
     </div>
+  )
+}
+
+function QuickAction({ to, icon, label, desc, color, wide }) {
+  return (
+    <Link
+      to={to}
+      className={`group card-hover flex items-center gap-3 p-3.5 ${wide ? 'col-span-2' : ''}`}
+    >
+      <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${color} text-white flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform`}>
+        {icon}
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="font-semibold text-sm text-gray-800 group-hover:text-orange-600 transition-colors">{label}</p>
+        <p className="text-xs text-gray-400">{desc}</p>
+      </div>
+      <ChevronRight size={16} className="text-gray-300 group-hover:text-orange-500 group-hover:translate-x-1 transition-all shrink-0" />
+    </Link>
   )
 }

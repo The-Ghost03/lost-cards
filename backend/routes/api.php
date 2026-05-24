@@ -30,6 +30,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/posts/{post}/contact',                               [ContactRequestController::class, 'index']);
     Route::post('/posts/{post}/contact',                              [ContactRequestController::class, 'store']);
     Route::patch('/posts/{post}/contact/{request}/approve',           [ContactRequestController::class, 'approve']);
+    Route::patch('/posts/{post}/contact/{request}/reject',            [ContactRequestController::class, 'reject']);
+    Route::get('/posts/{post}/contact/{request}/selfie',              [ContactRequestController::class, 'selfie']);
 
     // Messages
     Route::get('/conversations',                       [MessageController::class, 'conversations']);

@@ -19,6 +19,8 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
     env_file: backend/.env
+    volumes:
+      - selfies:/var/www/storage/app/selfies
     depends_on:
       db:
         condition: service_healthy
@@ -35,3 +37,4 @@ services:
 
 volumes:
   db_data:
+  selfies:

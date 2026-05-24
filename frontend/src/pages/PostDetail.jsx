@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
-import { getPost, submitContact, approveContact, getContactRequests, markRecovered } from '../api/posts'
+import { getPost, submitContact, approveContact, rejectContact, getContactRequests, markRecovered, getSelfie } from '../api/posts'
 import { getMessages, sendMessage } from '../api/messages'
 import { useAuth } from '../context/AuthContext'
 import { MapPin, FileText, Calendar, HelpCircle, Send, CheckCircle, MessageCircle, ChevronLeft } from 'lucide-react'
@@ -22,7 +22,9 @@ export default function PostDetail() {
   const [post, setPost]       = useState(null)
   const [requests, setReqs]   = useState([])
   const [messages, setMsgs]   = useState([])
-  const [answer, setAnswer]   = useState('')
+  const [selfie, setSelfie]         = useState(null)
+  const [selfiePreview, setPreview]  = useState(null)
+  const [selfieUrls, setSelfieUrls]  = useState({})
   const [msgText, setMsgText] = useState('')
   const [loading, setLoading] = useState(true)
   const [sending, setSending] = useState(false)
@@ -44,17 +46,49 @@ export default function PostDetail() {
      .finally(() => setLoading(false))
   }, [id, user])
 
+  const handleSelfieChange = (e) => {
+    const file = e.target.files[0]
+    if (!file) return
+    setSelfie(file)
+    setPreview(URL.createObjectURL(file))
+  }
+
   const submitContactRequest = async (e) => {
     e.preventDefault()
+    if (!selfie) { toast.error('Veuillez prendre un selfie'); return }
     setSending(true)
     try {
-      const res = await submitContact(id, { answer })
+      const fd = new FormData()
+      fd.append('selfie', selfie)
+      const res = await submitContact(id, fd)
       setMyReq(res.data)
-      toast.success('Demande envoyée ! Le retrouveur va vérifier votre réponse.')
+      toast.success('Selfie envoyé ! Le retrouveur va comparer avec la photo sur les pièces.')
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Réponse incorrecte ou erreur')
+      toast.error(err.response?.data?.message || 'Erreur lors de l\'envoi')
     } finally {
       setSending(false)
+    }
+  }
+
+  const loadSelfie = async (reqId) => {
+    if (selfieUrls[reqId]) return // already loaded
+    try {
+      const res = await getSelfie(id, reqId)
+      const url = URL.createObjectURL(res.data)
+      setSelfieUrls(prev => ({ ...prev, [reqId]: url }))
+    } catch {
+      toast.error('Impossible de charger le selfie')
+    }
+  }
+
+  const handleReject = async (requestId) => {
+    try {
+      await rejectContact(id, requestId)
+      toast.success('Demande refusée.')
+      const r = await getContactRequests(id)
+      setReqs(r.data)
+    } catch {
+      toast.error('Erreur')
     }
   }
 
@@ -157,36 +191,48 @@ export default function PostDetail() {
           </h2>
 
           {!myRequest && (
-            <form onSubmit={submitContactRequest}>
-              <p className="text-xs text-gray-500 mb-3 bg-orange-50 p-3 rounded-xl">
-                <strong>Question du retrouveur :</strong> {post.secret_question}
-              </p>
-              <input
-                type="text"
-                className="input mb-3"
-                placeholder="Votre réponse..."
-                value={answer}
-                onChange={e => setAnswer(e.target.value)}
-                required
-              />
-              <button type="submit" className="btn-primary w-full" disabled={sending}>
-                {sending ? 'Envoi...' : 'Envoyer ma demande'}
+            <form onSubmit={submitContactRequest} className="flex flex-col gap-3">
+              <div className="bg-orange-50 p-3 rounded-xl text-xs text-gray-600">
+                <p className="font-semibold text-orange-700 mb-1">📸 Vérification par selfie</p>
+                <p>Prenez un selfie de votre visage. Le retrouveur le comparera avec la photo sur vos pièces d'identité trouvées.</p>
+              </div>
+
+              {/* Bouton capture / upload */}
+              <label className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-orange-300 rounded-xl p-4 cursor-pointer bg-orange-50 hover:bg-orange-100 transition-colors">
+                {selfiePreview
+                  ? <img src={selfiePreview} alt="Aperçu selfie" className="w-32 h-32 object-cover rounded-full border-4 border-orange-400" />
+                  : <span className="text-4xl">🤳</span>
+                }
+                <span className="text-xs text-orange-700 font-medium">
+                  {selfiePreview ? 'Changer le selfie' : 'Prendre un selfie'}
+                </span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  capture="user"
+                  className="hidden"
+                  onChange={handleSelfieChange}
+                />
+              </label>
+
+              <button type="submit" className="btn-primary w-full" disabled={sending || !selfie}>
+                {sending ? 'Envoi en cours...' : 'Envoyer mon selfie'}
               </button>
             </form>
           )}
 
           {myRequest?.status === 'pending' && (
             <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-3 text-sm text-yellow-800">
-              Demande envoyée. En attente de validation par le retrouveur...
+              📸 Selfie envoyé. Le retrouveur va vérifier que votre visage correspond aux pièces trouvées.
             </div>
           )}
 
           {myRequest?.status === 'rejected' && (
             <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-sm text-red-700 flex items-center justify-between gap-3">
-              <span>Réponse incorrecte.</span>
+              <span>Selfie non validé par le retrouveur.</span>
               <button
                 className="text-red-700 underline text-xs font-medium shrink-0"
-                onClick={() => setMyReq(null)}
+                onClick={() => { setMyReq(null); setSelfie(null); setPreview(null) }}
               >
                 Réessayer
               </button>
@@ -200,26 +246,49 @@ export default function PostDetail() {
         <div className="card mb-4">
           <h2 className="font-semibold text-gray-800 text-sm mb-3">Demandes reçues</h2>
           {requests.map(req => (
-            <div key={req.id} className="border border-gray-100 rounded-xl p-3 mb-2">
-              <div className="flex items-center justify-between">
+            <div key={req.id} className="border border-gray-100 rounded-xl p-3 mb-2 flex flex-col gap-2">
+              <div className="flex items-center justify-between gap-2">
                 <div>
                   <p className="text-sm font-medium text-gray-800">{req.user?.name}</p>
-                  <p className="text-xs text-gray-500">Réponse : <em>{req.answer}</em></p>
+                  <p className="text-xs text-gray-400">{req.user?.phone}</p>
                 </div>
-                {req.status === 'pending' && (
-                  <button onClick={() => handleApprove(req.id)} className="btn-primary text-xs py-1 px-3">
-                    Valider
-                  </button>
-                )}
-                {req.status === 'rejected' && (
-                  <button onClick={() => handleApprove(req.id)} className="btn-primary text-xs py-1 px-3 bg-gray-500 hover:bg-gray-600">
-                    Valider quand même
-                  </button>
-                )}
-                {req.status === 'approved' && (
-                  <span className="badge bg-green-100 text-green-700">Approuvé</span>
-                )}
+                <span className={`badge text-xs ${
+                  req.status === 'approved' ? 'bg-green-100 text-green-700' :
+                  req.status === 'rejected' ? 'bg-red-100 text-red-600' :
+                  'bg-yellow-100 text-yellow-700'
+                }`}>
+                  {req.status === 'approved' ? '✓ Approuvé' : req.status === 'rejected' ? '✗ Refusé' : '⏳ En attente'}
+                </span>
               </div>
+
+              {/* Selfie viewer */}
+              {req.selfie_path && (
+                <div className="flex items-center gap-2">
+                  {selfieUrls[req.id]
+                    ? <img src={selfieUrls[req.id]} alt="Selfie" className="w-20 h-20 object-cover rounded-xl border border-gray-200" />
+                    : <button
+                        onClick={() => loadSelfie(req.id)}
+                        className="text-xs text-orange-600 underline"
+                      >
+                        📸 Voir le selfie
+                      </button>
+                  }
+                </div>
+              )}
+
+              {/* Actions */}
+              {req.status !== 'approved' && (
+                <div className="flex gap-2">
+                  <button onClick={() => handleApprove(req.id)} className="btn-primary text-xs py-1 px-3 flex-1">
+                    ✓ C'est bien lui / elle
+                  </button>
+                  {req.status === 'pending' && (
+                    <button onClick={() => handleReject(req.id)} className="text-xs py-1 px-3 flex-1 rounded-xl border border-red-300 text-red-600 hover:bg-red-50">
+                      ✗ Pas le bon
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           ))}
         </div>

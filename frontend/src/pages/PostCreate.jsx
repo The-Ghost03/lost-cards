@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { createPost } from '../api/posts'
-import { MapPin, FileText, HelpCircle, Phone, CheckSquare, Square } from 'lucide-react'
+import { MapPin, FileText, Phone, CheckSquare, Square } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 const DOCUMENTS = [
@@ -28,8 +28,6 @@ export default function PostCreate() {
     name_on_cards:   '',
     location:        '',
     documents:       [],
-    secret_question: '',
-    secret_answer:   '',
     pickup_address:  '',
   })
 
@@ -45,10 +43,6 @@ export default function PostCreate() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (form.documents.length === 0) { toast.error('Sélectionnez au moins un type de document'); return }
-    if (!form.secret_question.trim() || !form.secret_answer.trim()) {
-      toast.error('La question secrète est obligatoire')
-      return
-    }
     setLoading(true)
     try {
       const res = await createPost(form)
@@ -122,32 +116,6 @@ export default function PostCreate() {
               )
             })}
           </div>
-        </div>
-
-        {/* Question secrète */}
-        <div className="card">
-          <label className="flex items-center gap-2 text-sm font-semibold text-gray-800 mb-1">
-            <HelpCircle size={16} className="text-orange-500" /> Question secrète de vérification
-          </label>
-          <p className="text-xs text-gray-400 mb-3">
-            Posez une question dont seul le vrai propriétaire connaît la réponse.
-          </p>
-          <input
-            type="text"
-            className="input mb-2"
-            placeholder="Ex: Quelle est la couleur du portefeuille ?"
-            value={form.secret_question}
-            onChange={set('secret_question')}
-            required
-          />
-          <input
-            type="text"
-            className="input"
-            placeholder="Réponse secrète (visible uniquement par vous)"
-            value={form.secret_answer}
-            onChange={set('secret_answer')}
-            required
-          />
         </div>
 
         {/* Adresse de récupération */}

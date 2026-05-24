@@ -55,8 +55,8 @@ class PostController extends Controller
             'location'       => 'required|string|max:100',
             'documents'      => 'required|array|min:1',
             'documents.*'    => 'string|in:cni,permis,bancaire,assurance,passeport,sejour,electeur,autre',
-            'secret_question'=> 'required|string|max:255',
-            'secret_answer'  => 'required|string|max:255',
+            'secret_question'=> 'nullable|string|max:255',
+            'secret_answer'  => 'nullable|string|max:255',
             'pickup_address' => 'required|string|max:500',
         ]);
 

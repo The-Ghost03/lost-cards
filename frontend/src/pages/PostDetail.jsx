@@ -25,6 +25,7 @@ export default function PostDetail() {
   const [selfie, setSelfie]         = useState(null)
   const [selfiePreview, setPreview]  = useState(null)
   const [selfieUrls, setSelfieUrls]  = useState({})
+  const [enlargedSelfie, setEnlargedSelfie] = useState(null)
   const [msgText, setMsgText] = useState('')
   const [loading, setLoading] = useState(true)
   const [sending, setSending] = useState(false)
@@ -267,10 +268,15 @@ export default function PostDetail() {
               {req.selfie_path && (
                 <div className="flex items-center gap-2">
                   {selfieUrls[req.id]
-                    ? <img src={selfieUrls[req.id]} alt="Selfie" className="w-20 h-20 object-cover rounded-xl border border-gray-200" />
+                    ? <img
+                        src={selfieUrls[req.id]}
+                        alt="Selfie"
+                        className="w-20 h-20 object-cover rounded-xl border border-gray-200 cursor-zoom-in hover:opacity-90 transition-opacity"
+                        onClick={() => setEnlargedSelfie(selfieUrls[req.id])}
+                      />
                     : <button
                         onClick={() => loadSelfie(req.id)}
-                        className="text-xs text-orange-600 underline"
+                        className="text-xs bg-orange-50 border border-orange-300 text-orange-700 font-medium px-3 py-1.5 rounded-lg hover:bg-orange-100 transition-colors"
                       >
                         📸 Voir le selfie
                       </button>
@@ -345,6 +351,28 @@ export default function PostDetail() {
         <div className="card text-center py-6">
           <p className="text-gray-600 text-sm mb-3">Connectez-vous pour réclamer ce portefeuille</p>
           <button onClick={() => navigate('/login')} className="btn-primary">Se connecter</button>
+        </div>
+      )}
+
+      {/* Lightbox */}
+      {enlargedSelfie && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
+          onClick={() => setEnlargedSelfie(null)}
+        >
+          <div className="relative max-w-sm w-full" onClick={e => e.stopPropagation()}>
+            <img
+              src={enlargedSelfie}
+              alt="Selfie agrandi"
+              className="w-full rounded-2xl shadow-2xl"
+            />
+            <button
+              onClick={() => setEnlargedSelfie(null)}
+              className="absolute -top-3 -right-3 w-8 h-8 rounded-full bg-white text-gray-800 font-bold text-lg flex items-center justify-center shadow-lg hover:bg-gray-100"
+            >
+              ×
+            </button>
+          </div>
         </div>
       )}
     </div>

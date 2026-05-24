@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { Wallet } from 'lucide-react'
-import toast from 'react-hot-toast'
+import { Wallet, Search, Handshake } from 'lucide-react'
+import { t } from '../lib/toast'
+import { useAsyncAction } from '../lib/useAsyncAction'
 
 export default function Register() {
   const [form, setForm] = useState({
@@ -14,19 +15,19 @@ export default function Register() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!form.status) { toast.error('Choisissez votre statut'); return }
+    if (!form.status) { t.error('Choisissez votre statut'); return }
     if (form.password !== form.password_confirmation) {
-      toast.error('Les mots de passe ne correspondent pas'); return
+      t.error('Les mots de passe ne correspondent pas'); return
     }
     setLoading(true)
     try {
       await register(form)
-      toast.success('Compte créé avec succès !')
+      t.success('Compte créé avec succès !')
       navigate('/dashboard')
     } catch (err) {
       const errors = err.response?.data?.errors
-      if (errors) Object.values(errors).flat().forEach(msg => toast.error(msg))
-      else toast.error(err.response?.data?.message || "Erreur lors de l'inscription")
+      if (errors) Object.values(errors).flat().forEach(msg => t.error(msg))
+      else t.error(err.response?.data?.message || "Erreur lors de l'inscription")
     } finally {
       setLoading(false)
     }
@@ -51,22 +52,22 @@ export default function Register() {
           <p className="text-xs font-semibold text-gray-700 mb-3 uppercase tracking-wide">Vous êtes…</p>
           <div className="grid grid-cols-2 gap-3">
             {[
-              { key: 'chercheur',  emoji: '🔍', label: 'Chercheur',  desc: "J'ai perdu mes pièces" },
-              { key: 'retrouveur', emoji: '🤝', label: 'Retrouveur', desc: "J'aide à retrouver"   },
-            ].map(s => (
+              { key: 'chercheur',  Icon: Search,    label: 'Chercheur',  desc: "J'ai perdu mes pièces" },
+              { key: 'retrouveur', Icon: Handshake, label: 'Retrouveur', desc: "J'aide à retrouver"   },
+            ].map(({ key, Icon, label, desc }) => (
               <button
-                key={s.key}
+                key={key}
                 type="button"
-                onClick={() => setForm({ ...form, status: s.key })}
-                className={`p-3 rounded-xl border-2 text-center transition-all ${
-                  form.status === s.key
+                onClick={() => setForm({ ...form, status: key })}
+                className={`p-3 rounded-xl border-2 text-center transition-all active:scale-95 ${
+                  form.status === key
                     ? 'border-orange-400 bg-orange-50 text-orange-700'
                     : 'border-gray-200 text-gray-500 hover:border-gray-300'
                 }`}
               >
-                <div className="text-2xl mb-1">{s.emoji}</div>
-                <p className="font-semibold text-sm">{s.label}</p>
-                <p className="text-xs opacity-70 mt-0.5">{s.desc}</p>
+                <Icon size={26} className={`mx-auto mb-1.5 ${form.status === key ? 'text-orange-500' : 'text-gray-400'}`} />
+                <p className="font-semibold text-sm">{label}</p>
+                <p className="text-xs opacity-70 mt-0.5">{desc}</p>
               </button>
             ))}
           </div>

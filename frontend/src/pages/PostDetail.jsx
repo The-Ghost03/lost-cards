@@ -3,11 +3,13 @@ import { useParams, useNavigate, Link } from 'react-router-dom'
 import { getPost, submitContact, approveContact, rejectContact, getContactRequests, markRecovered, getSelfie } from '../api/posts'
 import { getMessages, sendMessage } from '../api/messages'
 import { useAuth } from '../context/AuthContext'
-import { MapPin, FileText, Calendar, HelpCircle, Send, CheckCircle, MessageCircle, ChevronLeft } from 'lucide-react'
+import { MapPin, FileText, Calendar, HelpCircle, Send, CheckCircle, XCircle, MessageCircle, ChevronLeft, Camera } from 'lucide-react'
 import SelfieCapture from '../components/SelfieCapture'
 import { formatDistanceToNow } from 'date-fns'
 import { fr } from 'date-fns/locale'
-import toast from 'react-hot-toast'
+import { t } from '../lib/toast'
+import { useAsyncAction } from '../lib/useAsyncAction'
+import { useConfirm } from '../components/ConfirmDialog'
 
 const DOC_LABELS = {
   cni: 'CNI', permis: 'Permis', bancaire: 'Carte bancaire',
@@ -19,6 +21,7 @@ export default function PostDetail() {
   const { id } = useParams()
   const { user } = useAuth()
   const navigate = useNavigate()
+  const confirm  = useConfirm()
 
   const [post, setPost]       = useState(null)
   const [requests, setReqs]   = useState([])
@@ -44,7 +47,7 @@ export default function PostDetail() {
       if (user) {
         setMyReq(r.data.find(req => req.user_id === user.id) || null)
       }
-    }).catch(() => toast.error('Annonce introuvable'))
+    }).catch(() => t.error('Annonce introuvable'))
      .finally(() => setLoading(false))
   }, [id, user])
 
@@ -55,16 +58,16 @@ export default function PostDetail() {
 
   const submitContactRequest = async (e) => {
     e.preventDefault()
-    if (!selfie) { toast.error('Veuillez prendre un selfie'); return }
+    if (!selfie) { t.error('Veuillez prendre un selfie'); return }
     setSending(true)
     try {
       const fd = new FormData()
       fd.append('selfie', selfie)
       const res = await submitContact(id, fd)
       setMyReq(res.data)
-      toast.success('Selfie envoyé ! Le retrouveur va comparer avec la photo sur les pièces.')
+      t.success('Selfie envoyé ! Le retrouveur va comparer avec la photo sur les pièces.')
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Erreur lors de l\'envoi')
+      t.error(err.response?.data?.message || 'Erreur lors de l\'envoi')
     } finally {
       setSending(false)
     }
@@ -77,57 +80,54 @@ export default function PostDetail() {
       const url = URL.createObjectURL(res.data)
       setSelfieUrls(prev => ({ ...prev, [reqId]: url }))
     } catch {
-      toast.error('Impossible de charger le selfie')
+      t.error('Impossible de charger le selfie')
     }
   }
 
-  const handleReject = async (requestId) => {
+  const { run: handleReject, loading: rejecting } = useAsyncAction(async (requestId) => {
     try {
       await rejectContact(id, requestId)
-      toast.success('Demande refusée.')
+      t.success('Demande refusée.')
       const r = await getContactRequests(id)
       setReqs(r.data)
     } catch {
-      toast.error('Erreur')
+      t.error('Erreur')
     }
-  }
+  })
 
-  const handleApprove = async (requestId) => {
+  const { run: handleApprove, loading: approving } = useAsyncAction(async (requestId) => {
     try {
       await approveContact(id, requestId)
-      toast.success('Contact approuvé ! Le chat est maintenant ouvert.')
+      t.success('Contact approuvé ! Le chat est maintenant ouvert.')
       const r = await getContactRequests(id)
       setReqs(r.data)
     } catch {
-      toast.error('Erreur lors de l\'approbation')
+      t.error('Erreur lors de l\'approbation')
     }
-  }
+  })
 
-  const handleSendMsg = async (e) => {
+  const { run: handleSendMsg, loading: sendingMsg } = useAsyncAction(async (e) => {
     e.preventDefault()
     if (!msgText.trim()) return
-    setSending(true)
     try {
       const res = await sendMessage(id, msgText)
       setMsgs(prev => [...prev, res.data])
       setMsgText('')
     } catch {
-      toast.error('Erreur d\'envoi')
-    } finally {
-      setSending(false)
+      t.error('Erreur d\'envoi')
     }
-  }
+  })
 
-  const handleRecover = async () => {
-    if (!confirm('Marquer ce portefeuille comme récupéré ? L\'annonce sera archivée.')) return
+  const { run: handleRecover } = useAsyncAction(async () => {
+    if (!(await confirm({ title: 'Marquer ce portefeuille comme récupéré ?', message: 'L\'annonce sera archivée.', confirmLabel: 'Confirmer' }))) return
     try {
       await markRecovered(id)
-      toast.success('Portefeuille marqué comme récupéré !')
+      t.success('Portefeuille marqué comme récupéré !')
       navigate('/')
     } catch {
-      toast.error('Erreur')
+      t.error('Erreur')
     }
-  }
+  })
 
   if (loading) return <div className="flex justify-center pt-20"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500" /></div>
   if (!post)   return <div className="pt-10 text-center text-gray-500">Annonce introuvable</div>
@@ -193,22 +193,22 @@ export default function PostDetail() {
           {!myRequest && (
             <form onSubmit={submitContactRequest} className="flex flex-col gap-3">
               <div className="bg-orange-50 p-3 rounded-xl text-xs text-gray-600">
-                <p className="font-semibold text-orange-700 mb-1">📸 Vérification par selfie</p>
+                <p className="font-semibold text-orange-700 mb-1 flex items-center gap-1.5"><Camera size={14} /> Vérification par selfie</p>
                 <p>Prenez un selfie de votre visage. Le retrouveur le comparera avec la photo sur vos pièces d'identité trouvées.</p>
               </div>
 
               {/* Caméra selfie */}
               <SelfieCapture onCapture={handleSelfieCapture} preview={selfiePreview} />
 
-              <button type="submit" className="btn-primary w-full" disabled={sending || !selfie}>
-                {sending ? 'Envoi en cours...' : 'Envoyer mon selfie'}
+              <button type="submit" className="btn-primary w-full" disabled={submittingContact || !selfie}>
+                {submittingContact ? 'Envoi en cours...' : 'Envoyer mon selfie'}
               </button>
             </form>
           )}
 
           {myRequest?.status === 'pending' && (
             <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-3 text-sm text-yellow-800">
-              📸 Selfie envoyé. Le retrouveur va vérifier que votre visage correspond aux pièces trouvées.
+              Selfie envoyé. Le retrouveur va vérifier que votre visage correspond aux pièces trouvées.
             </div>
           )}
 
@@ -260,7 +260,7 @@ export default function PostDetail() {
                         onClick={() => loadSelfie(req.id)}
                         className="text-xs bg-orange-50 border border-orange-300 text-orange-700 font-medium px-3 py-1.5 rounded-lg hover:bg-orange-100 transition-colors"
                       >
-                        📸 Voir le selfie
+                        Voir le selfie
                       </button>
                   }
                 </div>
@@ -269,12 +269,12 @@ export default function PostDetail() {
               {/* Actions */}
               {req.status !== 'approved' && (
                 <div className="flex gap-2">
-                  <button onClick={() => handleApprove(req.id)} className="btn-primary text-xs py-1 px-3 flex-1">
-                    ✓ C'est bien lui / elle
+                  <button onClick={() => handleApprove(req.id)} disabled={approving || rejecting} className="btn-primary text-xs py-1 px-3 flex-1">
+                    {approving ? '...' : <><CheckCircle size={12} className="inline mr-1" /> C'est bien lui / elle</>}
                   </button>
                   {req.status === 'pending' && (
-                    <button onClick={() => handleReject(req.id)} className="text-xs py-1 px-3 flex-1 rounded-xl border border-red-300 text-red-600 hover:bg-red-50">
-                      ✗ Pas le bon
+                    <button onClick={() => handleReject(req.id)} disabled={approving || rejecting} className="text-xs py-1 px-3 flex-1 rounded-xl border border-red-300 text-red-600 hover:bg-red-50 disabled:opacity-50 transition-colors active:scale-95">
+                      {rejecting ? '...' : <><XCircle size={12} className="inline mr-1" /> Pas le bon</>}
                     </button>
                   )}
                 </div>
@@ -322,7 +322,7 @@ export default function PostDetail() {
               value={msgText}
               onChange={e => setMsgText(e.target.value)}
             />
-            <button type="submit" className="btn-primary px-3" disabled={sending}>
+            <button type="submit" className="btn-primary px-3" disabled={sendingMsg}>
               <Send size={16} />
             </button>
           </form>

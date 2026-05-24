@@ -1,61 +1,60 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { Wallet } from 'lucide-react'
-import toast from 'react-hot-toast'
+import { Wallet, Mail, Lock } from 'lucide-react'
+import { t } from '../lib/toast'
+import { useAsyncAction } from '../lib/useAsyncAction'
 
 export default function Login() {
-  const [form, setForm]   = useState({ email: '', password: '' })
-  const [loading, setLoading] = useState(false)
+  const [form, setForm] = useState({ email: '', password: '' })
   const { login } = useAuth()
-  const navigate  = useNavigate()
+  const navigate = useNavigate()
 
-  const handleSubmit = async (e) => {
+  const { run: handleSubmit, loading } = useAsyncAction(async (e) => {
     e.preventDefault()
-    setLoading(true)
     try {
       await login(form)
-      toast.success('Bienvenue !')
+      t.success('Connecté !')
       navigate('/dashboard')
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Identifiants incorrects')
-    } finally {
-      setLoading(false)
+      const errors = err.response?.data?.errors
+      if (errors) {
+        Object.values(errors).flat().forEach(m => t.error(m))
+      } else {
+        t.error(err.response?.data?.message || 'Erreur de connexion')
+      }
     }
-  }
+  })
+
+  const set = (field) => (e) => setForm({ ...form, [field]: e.target.value })
 
   return (
-    <div className="max-w-sm mx-auto pt-10">
-      <div className="text-center mb-8">
+    <div className="max-w-sm mx-auto pt-10 page-enter">
+      <div className="text-center mb-8 animate-slide-down">
         <div className="inline-flex items-center gap-2 text-orange-500 font-bold text-xl mb-1">
           <Wallet size={24} /> LostCards
         </div>
-        <h1 className="text-2xl font-bold text-gray-900">Connexion</h1>
-        <p className="text-gray-500 text-sm mt-1">Content de vous revoir</p>
+        <h1 className="text-2xl font-bold text-gray-900">Content de vous revoir</h1>
+        <p className="text-gray-500 text-sm mt-1">Connectez-vous à votre compte</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="card flex flex-col gap-4">
+      <form onSubmit={handleSubmit} className="card flex flex-col gap-4 animate-slide-up">
         <div>
           <label className="text-xs font-medium text-gray-700 mb-1 block">Email</label>
-          <input
-            type="email"
-            className="input"
-            placeholder="votre@email.com"
-            value={form.email}
-            onChange={e => setForm({ ...form, email: e.target.value })}
-            required
-          />
+          <div className="relative">
+            <Mail size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+            <input type="email" required className="input pl-9" placeholder="votre@email.com" value={form.email} onChange={set('email')} />
+          </div>
         </div>
         <div>
-          <label className="text-xs font-medium text-gray-700 mb-1 block">Mot de passe</label>
-          <input
-            type="password"
-            className="input"
-            placeholder="••••••••"
-            value={form.password}
-            onChange={e => setForm({ ...form, password: e.target.value })}
-            required
-          />
+          <div className="flex items-center justify-between mb-1">
+            <label className="text-xs font-medium text-gray-700">Mot de passe</label>
+            <Link to="/forgot-password" className="text-xs text-orange-500 hover:underline">Oublié ?</Link>
+          </div>
+          <div className="relative">
+            <Lock size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+            <input type="password" required className="input pl-9" placeholder="••••••••" value={form.password} onChange={set('password')} />
+          </div>
         </div>
         <button type="submit" className="btn-primary w-full mt-1" disabled={loading}>
           {loading ? 'Connexion...' : 'Se connecter'}

@@ -2,10 +2,12 @@ import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { getPosts, markRecovered, deletePost } from '../api/posts'
 import { useAuth } from '../context/AuthContext'
-import { PlusCircle, Wallet, CheckCircle, Trash2, Eye, Search, Sparkles, X, Bell, User, Shield, ChevronRight } from 'lucide-react'
+import { PlusCircle, Wallet, CheckCircle, Trash2, Eye, Search, Sparkles, X, Bell, User, Shield, ChevronRight, Hand, Zap } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { fr } from 'date-fns/locale'
-import toast from 'react-hot-toast'
+import { t } from '../lib/toast'
+import { useAsyncAction } from '../lib/useAsyncAction'
+import { useConfirm } from '../components/ConfirmDialog'
 import PostCard from '../components/PostCard'
 
 const STATUS_BADGE = {
@@ -16,6 +18,7 @@ const STATUS_BADGE = {
 export default function Dashboard() {
   const { user } = useAuth()
   const navigate = useNavigate()
+  const confirm  = useConfirm()
 
   const [myPosts, setMyPosts]       = useState([])
   const [recent, setRecent]         = useState([])
@@ -53,23 +56,23 @@ export default function Dashboard() {
 
   const clearSearch = () => { setQuery(''); setResults(null) }
 
-  const handleRecover = async (id) => {
-    if (!confirm('Marquer comme récupéré ?')) return
+  const { run: handleRecover } = useAsyncAction(async (id) => {
+    if (!(await confirm({ title: 'Marquer comme récupéré ?', message: 'L\'annonce sera archivée.', confirmLabel: 'Marquer' }))) return
     try {
       await markRecovered(id)
-      toast.success('Marqué comme récupéré')
+      t.success('Marqué comme récupéré')
       loadAll()
-    } catch { toast.error('Erreur') }
-  }
+    } catch { t.error('Erreur') }
+  })
 
-  const handleDelete = async (id) => {
-    if (!confirm('Supprimer cette annonce ?')) return
+  const { run: handleDelete } = useAsyncAction(async (id) => {
+    if (!(await confirm({ title: 'Supprimer cette annonce ?', message: 'Action irréversible.', danger: true, confirmLabel: 'Supprimer' }))) return
     try {
       await deletePost(id)
-      toast.success('Annonce supprimée')
+      t.success('Annonce supprimée')
       loadAll()
-    } catch { toast.error('Erreur') }
-  }
+    } catch { t.error('Erreur') }
+  })
 
   return (
     <div className="pt-6 page-enter">
@@ -78,7 +81,7 @@ export default function Dashboard() {
         <div>
           <h1 className="text-xl font-bold text-gray-900 flex items-center gap-1.5">
             Bonjour, {user?.name?.split(' ')[0]}
-            <span className="animate-wiggle inline-block">👋</span>
+            <Hand size={20} className="animate-wiggle inline-block text-orange-500" />
           </h1>
           <p className="text-gray-500 text-sm">Bienvenue sur votre tableau de bord</p>
         </div>
@@ -129,7 +132,7 @@ export default function Dashboard() {
 
       {/* Quick actions */}
       <section className="mb-6 animate-slide-up" style={{ animationDelay: '230ms' }}>
-        <h2 className="font-semibold text-gray-800 text-sm mb-3 flex items-center gap-1.5">⚡ Actions rapides</h2>
+        <h2 className="font-semibold text-gray-800 text-sm mb-3 flex items-center gap-1.5"><Zap size={14} className="text-orange-500" /> Actions rapides</h2>
         <div className="grid grid-cols-2 gap-2.5">
           <QuickAction to="/alerts"  icon={<Bell size={18} />}  label="Mes alertes"  desc="Soyez notifié" color="from-blue-500 to-blue-600" />
           <QuickAction to="/profile" icon={<User size={18} />} label="Mon profil"   desc="Statut & infos" color="from-purple-500 to-purple-600" />
@@ -144,7 +147,7 @@ export default function Dashboard() {
         <div className="flex items-center justify-between mb-3">
           <h2 className="font-semibold text-gray-800 text-sm flex items-center gap-1.5">
             {results !== null
-              ? <>🔎 Résultats pour "{query}"</>
+              ? <><Search size={14} className="text-orange-500" /> Résultats pour "{query}"</>
               : <><Sparkles size={14} className="text-orange-500" /> Annonces récentes</>
             }
           </h2>

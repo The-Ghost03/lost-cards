@@ -1,12 +1,12 @@
 import { useState } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { Wallet, MessageCircle, LayoutDashboard, PlusCircle, LogOut } from 'lucide-react'
+import { Wallet, MessageCircle, LayoutDashboard, PlusCircle, LogOut, Search, Handshake } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 const STATUS_BADGE = {
-  chercheur:  { label: 'Chercheur',  emoji: '🔍', cls: 'bg-blue-50 text-blue-600'   },
-  retrouveur: { label: 'Retrouveur', emoji: '🤝', cls: 'bg-green-50 text-green-600' },
+  chercheur:  { label: 'Chercheur',  Icon: Search,    cls: 'bg-blue-50 text-blue-600'   },
+  retrouveur: { label: 'Retrouveur', Icon: Handshake, cls: 'bg-green-50 text-green-600' },
 }
 
 export default function Navbar() {
@@ -44,7 +44,7 @@ export default function Navbar() {
               to="/profile"
               className={`hidden sm:inline-flex text-xs px-2.5 py-1 rounded-full font-medium transition-transform hover:scale-105 ${badge?.cls ?? 'bg-gray-100 text-gray-500'}`}
             >
-              {badge ? `${badge.emoji} ${badge.label}` : 'Profil'}
+              {badge ? <span className="inline-flex items-center gap-1"><badge.Icon size={12} />{badge.label}</span> : 'Profil'}
             </Link>
 
             <button

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, Link } from 'react-router-dom'
 import { getPost, submitContact, approveContact, getContactRequests, markRecovered } from '../api/posts'
 import { getMessages, sendMessage } from '../api/messages'
 import { useAuth } from '../context/AuthContext'
@@ -104,9 +104,9 @@ export default function PostDetail() {
 
   return (
     <div className="pt-6">
-      <button onClick={() => navigate(-1)} className="flex items-center gap-1 text-gray-500 text-sm mb-4 hover:text-gray-700">
-        <ChevronLeft size={16} /> Retour
-      </button>
+      <Link to="/" className="flex items-center gap-1 text-gray-500 text-sm mb-4 hover:text-gray-700">
+        <ChevronLeft size={16} /> Toutes les annonces
+      </Link>
 
       {/* Post card */}
       <div className="card mb-4">

@@ -7,5 +7,5 @@ return [
         'file'     => ['driver' => 'file', 'path' => storage_path('framework/cache/data'), 'lock_path' => storage_path('framework/cache/data')],
         'array'    => ['driver' => 'array', 'serialize' => false],
     ],
-    'prefix'  => env('CACHE_PREFIX', str_slug(env('APP_NAME', 'laravel'), '_').'_cache_'),
+    'prefix'  => env('CACHE_PREFIX', \Illuminate\Support\Str::slug(env('APP_NAME', 'laravel'), '_').'_cache_'),
 ];

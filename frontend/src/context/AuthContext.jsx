@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react'
-import { getMe, login as apiLogin, logout as apiLogout, register as apiRegister } from '../api/auth'
+import { getMe, login as apiLogin, logout as apiLogout, register as apiRegister, updateStatus as apiUpdateStatus } from '../api/auth'
 
 const AuthContext = createContext(null)
 
@@ -9,7 +9,6 @@ export function AuthProvider({ children }) {
   })
   const [loading, setLoading] = useState(true)
 
-  // On app load, verify the stored token is still valid
   useEffect(() => {
     if (localStorage.getItem('token')) {
       getMe()
@@ -43,14 +42,29 @@ export function AuthProvider({ children }) {
   }
 
   const logout = async () => {
-    try { await apiLogout() } catch { /* ignore */ }
+    try { await apiLogout() } catch {}
     setUser(null)
     localStorage.removeItem('user')
     localStorage.removeItem('token')
   }
 
+  const updateStatus = async (status) => {
+    const res = await apiUpdateStatus(status)
+    const updated = res.data
+    setUser(updated)
+    localStorage.setItem('user', JSON.stringify(updated))
+    return updated
+  }
+
+  const refreshUser = async () => {
+    const res = await getMe()
+    setUser(res.data)
+    localStorage.setItem('user', JSON.stringify(res.data))
+    return res.data
+  }
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, updateStatus, refreshUser }}>
       {children}
     </AuthContext.Provider>
   )

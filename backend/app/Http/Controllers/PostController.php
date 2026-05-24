@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\AlertSubscription;
 use App\Models\Post;
+use App\Models\User;
 use App\Mail\WalletFoundNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
@@ -22,10 +23,7 @@ class PostController extends Controller
         if ($request->boolean('my')) {
             $query->where('user_id', $request->user()->id);
         } else {
-            // Public listing only shows active posts by default
-            if (! $request->boolean('my')) {
-                $query->where('status', 'active');
-            }
+            $query->where('status', 'active');
         }
 
         return response()->json($query->paginate($request->input('limit', 12)));
@@ -34,17 +32,13 @@ class PostController extends Controller
     public function show(Request $request, Post $post)
     {
         $post->load('user:id,name,phone');
-
         $data = $post->toArray();
 
-        // Reveal sensitive info if user is owner or approved
         if ($request->user() && $post->canRevealAddress($request->user())) {
             $data['pickup_address'] = $post->pickup_address;
         }
 
-        // Reveal secret question (needed for contact form)
         $data['secret_question'] = $post->secret_question;
-
         return response()->json($data);
     }
 
@@ -66,7 +60,6 @@ class PostController extends Controller
             'status'  => 'active',
         ]);
 
-        // Notify alert subscribers whose name matches
         $this->notifySubscribers($post);
 
         return response()->json($post->load('user:id,name,phone'), 201);
@@ -74,14 +67,21 @@ class PostController extends Controller
 
     public function recover(Request $request, Post $post)
     {
+        $userId = $request->user()->id;
+
+        $isOwner = $userId === $post->user_id;
+        $isApprovedRequester = $post->contactRequests()
+            ->where('user_id', $userId)
+            ->where('status', 'approved')
+            ->exists();
+
         abort_unless(
-            $request->user()->id === $post->user_id || $request->user()->isAdmin(),
+            $isOwner || $isApprovedRequester || $request->user()->isAdmin(),
             403,
             'Action non autorisée.'
         );
 
         $post->update(['status' => 'recovered']);
-
         return response()->json($post);
     }
 
@@ -94,25 +94,54 @@ class PostController extends Controller
         );
 
         $post->delete();
-
         return response()->json(['message' => 'Annonce supprimée.']);
     }
 
     private function notifySubscribers(Post $post): void
     {
-        $name = strtolower($post->name_on_cards);
+        // Split post name into significant words (min 2 chars)
+        $postWords = array_values(array_filter(
+            preg_split('/[\s\-\.]+/', strtolower($post->name_on_cards)),
+            fn($w) => mb_strlen($w) >= 2
+        ));
 
+        if (empty($postWords)) return;
+
+        $notifiedIds = collect();
+
+        // 1. Alert subscribers — word-level match
         AlertSubscription::with('user')
             ->get()
-            ->filter(fn ($sub) => str_contains(strtolower($post->name_on_cards), strtolower($sub->name))
-                               || str_contains(strtolower($sub->name), strtolower($name)))
-            ->each(function ($sub) use ($post) {
+            ->filter(function ($sub) use ($postWords) {
+                $subWords = array_values(array_filter(
+                    preg_split('/[\s\-\.]+/', strtolower($sub->name)),
+                    fn($w) => mb_strlen($w) >= 2
+                ));
+                return !empty(array_intersect($postWords, $subWords));
+            })
+            ->each(function ($sub) use ($post, $notifiedIds) {
                 try {
-                    Mail::to($sub->user->email)
-                        ->send(new WalletFoundNotification($post, $sub->user));
-                } catch (\Exception) {
-                    // Fail silently — email sending must not break the request
-                }
+                    Mail::to($sub->user->email)->send(new WalletFoundNotification($post, $sub->user));
+                    $notifiedIds->push($sub->user_id);
+                } catch (\Exception) {}
+            });
+
+        // 2. Chercheur users without explicit alert whose name matches
+        User::where('status', 'chercheur')
+            ->where('id', '!=', $post->user_id)
+            ->whereNotIn('id', $notifiedIds->all())
+            ->get()
+            ->filter(function ($user) use ($postWords) {
+                $nameWords = array_values(array_filter(
+                    preg_split('/[\s\-\.]+/', strtolower($user->name)),
+                    fn($w) => mb_strlen($w) >= 2
+                ));
+                return !empty(array_intersect($postWords, $nameWords));
+            })
+            ->each(function ($user) use ($post) {
+                try {
+                    Mail::to($user->email)->send(new WalletFoundNotification($post, $user));
+                } catch (\Exception) {}
             });
     }
 }

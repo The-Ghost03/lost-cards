@@ -4,6 +4,7 @@ import { getPost, submitContact, approveContact, rejectContact, getContactReques
 import { getMessages, sendMessage } from '../api/messages'
 import { useAuth } from '../context/AuthContext'
 import { MapPin, FileText, Calendar, HelpCircle, Send, CheckCircle, MessageCircle, ChevronLeft } from 'lucide-react'
+import SelfieCapture from '../components/SelfieCapture'
 import { formatDistanceToNow } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import toast from 'react-hot-toast'
@@ -47,11 +48,9 @@ export default function PostDetail() {
      .finally(() => setLoading(false))
   }, [id, user])
 
-  const handleSelfieChange = (e) => {
-    const file = e.target.files[0]
-    if (!file) return
+  const handleSelfieCapture = (file, previewUrl) => {
     setSelfie(file)
-    setPreview(URL.createObjectURL(file))
+    setPreview(previewUrl)
   }
 
   const submitContactRequest = async (e) => {
@@ -177,7 +176,7 @@ export default function PostDetail() {
         )}
 
         {/* Owner actions */}
-        {isOwner && post.status !== 'recovered' && (
+        {(isOwner || approved) && post.status !== 'recovered' && (
           <button onClick={handleRecover} className="btn-primary mt-3 w-full flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600">
             <CheckCircle size={16} /> Marquer comme récupéré
           </button>
@@ -198,25 +197,8 @@ export default function PostDetail() {
                 <p>Prenez un selfie de votre visage. Le retrouveur le comparera avec la photo sur vos pièces d'identité trouvées.</p>
               </div>
 
-              {/* Bouton capture / upload */}
-              <input
-                id="selfie-upload"
-                type="file"
-                accept="image/*"
-                capture="user"
-                className="hidden"
-                onChange={handleSelfieChange}
-              />
-              {selfiePreview && (
-                <img src={selfiePreview} alt="Aperçu selfie" className="w-32 h-32 object-cover rounded-full border-4 border-orange-400 mx-auto" />
-              )}
-              <button
-                type="button"
-                onClick={() => document.getElementById('selfie-upload').click()}
-                className="w-full py-2.5 px-4 rounded-xl border-2 border-orange-400 text-orange-700 font-medium text-sm bg-orange-50 hover:bg-orange-100 transition-colors flex items-center justify-center gap-2"
-              >
-                🤳 {selfiePreview ? 'Changer le selfie' : 'Prendre un selfie'}
-              </button>
+              {/* Caméra selfie */}
+              <SelfieCapture onCapture={handleSelfieCapture} preview={selfiePreview} />
 
               <button type="submit" className="btn-primary w-full" disabled={sending || !selfie}>
                 {sending ? 'Envoi en cours...' : 'Envoyer mon selfie'}

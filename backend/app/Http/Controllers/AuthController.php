@@ -17,6 +17,7 @@ class AuthController extends Controller
             'email'    => 'required|email|unique:users',
             'phone'    => 'required|string|max:20',
             'password' => 'required|string|min:8|confirmed',
+            'status'   => 'required|in:chercheur,retrouveur',
         ]);
 
         $user = User::create([
@@ -25,6 +26,7 @@ class AuthController extends Controller
             'phone'    => $data['phone'],
             'password' => Hash::make($data['password']),
             'role'     => 'user',
+            'status'   => $data['status'],
         ]);
 
         return response()->json([
@@ -56,12 +58,9 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
-        // Works for both PersonalAccessToken and TransientToken
         try {
             $request->user()->currentAccessToken()->delete();
-        } catch (\Exception) {
-            // TransientToken (session-based) has no delete() — ignore
-        }
+        } catch (\Exception) {}
 
         return response()->json(['message' => 'Déconnecté.']);
     }
@@ -69,5 +68,16 @@ class AuthController extends Controller
     public function me(Request $request)
     {
         return response()->json($request->user());
+    }
+
+    public function updateStatus(Request $request)
+    {
+        $data = $request->validate([
+            'status' => 'required|in:chercheur,retrouveur',
+        ]);
+
+        $request->user()->update(['status' => $data['status']]);
+
+        return response()->json($request->user()->fresh());
     }
 }

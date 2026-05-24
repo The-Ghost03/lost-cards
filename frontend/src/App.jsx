@@ -10,6 +10,7 @@ import Messages    from './pages/Messages'
 import Dashboard   from './pages/Dashboard'
 import Alerts      from './pages/Alerts'
 import AdminDash   from './pages/admin/Dashboard'
+import Profile     from './pages/Profile'
 
 export default function App() {
   return (
@@ -36,6 +37,9 @@ export default function App() {
           } />
           <Route path="/admin" element={
             <ProtectedRoute adminOnly><AdminDash /></ProtectedRoute>
+          } />
+          <Route path="/profile" element={
+            <ProtectedRoute><Profile /></ProtectedRoute>
           } />
         </Routes>
       </main>

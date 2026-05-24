@@ -18,8 +18,9 @@ Route::get('/posts/{post}', [PostController::class, 'show']);
 
 // Protected
 Route::middleware('auth:sanctum')->group(function () {
-    Route::post('/logout', [AuthController::class, 'logout']);
-    Route::get('/me',      [AuthController::class, 'me']);
+    Route::post('/logout',     [AuthController::class, 'logout']);
+    Route::get('/me',          [AuthController::class, 'me']);
+    Route::patch('/me/status', [AuthController::class, 'updateStatus']);
 
     // Posts
     Route::post('/posts',                 [PostController::class, 'store']);

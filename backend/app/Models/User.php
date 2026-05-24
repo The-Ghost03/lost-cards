@@ -11,7 +11,7 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
-    protected $fillable = ['name', 'email', 'phone', 'password', 'role'];
+    protected $fillable = ['name', 'email', 'phone', 'password', 'role', 'status'];
 
     protected $hidden = ['password', 'remember_token'];
 
@@ -23,6 +23,11 @@ class User extends Authenticatable
     public function isAdmin(): bool
     {
         return $this->role === 'admin';
+    }
+
+    public function isSearcher(): bool
+    {
+        return $this->status === 'chercheur';
     }
 
     public function posts()

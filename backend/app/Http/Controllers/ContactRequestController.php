@@ -5,13 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\ContactRequest;
 use App\Models\Post;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 
 class ContactRequestController extends Controller
 {
     public function index(Request $request, Post $post)
     {
-        // Owner sees all requests; requester sees only their own
         if ($request->user()->id === $post->user_id) {
             return response()->json(
                 $post->contactRequests()->with('user:id,name,email,phone')->get()
@@ -30,13 +28,23 @@ class ContactRequestController extends Controller
         abort_if($request->user()->id === $post->user_id, 422, 'Vous ne pouvez pas réclamer votre propre annonce.');
         abort_if($post->status === 'recovered', 422, 'Ce portefeuille a déjà été récupéré.');
 
-        // Check if already submitted
         $existing = $post->contactRequests()->where('user_id', $request->user()->id)->first();
-        if ($existing) {
+
+        // Already approved → return as-is
+        if ($existing?->status === 'approved') {
             return response()->json($existing);
         }
 
-        // Verify the secret answer (case-insensitive)
+        // Already pending → return as-is
+        if ($existing?->status === 'pending') {
+            return response()->json($existing);
+        }
+
+        // Rejected → allow retry: delete old and create fresh
+        if ($existing?->status === 'rejected') {
+            $existing->delete();
+        }
+
         $correct = strtolower(trim($request->answer)) === strtolower(trim($post->secret_answer));
 
         $contactRequest = ContactRequest::create([
@@ -48,7 +56,7 @@ class ContactRequestController extends Controller
 
         if (! $correct) {
             return response()->json(
-                ['message' => 'Réponse incorrecte. Vérifiez et réessayez.'],
+                ['message' => 'Réponse incorrecte. Vérifiez et réessayez.', 'status' => 'rejected'],
                 422
             );
         }

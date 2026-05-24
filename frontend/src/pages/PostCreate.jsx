@@ -84,7 +84,6 @@ export default function PostCreate() {
             onChange={set('name_on_cards')}
             required
           />
-          <p className="text-xs text-gray-400 mt-1.5">Seules les 3 premières lettres seront affichées publiquement.</p>
         </div>
 
         {/* Lieu */}

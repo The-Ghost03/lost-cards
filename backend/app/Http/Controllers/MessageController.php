@@ -12,7 +12,6 @@ class MessageController extends Controller
     {
         $userId = $request->user()->id;
 
-        // Get all posts where the user is the finder OR has an approved contact request
         $postIds = Post::where('user_id', $userId)->pluck('id')
             ->merge(
                 \App\Models\ContactRequest::where('user_id', $userId)
@@ -46,7 +45,6 @@ class MessageController extends Controller
     {
         $this->authorizeAccess($request, $post);
 
-        // Mark messages to this user as read
         $post->messages()
             ->where('receiver_id', $request->user()->id)
             ->whereNull('read_at')
@@ -63,9 +61,22 @@ class MessageController extends Controller
 
         $request->validate(['content' => 'required|string|max:2000']);
 
-        $receiverId = $post->user_id === $request->user()->id
-            ? $post->contactRequests()->where('status', 'approved')->value('user_id')
-            : $post->user_id;
+        if ($post->user_id === $request->user()->id) {
+            // Finder sends to the approved requester
+            $receiverId = $post->contactRequests()
+                ->where('status', 'approved')
+                ->latest()
+                ->value('user_id');
+
+            abort_if(
+                is_null($receiverId),
+                422,
+                'Aucune demande approuvée sur cette annonce. Approuvez d\'abord une demande pour ouvrir le chat.'
+            );
+        } else {
+            // Requester always sends to the post owner
+            $receiverId = $post->user_id;
+        }
 
         $message = Message::create([
             'post_id'     => $post->id,
@@ -79,8 +90,8 @@ class MessageController extends Controller
 
     private function authorizeAccess(Request $request, Post $post): void
     {
-        $userId  = $request->user()->id;
-        $isOwner = $post->user_id === $userId;
+        $userId     = $request->user()->id;
+        $isOwner    = $post->user_id === $userId;
         $isApproved = $post->contactRequests()
             ->where('user_id', $userId)
             ->where('status', 'approved')

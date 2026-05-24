@@ -182,8 +182,14 @@ export default function PostDetail() {
           )}
 
           {myRequest?.status === 'rejected' && (
-            <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-sm text-red-700">
-              Réponse incorrecte. Vous pouvez réessayer.
+            <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-sm text-red-700 flex items-center justify-between gap-3">
+              <span>Réponse incorrecte.</span>
+              <button
+                className="text-red-700 underline text-xs font-medium shrink-0"
+                onClick={() => setMyReq(null)}
+              >
+                Réessayer
+              </button>
             </div>
           )}
         </div>
@@ -205,6 +211,11 @@ export default function PostDetail() {
                     Valider
                   </button>
                 )}
+                {req.status === 'rejected' && (
+                  <button onClick={() => handleApprove(req.id)} className="btn-primary text-xs py-1 px-3 bg-gray-500 hover:bg-gray-600">
+                    Valider quand même
+                  </button>
+                )}
                 {req.status === 'approved' && (
                   <span className="badge bg-green-100 text-green-700">Approuvé</span>
                 )}
@@ -221,6 +232,11 @@ export default function PostDetail() {
             <MessageCircle size={16} className="text-orange-500" /> Messagerie
           </h2>
 
+          {isOwner && !requests.some(r => r.status === 'approved') && (
+            <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-3 text-xs text-yellow-700 mb-3">
+              Approuvez une demande ci-dessus pour pouvoir envoyer des messages.
+            </div>
+          )}
           <div className="flex flex-col gap-2 max-h-64 overflow-y-auto mb-3 pr-1">
             {messages.length === 0 && (
               <p className="text-xs text-gray-400 text-center py-4">Démarrez la conversation</p>

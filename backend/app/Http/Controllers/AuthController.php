@@ -13,10 +13,10 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $data = $request->validate([
-            'name'                  => 'required|string|max:100',
-            'email'                 => 'required|email|unique:users',
-            'phone'                 => 'required|string|max:20',
-            'password'              => 'required|string|min:8|confirmed',
+            'name'     => 'required|string|max:100',
+            'email'    => 'required|email|unique:users',
+            'phone'    => 'required|string|max:20',
+            'password' => 'required|string|min:8|confirmed',
         ]);
 
         $user = User::create([
@@ -26,8 +26,6 @@ class AuthController extends Controller
             'password' => Hash::make($data['password']),
             'role'     => 'user',
         ]);
-
-        Auth::login($user);
 
         return response()->json([
             'user'  => $user,
@@ -58,8 +56,12 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
-        $request->user()->currentAccessToken()->delete();
-        Auth::guard('web')->logout();
+        // Works for both PersonalAccessToken and TransientToken
+        try {
+            $request->user()->currentAccessToken()->delete();
+        } catch (\Exception) {
+            // TransientToken (session-based) has no delete() — ignore
+        }
 
         return response()->json(['message' => 'Déconnecté.']);
     }

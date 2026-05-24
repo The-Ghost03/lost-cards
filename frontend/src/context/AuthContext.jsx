@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react'
-import { getMe, login as apiLogin, logout as apiLogout, register as apiRegister, getCsrfCookie } from '../api/auth'
+import { getMe, login as apiLogin, logout as apiLogout, register as apiRegister } from '../api/auth'
 
 const AuthContext = createContext(null)
 
@@ -9,33 +9,44 @@ export function AuthProvider({ children }) {
   })
   const [loading, setLoading] = useState(true)
 
+  // On app load, verify the stored token is still valid
   useEffect(() => {
-    getMe()
-      .then(r => { setUser(r.data); localStorage.setItem('user', JSON.stringify(r.data)) })
-      .catch(() => { setUser(null); localStorage.removeItem('user') })
-      .finally(() => setLoading(false))
+    if (localStorage.getItem('token')) {
+      getMe()
+        .then(r => { setUser(r.data); localStorage.setItem('user', JSON.stringify(r.data)) })
+        .catch(() => {
+          setUser(null)
+          localStorage.removeItem('user')
+          localStorage.removeItem('token')
+        })
+        .finally(() => setLoading(false))
+    } else {
+      setUser(null)
+      setLoading(false)
+    }
   }, [])
 
   const login = async (credentials) => {
-    await getCsrfCookie()
     const res = await apiLogin(credentials)
-    setUser(res.data.user)
+    localStorage.setItem('token', res.data.token)
     localStorage.setItem('user', JSON.stringify(res.data.user))
+    setUser(res.data.user)
     return res.data.user
   }
 
   const register = async (data) => {
-    await getCsrfCookie()
     const res = await apiRegister(data)
-    setUser(res.data.user)
+    localStorage.setItem('token', res.data.token)
     localStorage.setItem('user', JSON.stringify(res.data.user))
+    setUser(res.data.user)
     return res.data.user
   }
 
   const logout = async () => {
-    await apiLogout()
+    try { await apiLogout() } catch { /* ignore */ }
     setUser(null)
     localStorage.removeItem('user')
+    localStorage.removeItem('token')
   }
 
   return (

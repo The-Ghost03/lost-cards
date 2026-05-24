@@ -198,22 +198,24 @@ export default function PostDetail() {
               </div>
 
               {/* Bouton capture / upload */}
-              <label className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-orange-300 rounded-xl p-4 cursor-pointer bg-orange-50 hover:bg-orange-100 transition-colors">
-                {selfiePreview
-                  ? <img src={selfiePreview} alt="Aperçu selfie" className="w-32 h-32 object-cover rounded-full border-4 border-orange-400" />
-                  : <span className="text-4xl">🤳</span>
-                }
-                <span className="text-xs text-orange-700 font-medium">
-                  {selfiePreview ? 'Changer le selfie' : 'Prendre un selfie'}
-                </span>
-                <input
-                  type="file"
-                  accept="image/*"
-                  capture="user"
-                  className="hidden"
-                  onChange={handleSelfieChange}
-                />
-              </label>
+              <input
+                id="selfie-upload"
+                type="file"
+                accept="image/*"
+                capture="user"
+                className="hidden"
+                onChange={handleSelfieChange}
+              />
+              {selfiePreview && (
+                <img src={selfiePreview} alt="Aperçu selfie" className="w-32 h-32 object-cover rounded-full border-4 border-orange-400 mx-auto" />
+              )}
+              <button
+                type="button"
+                onClick={() => document.getElementById('selfie-upload').click()}
+                className="w-full py-2.5 px-4 rounded-xl border-2 border-orange-400 text-orange-700 font-medium text-sm bg-orange-50 hover:bg-orange-100 transition-colors flex items-center justify-center gap-2"
+              >
+                🤳 {selfiePreview ? 'Changer le selfie' : 'Prendre un selfie'}
+              </button>
 
               <button type="submit" className="btn-primary w-full" disabled={sending || !selfie}>
                 {sending ? 'Envoi en cours...' : 'Envoyer mon selfie'}

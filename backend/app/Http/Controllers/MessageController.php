@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\NewMessageNotification;
 use App\Models\Message;
 use App\Models\Post;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 
 class MessageController extends Controller
 {
@@ -62,7 +65,6 @@ class MessageController extends Controller
         $request->validate(['content' => 'required|string|max:2000']);
 
         if ($post->user_id === $request->user()->id) {
-            // Finder sends to the approved requester
             $receiverId = $post->contactRequests()
                 ->where('status', 'approved')
                 ->latest()
@@ -74,7 +76,6 @@ class MessageController extends Controller
                 'Aucune demande approuvée sur cette annonce. Approuvez d\'abord une demande pour ouvrir le chat.'
             );
         } else {
-            // Requester always sends to the post owner
             $receiverId = $post->user_id;
         }
 
@@ -84,6 +85,16 @@ class MessageController extends Controller
             'receiver_id' => $receiverId,
             'content'     => $request->content,
         ]);
+
+        // Notify the receiver by email
+        try {
+            $receiver = User::find($receiverId);
+            $sender   = $request->user();
+            $preview  = mb_strimwidth($request->content, 0, 120, '…');
+            Mail::to($receiver->email)->send(
+                new NewMessageNotification($post, $sender, $receiver, $preview)
+            );
+        } catch (\Exception) {}
 
         return response()->json($message->load('sender:id,name'), 201);
     }

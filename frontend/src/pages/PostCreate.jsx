@@ -8,7 +8,7 @@ const DOCUMENTS = [
   { key: 'cni',       label: "CNI (Carte Nationale d'Identité)" },
   { key: 'permis',    label: 'Permis de conduire' },
   { key: 'bancaire',  label: 'Carte bancaire' },
-  { key: 'assurance', label: "Carte d'assurance (CNAM / SAN)" },
+  { key: 'assurance', label: "Carte d'assurance" },
   { key: 'passeport', label: 'Passeport' },
   { key: 'sejour',    label: 'Carte de séjour' },
   { key: 'electeur',  label: "Carte d'électeur" },

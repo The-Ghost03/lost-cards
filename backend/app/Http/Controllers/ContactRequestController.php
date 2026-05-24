@@ -2,9 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\ContactApprovedNotification;
+use App\Mail\ContactRejectedNotification;
+use App\Mail\SelfieSubmittedNotification;
 use App\Models\ContactRequest;
 use App\Models\Post;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 
 class ContactRequestController extends Controller
@@ -24,7 +29,7 @@ class ContactRequestController extends Controller
     public function store(Request $request, Post $post)
     {
         $request->validate([
-            'selfie' => 'required|image|max:8192', // 8 MB max
+            'selfie' => 'required|image|max:8192',
         ]);
 
         abort_if($request->user()->id === $post->user_id, 422, 'Vous ne pouvez pas réclamer votre propre annonce.');
@@ -52,12 +57,20 @@ class ContactRequestController extends Controller
             'status'      => 'pending',
         ]);
 
+        // Notify the finder (post owner)
+        try {
+            $finder    = User::find($post->user_id);
+            $requester = $request->user();
+            Mail::to($finder->email)->send(
+                new SelfieSubmittedNotification($post, $finder, $requester, $contactRequest)
+            );
+        } catch (\Exception) {}
+
         return response()->json($contactRequest, 201);
     }
 
     public function selfie(Request $request, Post $post, ContactRequest $contactRequest)
     {
-        // Only the post owner (finder) can view the selfie
         abort_unless($request->user()->id === $post->user_id, 403, 'Accès non autorisé.');
         abort_unless($contactRequest->post_id === $post->id, 404);
         abort_unless($contactRequest->selfie_path, 404);
@@ -72,6 +85,15 @@ class ContactRequestController extends Controller
     {
         abort_unless($request->user()->id === $post->user_id, 403, 'Action non autorisée.');
         $contactRequest->update(['status' => 'approved']);
+
+        // Notify the requester
+        try {
+            $requester = User::find($contactRequest->user_id);
+            Mail::to($requester->email)->send(
+                new ContactApprovedNotification($post, $requester)
+            );
+        } catch (\Exception) {}
+
         return response()->json($contactRequest);
     }
 
@@ -79,6 +101,15 @@ class ContactRequestController extends Controller
     {
         abort_unless($request->user()->id === $post->user_id, 403, 'Action non autorisée.');
         $contactRequest->update(['status' => 'rejected']);
+
+        // Notify the requester
+        try {
+            $requester = User::find($contactRequest->user_id);
+            Mail::to($requester->email)->send(
+                new ContactRejectedNotification($post, $requester)
+            );
+        } catch (\Exception) {}
+
         return response()->json($contactRequest);
     }
 }

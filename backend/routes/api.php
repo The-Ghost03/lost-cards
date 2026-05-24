@@ -13,30 +13,30 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login',    [AuthController::class, 'login']);
 
 // Public posts
-Route::get('/posts',     [PostController::class, 'index']);
+Route::get('/posts',        [PostController::class, 'index']);
 Route::get('/posts/{post}', [PostController::class, 'show']);
 
 // Protected
 Route::middleware('auth:sanctum')->group(function () {
-    Route::post('/logout',  [AuthController::class, 'logout']);
-    Route::get('/me',       [AuthController::class, 'me']);
+    Route::post('/logout', [AuthController::class, 'logout']);
+    Route::get('/me',      [AuthController::class, 'me']);
 
     // Posts
-    Route::post('/posts',                [PostController::class, 'store']);
-    Route::patch('/posts/{post}/recover',[PostController::class, 'recover']);
-    Route::delete('/posts/{post}',       [PostController::class, 'destroy']);
+    Route::post('/posts',                 [PostController::class, 'store']);
+    Route::patch('/posts/{post}/recover', [PostController::class, 'recover']);
+    Route::delete('/posts/{post}',        [PostController::class, 'destroy']);
 
-    // Contact requests
-    Route::get('/posts/{post}/contact',                               [ContactRequestController::class, 'index']);
-    Route::post('/posts/{post}/contact',                              [ContactRequestController::class, 'store']);
-    Route::patch('/posts/{post}/contact/{request}/approve',           [ContactRequestController::class, 'approve']);
-    Route::patch('/posts/{post}/contact/{request}/reject',            [ContactRequestController::class, 'reject']);
-    Route::get('/posts/{post}/contact/{request}/selfie',              [ContactRequestController::class, 'selfie']);
+    // Contact requests  (param renamed {contactRequest} to avoid conflict with Request injection)
+    Route::get('/posts/{post}/contact',                                    [ContactRequestController::class, 'index']);
+    Route::post('/posts/{post}/contact',                                   [ContactRequestController::class, 'store']);
+    Route::patch('/posts/{post}/contact/{contactRequest}/approve',         [ContactRequestController::class, 'approve']);
+    Route::patch('/posts/{post}/contact/{contactRequest}/reject',          [ContactRequestController::class, 'reject']);
+    Route::get('/posts/{post}/contact/{contactRequest}/selfie',            [ContactRequestController::class, 'selfie']);
 
     // Messages
-    Route::get('/conversations',                       [MessageController::class, 'conversations']);
-    Route::get('/conversations/{post}/messages',       [MessageController::class, 'index']);
-    Route::post('/conversations/{post}/messages',      [MessageController::class, 'store']);
+    Route::get('/conversations',                   [MessageController::class, 'conversations']);
+    Route::get('/conversations/{post}/messages',   [MessageController::class, 'index']);
+    Route::post('/conversations/{post}/messages',  [MessageController::class, 'store']);
 
     // Alerts
     Route::get('/alerts',         [AlertSubscriptionController::class, 'index']);

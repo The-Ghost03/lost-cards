@@ -11,6 +11,7 @@ import Dashboard   from './pages/Dashboard'
 import Alerts      from './pages/Alerts'
 import AdminDash   from './pages/admin/Dashboard'
 import Profile     from './pages/Profile'
+import InstallPrompt from './components/InstallPrompt'
 
 export default function App() {
   return (
@@ -43,6 +44,7 @@ export default function App() {
           } />
         </Routes>
       </main>
+      <InstallPrompt />
     </div>
   )
 }

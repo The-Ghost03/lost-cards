@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { MapPin, Calendar, FileText, CheckCircle } from 'lucide-react'
+import { MapPin, Calendar, FileText, CheckCircle, ArrowRight } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { fr } from 'date-fns/locale'
 
@@ -18,19 +18,20 @@ export default function PostCard({ post }) {
   const age = formatDistanceToNow(new Date(post.created_at), { addSuffix: true, locale: fr })
 
   return (
-    <Link to={`/posts/${post.id}`} className="card block hover:shadow-md transition-shadow">
+    <Link to={`/posts/${post.id}`} className="card-hover block group">
       <div className="flex items-start justify-between gap-2 mb-3">
-        <div>
-          <p className="font-semibold text-gray-800 text-base">{post.name_partial}</p>
+        <div className="min-w-0">
+          <p className="font-semibold text-gray-800 text-base group-hover:text-orange-600 transition-colors">{post.name_partial}</p>
           <p className="text-xs text-gray-400 flex items-center gap-1 mt-0.5">
             <MapPin size={11} /> {post.location}
           </p>
         </div>
-        {post.status === 'recovered' && (
-          <span className="badge bg-green-100 text-green-700 shrink-0">
-            <CheckCircle size={11} /> Récupéré
-          </span>
-        )}
+        {post.status === 'recovered'
+          ? <span className="badge bg-green-100 text-green-700 shrink-0">
+              <CheckCircle size={11} /> Récupéré
+            </span>
+          : <ArrowRight size={16} className="text-gray-300 group-hover:text-orange-500 group-hover:translate-x-1 transition-all shrink-0 mt-1" />
+        }
       </div>
 
       <div className="flex flex-wrap gap-1.5 mb-3">

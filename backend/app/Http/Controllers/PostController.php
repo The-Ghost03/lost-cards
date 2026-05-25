@@ -21,8 +21,9 @@ class PostController extends Controller
             $query->where('name_on_cards', 'like', '%'.$request->name.'%');
         }
 
-        if ($request->boolean('my')) {
-            $query->where('user_id', $request->user()->id);
+        $authUserEarly = auth('sanctum')->user();
+        if ($request->boolean('my') && $authUserEarly) {
+            $query->where('user_id', $authUserEarly->id);
         } else {
             $query->where('status', 'active');
         }

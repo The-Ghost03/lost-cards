@@ -43,7 +43,7 @@ export default function Navbar() {
     { to: '/messages',  icon: MessageCircle,   label: 'Messages', badge: total },
     isRetrouveur
       ? { to: '/dashboard',    icon: LayoutDashboard, label: 'Tableau'    }
-      : { to: '/alerts',       icon: Bell,            label: 'Alertes'    },
+      : { to: '/dashboard',    icon: LayoutDashboard, label: 'Tableau'    },
     { to: '/profile',   icon: User,            label: 'Profil'     },
     ...(isAdmin ? [{ to: '/admin', icon: Shield, label: 'Admin' }] : []),
   ] : []

@@ -200,8 +200,8 @@ export default function PostDetail() {
               {/* Caméra selfie */}
               <SelfieCapture onCapture={handleSelfieCapture} preview={selfiePreview} />
 
-              <button type="submit" className="btn-primary w-full" disabled={submittingContact || !selfie}>
-                {submittingContact ? 'Envoi en cours...' : 'Envoyer mon selfie'}
+              <button type="submit" className="btn-primary w-full" disabled={sending || !selfie}>
+                {sending ? 'Envoi en cours...' : 'Envoyer mon selfie'}
               </button>
             </form>
           )}

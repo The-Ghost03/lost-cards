@@ -7,6 +7,7 @@ import { useUnread } from '../context/UnreadContext'
 import { t }  from '../lib/toast'
 import { ChevronLeft, Send, Wallet, CheckCircle, Lock } from 'lucide-react'
 import { format, isToday, isYesterday } from 'date-fns'
+import { Spinner } from '../components/Spinner'
 import { fr } from 'date-fns/locale'
 
 /* ── Helpers ──────────────────────────────────────────────────────── */
@@ -264,7 +265,7 @@ export default function Chat() {
               disabled={!text.trim()}
               className="shrink-0 w-11 h-11 rounded-xl bg-orange-500 hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed text-white flex items-center justify-center transition-colors"
             >
-              <Send size={18} />
+              {sending ? <Spinner size={16} /> : <Send size={18} />}
             </button>
           </div>
         </div>

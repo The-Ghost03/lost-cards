@@ -5,6 +5,7 @@ import { getPost, submitContact, approveContact, rejectContact, getContactReques
 import { useAuth } from '../context/AuthContext'
 import { MapPin, FileText, Calendar, HelpCircle, CheckCircle, XCircle, MessageCircle, ChevronLeft, ChevronRight, Camera } from 'lucide-react'
 import SelfieCapture from '../components/SelfieCapture'
+import { Spinner, SkeletonCard } from '../components/Spinner'
 import { formatDistanceToNow } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { t } from '../lib/toast'
@@ -23,15 +24,15 @@ export default function PostDetail() {
   const navigate = useNavigate()
   const confirm  = useConfirm()
 
-  const [post, setPost]       = useState(null)
-  const [requests, setReqs]   = useState([])
-  const [selfie, setSelfie]         = useState(null)
-  const [selfiePreview, setPreview]  = useState(null)
-  const [selfieUrls, setSelfieUrls]  = useState({})
-  const [enlargedSelfie, setEnlargedSelfie] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [sending, setSending] = useState(false)
-  const [myRequest, setMyReq] = useState(null)
+  const [post, setPost]                    = useState(null)
+  const [requests, setReqs]                = useState([])
+  const [selfie, setSelfie]                = useState(null)
+  const [selfiePreview, setPreview]        = useState(null)
+  const [selfieUrls, setSelfieUrls]        = useState({})
+  const [enlargedSelfie, setEnlargedSelfie]= useState(null)
+  const [loading, setLoading]              = useState(true)
+  const [sending, setSending]              = useState(false)
+  const [myRequest, setMyReq]              = useState(null)
 
   useEffect(() => {
     Promise.all([
@@ -40,9 +41,7 @@ export default function PostDetail() {
     ]).then(([p, r]) => {
       setPost(p.data)
       setReqs(r.data)
-      if (user) {
-        setMyReq(r.data.find(req => req.user_id === user.id) || null)
-      }
+      if (user) setMyReq(r.data.find(req => req.user_id === user.id) || null)
     }).catch(() => t.error('Annonce introuvable'))
      .finally(() => setLoading(false))
   }, [id, user])
@@ -63,14 +62,14 @@ export default function PostDetail() {
       setMyReq(res.data)
       t.success('Selfie envoyé ! Le retrouveur va comparer avec la photo sur les pièces.')
     } catch (err) {
-      t.error(err.response?.data?.message || 'Erreur lors de l\'envoi')
+      t.error(err.response?.data?.message || "Erreur lors de l'envoi")
     } finally {
       setSending(false)
     }
   }
 
   const loadSelfie = async (reqId) => {
-    if (selfieUrls[reqId]) return // already loaded
+    if (selfieUrls[reqId]) return
     try {
       const res = await getSelfie(id, reqId)
       const url = URL.createObjectURL(res.data)
@@ -98,12 +97,12 @@ export default function PostDetail() {
       const r = await getContactRequests(id)
       setReqs(r.data)
     } catch {
-      t.error('Erreur lors de l\'approbation')
+      t.error("Erreur lors de l'approbation")
     }
   })
 
-  const { run: handleRecover } = useAsyncAction(async () => {
-    if (!(await confirm({ title: 'Marquer ce portefeuille comme récupéré ?', message: 'L\'annonce sera archivée.', confirmLabel: 'Confirmer' }))) return
+  const { run: handleRecover, loading: recovering } = useAsyncAction(async () => {
+    if (!(await confirm({ title: 'Marquer ce portefeuille comme récupéré ?', message: "L'annonce sera archivée.", confirmLabel: 'Confirmer' }))) return
     try {
       await markRecovered(id)
       t.success('Portefeuille marqué comme récupéré !')
@@ -113,223 +112,251 @@ export default function PostDetail() {
     }
   })
 
-  if (loading) return <div className="flex justify-center pt-20"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500" /></div>
-  if (!post)   return <div className="pt-10 text-center text-gray-500">Annonce introuvable</div>
+  /* ── Skeleton loading ──────────────────────────────────────────── */
+  if (loading) return (
+    <div className="pt-6">
+      <div className="flex items-center gap-1 text-gray-300 text-sm mb-4">
+        <ChevronLeft size={16} /> Toutes les annonces
+      </div>
+      <SkeletonCard className="mb-4" />
+      <SkeletonCard />
+    </div>
+  )
+  if (!post) return <div className="pt-10 text-center text-gray-500">Annonce introuvable</div>
 
   const isOwner    = user?.id === post.user_id
   const approved   = myRequest?.status === 'approved'
   const pending    = myRequest?.status === 'pending'
-  const hasReqOpen = requests.some(r => ['pending','approved'].includes(r.status))
+  const hasReqOpen = requests.some(r => ['pending', 'approved'].includes(r.status))
   const canChat    = (isOwner && hasReqOpen) || approved || pending
 
   return (
     <>
       <SEO
-        title={post?.name_partial ? `Portefeuille "${post.name_partial}" trouve a ${post.location}` : 'Annonce de portefeuille trouve'}
-        description={post?.name_partial ? `Un portefeuille au nom de "${post.name_partial}" a ete trouve a ${post.location}. Reclamez-le sur LostCards avec verification selfie.` : "Annonce sur LostCards — plateforme de portefeuilles retrouves a Abidjan."}
+        title={post?.name_partial ? `Portefeuille "${post.name_partial}" trouvé à ${post.location}` : 'Annonce de portefeuille trouvé'}
+        description={post?.name_partial ? `Un portefeuille au nom de "${post.name_partial}" a été trouvé à ${post.location}. Réclamez-le sur LostCards avec vérification selfie.` : "Annonce sur LostCards — plateforme de portefeuilles retrouvés à Abidjan."}
         path={`/posts/${id}`}
       />
       <div className="pt-6">
-      <Link to="/" className="flex items-center gap-1 text-gray-500 text-sm mb-4 hover:text-gray-700">
-        <ChevronLeft size={16} /> Toutes les annonces
-      </Link>
+        <Link to="/" className="flex items-center gap-1 text-gray-500 text-sm mb-4 hover:text-gray-700">
+          <ChevronLeft size={16} /> Toutes les annonces
+        </Link>
 
-      {/* Post card */}
-      <div className="card mb-4">
-        <div className="flex items-start justify-between mb-3">
-          <div>
-            <h1 className="text-xl font-bold text-gray-900">{post.name_partial}</h1>
-            <p className="text-xs text-gray-400 flex items-center gap-1 mt-1">
-              <MapPin size={12} /> {post.location}
-              <span className="ml-3"><Calendar size={12} className="inline mr-1" />
-                {formatDistanceToNow(new Date(post.created_at), { addSuffix: true, locale: fr })}
-              </span>
-            </p>
+        {/* Post card */}
+        <div className="card mb-4">
+          <div className="flex items-start justify-between mb-3">
+            <div>
+              <h1 className="text-xl font-bold text-gray-900">{post.name_partial}</h1>
+              <p className="text-xs text-gray-400 flex items-center gap-1 mt-1">
+                <MapPin size={12} /> {post.location}
+                <span className="ml-3"><Calendar size={12} className="inline mr-1" />
+                  {formatDistanceToNow(new Date(post.created_at), { addSuffix: true, locale: fr })}
+                </span>
+              </p>
+            </div>
+            {post.status === 'recovered' && (
+              <span className="badge bg-green-100 text-green-700"><CheckCircle size={12} /> Récupéré</span>
+            )}
           </div>
-          {post.status === 'recovered' && (
-            <span className="badge bg-green-100 text-green-700"><CheckCircle size={12} /> Récupéré</span>
+
+          <div className="flex flex-wrap gap-1.5 mb-4">
+            {post.documents.map(doc => (
+              <span key={doc} className="badge bg-orange-50 text-orange-700">
+                <FileText size={11} /> {DOC_LABELS[doc] || doc}
+              </span>
+            ))}
+          </div>
+
+          {/* Recovered address — backend only sends this field to owner / approved */}
+          {post.pickup_address && (
+            <div className="bg-green-50 border border-green-200 rounded-xl p-3 text-sm mb-3">
+              <p className="font-semibold text-green-800 mb-1">Adresse de récupération</p>
+              <p className="text-green-700">{post.pickup_address}</p>
+            </div>
+          )}
+
+          {/* Owner: mark recovered */}
+          {isOwner && post.status !== 'recovered' && (
+            <button
+              onClick={handleRecover}
+              disabled={recovering}
+              className="btn-primary mt-1 w-full flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 disabled:opacity-60"
+            >
+              {recovering ? <><Spinner size={15} /> Traitement...</> : <><CheckCircle size={16} /> Marquer comme récupéré</>}
+            </button>
           )}
         </div>
 
-        <div className="flex flex-wrap gap-1.5 mb-4">
-          {post.documents.map(doc => (
-            <span key={doc} className="badge bg-orange-50 text-orange-700">
-              <FileText size={11} /> {DOC_LABELS[doc] || doc}
-            </span>
-          ))}
-        </div>
+        {/* ── Chat CTA ─────────────────────────────────────────────── */}
+        {canChat && (
+          <Link to={`/messages/${id}`} className="card flex items-center gap-3 group mb-4 hover:shadow-md transition-shadow active:scale-[.98]">
+            <div className="w-12 h-12 rounded-xl bg-orange-100 flex items-center justify-center shrink-0">
+              <MessageCircle size={22} className="text-orange-500" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-semibold text-gray-800 text-sm group-hover:text-orange-600 transition-colors">
+                Ouvrir la conversation
+              </p>
+              <p className="text-xs text-gray-400 mt-0.5 truncate">
+                {isOwner
+                  ? 'Échanger avec le chercheur'
+                  : approved
+                    ? 'Échanger avec le retrouveur'
+                    : 'Votre selfie est en attente — vous pouvez déjà échanger'}
+              </p>
+            </div>
+            <ChevronRight size={18} className="text-gray-300 group-hover:text-orange-500 group-hover:translate-x-1 transition-all shrink-0" />
+          </Link>
+        )}
 
-        {/* Recovered address (shown only after approval, backend gate sur canRevealAddress) */}
-        {post.pickup_address && (
-          <div className="bg-green-50 border border-green-200 rounded-xl p-3 text-sm">
-            <p className="font-semibold text-green-800 mb-1">Adresse de récupération</p>
-            <p className="text-green-700">{post.pickup_address}</p>
+        {/* ── Contact section (non-owners) ─────────────────────────── */}
+        {!isOwner && user && post.status !== 'recovered' && (
+          <div className="card mb-4">
+            <h2 className="font-semibold text-gray-800 text-sm mb-3 flex items-center gap-2">
+              <HelpCircle size={16} className="text-orange-500" /> Réclamez ce portefeuille
+            </h2>
+
+            {!myRequest && (
+              <form onSubmit={submitContactRequest} className="flex flex-col gap-3">
+                <div className="bg-orange-50 p-3 rounded-xl text-xs text-gray-600">
+                  <p className="font-semibold text-orange-700 mb-1 flex items-center gap-1.5">
+                    <Camera size={14} /> Vérification par selfie
+                  </p>
+                  <p>Prenez un selfie de votre visage. Le retrouveur le comparera avec la photo sur vos pièces d'identité trouvées.</p>
+                </div>
+
+                <SelfieCapture onCapture={handleSelfieCapture} preview={selfiePreview} />
+
+                <button
+                  type="submit"
+                  className="btn-primary w-full flex items-center justify-center gap-2"
+                  disabled={sending || !selfie}
+                >
+                  {sending
+                    ? <><Spinner size={15} /> Envoi en cours...</>
+                    : 'Envoyer mon selfie'
+                  }
+                </button>
+              </form>
+            )}
+
+            {myRequest?.status === 'pending' && (
+              <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-3 text-sm text-yellow-800">
+                Selfie envoyé. Le retrouveur va vérifier que votre visage correspond aux pièces trouvées.
+              </div>
+            )}
+
+            {myRequest?.status === 'rejected' && (
+              <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-sm text-red-700 flex items-center justify-between gap-3">
+                <span>Selfie non validé par le retrouveur.</span>
+                <button
+                  className="text-red-700 underline text-xs font-medium shrink-0"
+                  onClick={() => { setMyReq(null); setSelfie(null); setPreview(null) }}
+                >
+                  Réessayer
+                </button>
+              </div>
+            )}
           </div>
         )}
 
-        {/* Owner actions */}
-        {(isOwner || approved) && post.status !== 'recovered' && (
-          <button onClick={handleRecover} className="btn-primary mt-3 w-full flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600">
-            <CheckCircle size={16} /> Marquer comme récupéré
-          </button>
+        {/* ── Owner: incoming contact requests ─────────────────────── */}
+        {isOwner && requests.length > 0 && (
+          <div className="card mb-4">
+            <h2 className="font-semibold text-gray-800 text-sm mb-3">Demandes reçues</h2>
+            {requests.map(req => (
+              <div key={req.id} className="border border-gray-100 rounded-xl p-3 mb-2 flex flex-col gap-2">
+                <div className="flex items-center justify-between gap-2">
+                  <div>
+                    <p className="text-sm font-medium text-gray-800">{req.user?.name}</p>
+                    <p className="text-xs text-gray-400">{req.user?.phone}</p>
+                  </div>
+                  <span className={`badge text-xs ${
+                    req.status === 'approved' ? 'bg-green-100 text-green-700' :
+                    req.status === 'rejected' ? 'bg-red-100 text-red-600' :
+                    'bg-yellow-100 text-yellow-700'
+                  }`}>
+                    {req.status === 'approved' ? '✓ Approuvé' : req.status === 'rejected' ? '✗ Refusé' : '⏳ En attente'}
+                  </span>
+                </div>
+
+                {/* Selfie viewer */}
+                {req.selfie_path && (
+                  <div className="flex items-center gap-2">
+                    {selfieUrls[req.id]
+                      ? <img
+                          src={selfieUrls[req.id]}
+                          alt="Selfie"
+                          className="w-20 h-20 object-cover rounded-xl border border-gray-200 cursor-zoom-in hover:opacity-90 transition-opacity"
+                          onClick={() => setEnlargedSelfie(selfieUrls[req.id])}
+                        />
+                      : <button
+                          onClick={() => loadSelfie(req.id)}
+                          className="text-xs bg-orange-50 border border-orange-300 text-orange-700 font-medium px-3 py-1.5 rounded-lg hover:bg-orange-100 transition-colors"
+                        >
+                          Voir le selfie
+                        </button>
+                    }
+                  </div>
+                )}
+
+                {/* Actions */}
+                {req.status !== 'approved' && (
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleApprove(req.id)}
+                      disabled={approving || rejecting}
+                      className="btn-primary text-xs py-1.5 px-3 flex-1 flex items-center justify-center gap-1.5 disabled:opacity-60"
+                    >
+                      {approving
+                        ? <><Spinner size={13} /> Approbation...</>
+                        : <><CheckCircle size={12} /> C'est bien lui / elle</>
+                      }
+                    </button>
+                    {req.status === 'pending' && (
+                      <button
+                        onClick={() => handleReject(req.id)}
+                        disabled={approving || rejecting}
+                        className="text-xs py-1.5 px-3 flex-1 rounded-xl border border-red-300 text-red-600 hover:bg-red-50 disabled:opacity-50 transition-colors active:scale-95 flex items-center justify-center gap-1.5"
+                      >
+                        {rejecting
+                          ? <><Spinner size={13} className="text-red-400" /> Refus...</>
+                          : <><XCircle size={12} /> Pas le bon</>
+                        }
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {!user && post.status !== 'recovered' && (
+          <div className="card text-center py-6">
+            <p className="text-gray-600 text-sm mb-3">Connectez-vous pour réclamer ce portefeuille</p>
+            <button onClick={() => navigate('/login')} className="btn-primary">Se connecter</button>
+          </div>
+        )}
+
+        {/* Lightbox */}
+        {enlargedSelfie && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
+            onClick={() => setEnlargedSelfie(null)}
+          >
+            <div className="relative max-w-sm w-full" onClick={e => e.stopPropagation()}>
+              <img src={enlargedSelfie} alt="Selfie agrandi" className="w-full rounded-2xl shadow-2xl" />
+              <button
+                onClick={() => setEnlargedSelfie(null)}
+                className="absolute -top-3 -right-3 w-8 h-8 rounded-full bg-white text-gray-800 font-bold text-lg flex items-center justify-center shadow-lg hover:bg-gray-100"
+              >
+                ×
+              </button>
+            </div>
+          </div>
         )}
       </div>
-
-      {/* Contact section (non-owners) */}
-      {!isOwner && user && post.status !== 'recovered' && (
-        <div className="card mb-4">
-          <h2 className="font-semibold text-gray-800 text-sm mb-3 flex items-center gap-2">
-            <HelpCircle size={16} className="text-orange-500" /> Réclamez ce portefeuille
-          </h2>
-
-          {!myRequest && (
-            <form onSubmit={submitContactRequest} className="flex flex-col gap-3">
-              <div className="bg-orange-50 p-3 rounded-xl text-xs text-gray-600">
-                <p className="font-semibold text-orange-700 mb-1 flex items-center gap-1.5"><Camera size={14} /> Vérification par selfie</p>
-                <p>Prenez un selfie de votre visage. Le retrouveur le comparera avec la photo sur vos pièces d'identité trouvées.</p>
-              </div>
-
-              {/* Caméra selfie */}
-              <SelfieCapture onCapture={handleSelfieCapture} preview={selfiePreview} />
-
-              <button type="submit" className="btn-primary w-full" disabled={sending || !selfie}>
-                {sending ? 'Envoi en cours...' : 'Envoyer mon selfie'}
-              </button>
-            </form>
-          )}
-
-          {myRequest?.status === 'pending' && (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-3 text-sm text-yellow-800">
-              Selfie envoyé. Le retrouveur va vérifier que votre visage correspond aux pièces trouvées.
-            </div>
-          )}
-
-          {myRequest?.status === 'rejected' && (
-            <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-sm text-red-700 flex items-center justify-between gap-3">
-              <span>Selfie non validé par le retrouveur.</span>
-              <button
-                className="text-red-700 underline text-xs font-medium shrink-0"
-                onClick={() => { setMyReq(null); setSelfie(null); setPreview(null) }}
-              >
-                Réessayer
-              </button>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Owner: incoming contact requests */}
-      {isOwner && requests.length > 0 && (
-        <div className="card mb-4">
-          <h2 className="font-semibold text-gray-800 text-sm mb-3">Demandes reçues</h2>
-          {requests.map(req => (
-            <div key={req.id} className="border border-gray-100 rounded-xl p-3 mb-2 flex flex-col gap-2">
-              <div className="flex items-center justify-between gap-2">
-                <div>
-                  <p className="text-sm font-medium text-gray-800">{req.user?.name}</p>
-                  <p className="text-xs text-gray-400">{req.user?.phone}</p>
-                </div>
-                <span className={`badge text-xs ${
-                  req.status === 'approved' ? 'bg-green-100 text-green-700' :
-                  req.status === 'rejected' ? 'bg-red-100 text-red-600' :
-                  'bg-yellow-100 text-yellow-700'
-                }`}>
-                  {req.status === 'approved' ? '✓ Approuvé' : req.status === 'rejected' ? '✗ Refusé' : '⏳ En attente'}
-                </span>
-              </div>
-
-              {/* Selfie viewer */}
-              {req.selfie_path && (
-                <div className="flex items-center gap-2">
-                  {selfieUrls[req.id]
-                    ? <img
-                        src={selfieUrls[req.id]}
-                        alt="Selfie"
-                        className="w-20 h-20 object-cover rounded-xl border border-gray-200 cursor-zoom-in hover:opacity-90 transition-opacity"
-                        onClick={() => setEnlargedSelfie(selfieUrls[req.id])}
-                      />
-                    : <button
-                        onClick={() => loadSelfie(req.id)}
-                        className="text-xs bg-orange-50 border border-orange-300 text-orange-700 font-medium px-3 py-1.5 rounded-lg hover:bg-orange-100 transition-colors"
-                      >
-                        Voir le selfie
-                      </button>
-                  }
-                </div>
-              )}
-
-              {/* Actions */}
-              {req.status !== 'approved' && (
-                <div className="flex gap-2">
-                  <button onClick={() => handleApprove(req.id)} disabled={approving || rejecting} className="btn-primary text-xs py-1 px-3 flex-1">
-                    {approving ? '...' : <><CheckCircle size={12} className="inline mr-1" /> C'est bien lui / elle</>}
-                  </button>
-                  {req.status === 'pending' && (
-                    <button onClick={() => handleReject(req.id)} disabled={approving || rejecting} className="text-xs py-1 px-3 flex-1 rounded-xl border border-red-300 text-red-600 hover:bg-red-50 disabled:opacity-50 transition-colors active:scale-95">
-                      {rejecting ? '...' : <><XCircle size={12} className="inline mr-1" /> Pas le bon</>}
-                    </button>
-                  )}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* CTA Conversation — remplace la messagerie inline */}
-      {canChat && (
-        <Link
-          to={`/messages/${id}`}
-          className="card-hover flex items-center gap-3 group mb-4"
-        >
-          <div className="w-12 h-12 rounded-xl bg-orange-100 flex items-center justify-center shrink-0">
-            <MessageCircle size={22} className="text-orange-500" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="font-semibold text-gray-800 text-sm group-hover:text-orange-600 transition-colors">
-              Ouvrir la conversation
-            </p>
-            <p className="text-xs text-gray-400 mt-0.5 truncate">
-              {isOwner
-                ? 'Échanger avec le chercheur'
-                : approved
-                  ? 'Échanger avec le retrouveur'
-                  : 'Votre selfie est en attente — vous pouvez déjà échanger'}
-            </p>
-          </div>
-          <ChevronRight size={18} className="text-gray-300 group-hover:text-orange-500 group-hover:translate-x-1 transition-all shrink-0" />
-        </Link>
-      )}
-
-      {!user && post.status !== 'recovered' && (
-        <div className="card text-center py-6">
-          <p className="text-gray-600 text-sm mb-3">Connectez-vous pour réclamer ce portefeuille</p>
-          <button onClick={() => navigate('/login')} className="btn-primary">Se connecter</button>
-        </div>
-      )}
-
-      {/* Lightbox */}
-      {enlargedSelfie && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
-          onClick={() => setEnlargedSelfie(null)}
-        >
-          <div className="relative max-w-sm w-full" onClick={e => e.stopPropagation()}>
-            <img
-              src={enlargedSelfie}
-              alt="Selfie agrandi"
-              className="w-full rounded-2xl shadow-2xl"
-            />
-            <button
-              onClick={() => setEnlargedSelfie(null)}
-              className="absolute -top-3 -right-3 w-8 h-8 rounded-full bg-white text-gray-800 font-bold text-lg flex items-center justify-center shadow-lg hover:bg-gray-100"
-            >
-              ×
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
     </>
   )
 }

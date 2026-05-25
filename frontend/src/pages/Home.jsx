@@ -3,14 +3,15 @@ import { useNavigate } from 'react-router-dom'
 import { Search, Wallet, Shield, Bell, ArrowRight } from 'lucide-react'
 import { getPosts } from '../api/posts'
 import PostCard from '../components/PostCard'
+import { Spinner, SkeletonCard } from '../components/Spinner'
 import { useAuth } from '../context/AuthContext'
-import SEO from '../components/SEO'
 
 export default function Home() {
-  const [query, setQuery]   = useState('')
-  const [posts, setPosts]   = useState([])
-  const [loading, setLoading] = useState(false)
-  const [searched, setSearched] = useState(false)
+  const [query, setQuery]           = useState('')
+  const [posts, setPosts]           = useState([])
+  const [loading, setLoading]       = useState(false)
+  const [initialLoading, setInitialLoading] = useState(true)
+  const [searched, setSearched]     = useState(false)
   const { user } = useAuth()
   const navigate = useNavigate()
 
@@ -38,16 +39,13 @@ export default function Home() {
     getPosts({ limit: 6 })
       .then(r => setPosts(r.data.data ?? r.data))
       .catch(() => {})
+      .finally(() => setInitialLoading(false))
   }, [])
 
+  const isLoading = loading || initialLoading
+
   return (
-    <>
-      <SEO
-        title="Retrouvez vos pieces perdues a Abidjan"
-        description="LostCards connecte ceux qui ont perdu un portefeuille (CNI, permis, carte bancaire) avec ceux qui l'ont retrouve, a Abidjan. Verification selfie obligatoire, chat prive, 100% gratuit."
-        path="/"
-      />
-      <div>
+    <div>
       {/* Hero */}
       <div className="py-10 text-center">
         <div className="inline-flex items-center gap-2 bg-orange-50 text-orange-600 text-xs font-semibold px-3 py-1.5 rounded-full mb-4">
@@ -73,8 +71,9 @@ export default function Home() {
               className="input pl-9"
             />
           </div>
-          <button type="submit" className="btn-primary px-5" disabled={loading}>
-            {loading ? '...' : 'Chercher'}
+          <button type="submit" className="btn-primary px-5 flex items-center gap-2" disabled={loading}>
+            {loading ? <Spinner size={15} /> : <Search size={15} />}
+            {loading ? 'Recherche...' : 'Chercher'}
           </button>
         </form>
       </div>
@@ -95,7 +94,7 @@ export default function Home() {
       {/* How it works */}
       <div className="grid grid-cols-3 gap-3 mb-8">
         {[
-          { icon: <Wallet size={20} className="text-orange-500" />, title: 'Quelqu\'un signale', desc: 'Le retrouveur publie l\'annonce avec les infos partielles du portefeuille.' },
+          { icon: <Wallet size={20} className="text-orange-500" />, title: "Quelqu'un signale", desc: "Le retrouveur publie l'annonce avec les infos partielles du portefeuille." },
           { icon: <Search size={20} className="text-orange-500" />, title: 'Le proprio cherche', desc: 'Il tape son nom et trouve l\'annonce correspondante.' },
           { icon: <Shield size={20} className="text-orange-500" />, title: 'Contact sécurisé', desc: 'Une question secrète vérifie l\'identité avant d\'ouvrir le chat.' },
         ].map((step, i) => (
@@ -113,11 +112,21 @@ export default function Home() {
           {searched ? `Résultats pour "${query}"` : 'Annonces récentes'}
         </h2>
 
-        {loading && (
-          <div className="text-center py-8 text-gray-400 text-sm">Recherche en cours...</div>
+        {/* Skeleton on initial load */}
+        {initialLoading && (
+          <div className="flex flex-col gap-3">
+            {[1, 2, 3].map(n => <SkeletonCard key={n} />)}
+          </div>
         )}
 
-        {!loading && posts.length === 0 && searched && (
+        {/* Spinner on search */}
+        {loading && !initialLoading && (
+          <div className="flex items-center justify-center gap-2 py-8 text-gray-400 text-sm">
+            <Spinner size={18} className="text-orange-400" /> Recherche en cours...
+          </div>
+        )}
+
+        {!isLoading && posts.length === 0 && searched && (
           <div className="card text-center py-10">
             <Bell size={32} className="mx-auto text-gray-300 mb-3" />
             <p className="text-gray-600 font-medium text-sm">Aucun portefeuille trouvé pour ce nom</p>
@@ -128,13 +137,14 @@ export default function Home() {
           </div>
         )}
 
-        <div className="flex flex-col gap-3">
-          {posts
-            .filter(p => p.status !== 'recovered')
-            .map(post => <PostCard key={post.id} post={post} />)}
-        </div>
+        {!isLoading && (
+          <div className="flex flex-col gap-3">
+            {posts
+              .filter(p => p.status !== 'recovered')
+              .map(post => <PostCard key={post.id} post={post} />)}
+          </div>
+        )}
       </div>
     </div>
-    </>
   )
 }

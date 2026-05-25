@@ -2,7 +2,9 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { createPost } from '../api/posts'
 import { MapPin, FileText, Phone, CheckSquare, Square } from 'lucide-react'
-import toast from 'react-hot-toast'
+import { Spinner } from '../components/Spinner'
+import { useAsyncAction } from '../lib/useAsyncAction'
+import { t } from '../lib/toast'
 
 const DOCUMENTS = [
   { key: 'cni',       label: "CNI (Carte Nationale d'Identité)" },
@@ -23,7 +25,6 @@ const COMMUNES = [
 
 export default function PostCreate() {
   const navigate = useNavigate()
-  const [loading, setLoading] = useState(false)
   const [form, setForm] = useState({
     name_on_cards:   '',
     location:        '',
@@ -40,22 +41,19 @@ export default function PostCreate() {
     }))
   }
 
-  const handleSubmit = async (e) => {
+  const { run: handleSubmit, loading } = useAsyncAction(async (e) => {
     e.preventDefault()
-    if (form.documents.length === 0) { toast.error('Sélectionnez au moins un type de document'); return }
-    setLoading(true)
+    if (form.documents.length === 0) { t.error('Sélectionnez au moins un type de document'); return }
     try {
       const res = await createPost(form)
-      toast.success('Annonce publiée ! Merci pour votre geste.')
+      t.success('Annonce publiée ! Merci pour votre geste.')
       navigate(`/posts/${res.data.id}`)
     } catch (err) {
       const errors = err.response?.data?.errors
-      if (errors) Object.values(errors).flat().forEach(m => toast.error(m))
-      else toast.error('Erreur lors de la publication')
-    } finally {
-      setLoading(false)
+      if (errors) Object.values(errors).flat().forEach(m => t.error(m))
+      else t.error('Erreur lors de la publication')
     }
-  }
+  })
 
   const set = (field) => (e) => setForm({ ...form, [field]: e.target.value })
 
@@ -134,8 +132,12 @@ export default function PostCreate() {
           <p className="text-xs text-gray-400 mt-1.5">Visible uniquement après vérification de l'identité du propriétaire.</p>
         </div>
 
-        <button type="submit" className="btn-primary w-full py-3 text-base" disabled={loading}>
-          {loading ? 'Publication en cours...' : 'Publier l\'annonce'}
+        <button
+          type="submit"
+          className="btn-primary w-full py-3 text-base flex items-center justify-center gap-2"
+          disabled={loading}
+        >
+          {loading ? <><Spinner size={16} /> Publication en cours...</> : "Publier l'annonce"}
         </button>
       </form>
     </div>

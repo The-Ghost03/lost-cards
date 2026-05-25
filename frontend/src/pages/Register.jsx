@@ -1,9 +1,9 @@
 import { useState } from 'react'
-import SEO from '../components/SEO'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { Search, Handshake } from 'lucide-react'
 import LogoIcon from '../components/LogoIcon'
+import { Spinner } from '../components/Spinner'
 import { t } from '../lib/toast'
 import { useAsyncAction } from '../lib/useAsyncAction'
 
@@ -11,17 +11,15 @@ export default function Register() {
   const [form, setForm] = useState({
     name: '', email: '', phone: '', password: '', password_confirmation: '', status: '',
   })
-  const [loading, setLoading] = useState(false)
   const { register } = useAuth()
   const navigate = useNavigate()
 
-  const handleSubmit = async (e) => {
+  const { run: handleSubmit, loading } = useAsyncAction(async (e) => {
     e.preventDefault()
     if (!form.status) { t.error('Choisissez votre statut'); return }
     if (form.password !== form.password_confirmation) {
       t.error('Les mots de passe ne correspondent pas'); return
     }
-    setLoading(true)
     try {
       await register(form)
       t.success('Compte créé avec succès !')
@@ -30,20 +28,16 @@ export default function Register() {
       const errors = err.response?.data?.errors
       if (errors) Object.values(errors).flat().forEach(msg => t.error(msg))
       else t.error(err.response?.data?.message || "Erreur lors de l'inscription")
-    } finally {
-      setLoading(false)
     }
-  }
+  })
 
   const set = (field) => (e) => setForm({ ...form, [field]: e.target.value })
 
   return (
-    <>
-      <SEO title="Inscription" path="/register" description="Inscrivez-vous sur LostCards — chercheur (j'ai perdu) ou retrouveur (j'ai trouve). Inscription gratuite, securisee." />
-      <div className="max-w-sm mx-auto pt-10 pb-16">
+    <div className="max-w-sm mx-auto pt-10 pb-16">
       <div className="text-center mb-8">
         <div className="inline-flex items-center gap-2 text-orange-500 font-bold text-xl mb-1">
-          <LogoIcon size={28} /> LostCards
+          <LogoIcon size={26} /> LostCards
         </div>
         <h1 className="text-2xl font-bold text-gray-900">Créer un compte</h1>
         <p className="text-gray-500 text-sm mt-1">Rejoignez la communauté d'entraide</p>
@@ -51,7 +45,7 @@ export default function Register() {
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
 
-        {/* Statut — step 1 visually */}
+        {/* Statut */}
         <div className="card">
           <p className="text-xs font-semibold text-gray-700 mb-3 uppercase tracking-wide">Vous êtes…</p>
           <div className="grid grid-cols-2 gap-3">
@@ -100,8 +94,12 @@ export default function Register() {
           </div>
         </div>
 
-        <button type="submit" className="btn-primary w-full py-3 text-base" disabled={loading}>
-          {loading ? 'Création...' : 'Créer mon compte'}
+        <button
+          type="submit"
+          className="btn-primary w-full py-3 text-base flex items-center justify-center gap-2"
+          disabled={loading}
+        >
+          {loading ? <><Spinner size={16} /> Création en cours...</> : 'Créer mon compte'}
         </button>
       </form>
 
@@ -110,6 +108,5 @@ export default function Register() {
         <Link to="/login" className="text-orange-500 font-medium">Se connecter</Link>
       </p>
     </div>
-    </>
   )
 }

@@ -5,7 +5,7 @@ import { getPost } from '../api/posts'
 import { useAuth }   from '../context/AuthContext'
 import { useUnread } from '../context/UnreadContext'
 import { t }  from '../lib/toast'
-import { ChevronLeft, Send, Wallet, CheckCircle } from 'lucide-react'
+import { ChevronLeft, Send, Wallet, CheckCircle, Lock } from 'lucide-react'
 import { format, isToday, isYesterday } from 'date-fns'
 import { fr } from 'date-fns/locale'
 
@@ -222,27 +222,34 @@ export default function Chat() {
       </div>
 
       {/* ── Input bar ───────────────────────────────────────────── */}
-      <div className="flex-none px-4 py-3 bg-white border-t border-gray-100">
-        <div className="flex items-end gap-2">
-          <textarea
-            ref={textareaRef}
-            rows={1}
-            placeholder="Votre message..."
-            value={text}
-            onChange={e => setText(e.target.value)}
-            onKeyDown={handleKey}
-            className="flex-1 input resize-none py-2.5 text-sm overflow-hidden"
-            style={{ minHeight: '44px', maxHeight: '120px' }}
-          />
-          <button
-            onClick={handleSend}
-            disabled={!text.trim()}
-            className="shrink-0 w-11 h-11 rounded-xl bg-orange-500 hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed text-white flex items-center justify-center transition-colors"
-          >
-            <Send size={18} />
-          </button>
+      {post?.status === 'recovered' ? (
+        <div className="flex-none px-4 py-4 bg-gray-50 border-t border-gray-200 flex items-center justify-center gap-2">
+          <Lock size={13} className="text-gray-400" />
+          <p className="text-xs text-gray-400 font-medium">Cette conversation est clôturée</p>
         </div>
-      </div>
+      ) : (
+        <div className="flex-none px-4 py-3 bg-white border-t border-gray-100">
+          <div className="flex items-end gap-2">
+            <textarea
+              ref={textareaRef}
+              rows={1}
+              placeholder="Votre message..."
+              value={text}
+              onChange={e => setText(e.target.value)}
+              onKeyDown={handleKey}
+              className="flex-1 input resize-none py-2.5 text-sm overflow-hidden"
+              style={{ minHeight: '44px', maxHeight: '120px' }}
+            />
+            <button
+              onClick={handleSend}
+              disabled={!text.trim()}
+              className="shrink-0 w-11 h-11 rounded-xl bg-orange-500 hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed text-white flex items-center justify-center transition-colors"
+            >
+              <Send size={18} />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

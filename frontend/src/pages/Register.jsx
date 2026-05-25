@@ -2,7 +2,8 @@ import { useState } from 'react'
 import SEO from '../components/SEO'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { Wallet, Search, Handshake } from 'lucide-react'
+import { Search, Handshake } from 'lucide-react'
+import LogoIcon from '../components/LogoIcon'
 import { t } from '../lib/toast'
 import { useAsyncAction } from '../lib/useAsyncAction'
 
@@ -42,7 +43,7 @@ export default function Register() {
       <div className="max-w-sm mx-auto pt-10 pb-16">
       <div className="text-center mb-8">
         <div className="inline-flex items-center gap-2 text-orange-500 font-bold text-xl mb-1">
-          <Wallet size={24} /> LostCards
+          <LogoIcon size={28} /> LostCards
         </div>
         <h1 className="text-2xl font-bold text-gray-900">Créer un compte</h1>
         <p className="text-gray-500 text-sm mt-1">Rejoignez la communauté d'entraide</p>

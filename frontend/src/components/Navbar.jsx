@@ -6,6 +6,7 @@ import {
   Bell, Shield, User, LogOut, Search,
 } from 'lucide-react'
 import { t } from '../lib/toast'
+import LogoIcon from './LogoIcon'
 
 /* ── Badge dot ──────────────────────────────────────────────────── */
 function UnreadBadge({ count, small = false }) {
@@ -55,7 +56,7 @@ export default function Navbar() {
         <div className="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 font-bold text-orange-500 text-lg">
-            <svg width="26" height="26" viewBox="0 0 100 100" fill="none"><rect width="100" height="100" rx="23" fill="#F97316"/><rect x="28" y="20" width="14" height="58" rx="4" fill="#FFFFFF"/><rect x="28" y="65" width="50" height="14" rx="4" fill="#FFFFFF"/><circle cx="72" cy="18" r="12" fill="#10B981" stroke="#FFFFFF" strokeWidth="4"/></svg>
+            <LogoIcon size={26} />
             <span>LostCards</span>
           </Link>
 

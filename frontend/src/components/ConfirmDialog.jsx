@@ -38,7 +38,7 @@ export function ConfirmProvider({ children }) {
           />
 
           {/* Sheet */}
-          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6"
+          <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm p-6"
                style={{ animation: 'slideUp 0.22s ease' }}>
             <div className="flex gap-3 mb-4">
               <div className={`shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${

@@ -23,7 +23,7 @@ export default function App() {
   return (
     <ConfirmProvider>
       <UnreadProvider>
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 transition-colors duration-200">
           <Navbar />
           <main className="max-w-2xl mx-auto px-4 pb-24">
             <Routes>
@@ -53,6 +53,7 @@ export default function App() {
             toastOptions={{
               duration: 3000,
               style: { borderRadius: '12px', fontSize: '14px' },
+              className: 'dark:!bg-gray-800 dark:!text-gray-100',
             }}
           />
         </div>

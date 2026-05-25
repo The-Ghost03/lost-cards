@@ -160,7 +160,7 @@ export default function Chat() {
       style={{ height: 'calc(100svh - 3.5rem - 4rem)' }}
     >
       {/* ── Chat header ─────────────────────────────────────────── */}
-      <div className="flex-none flex items-center gap-3 px-4 py-3 bg-white border-b border-gray-100 shadow-sm">
+      <div className="flex-none flex items-center gap-3 px-4 py-3 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 shadow-sm">
         <button
           onClick={() => navigate('/messages')}
           className="p-1 text-gray-500 hover:text-gray-700 transition-colors"
@@ -192,7 +192,7 @@ export default function Chat() {
       </div>
 
       {/* ── Messages ────────────────────────────────────────────── */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 bg-gray-50 space-y-1">
+      <div className="flex-1 overflow-y-auto px-4 py-4 bg-gray-50 dark:bg-gray-950 space-y-1">
         {messages.length === 0 && (
           <p className="text-center text-gray-400 text-sm pt-10">
             Démarrez la conversation
@@ -216,7 +216,7 @@ export default function Chat() {
                   className={`max-w-[78%] px-3.5 py-2.5 text-sm leading-relaxed transition-opacity ${
                     mine
                       ? 'bg-orange-500 text-white rounded-2xl rounded-br-sm'
-                      : 'bg-white text-gray-800 shadow-sm rounded-2xl rounded-bl-sm'
+                      : 'bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 shadow-sm rounded-2xl rounded-bl-sm'
                   } ${msg._pending ? 'opacity-60' : 'opacity-100'}`}
                 >
                   {msg.content}
@@ -248,7 +248,7 @@ export default function Chat() {
           </button>
         </div>
       ) : (
-        <div className="flex-none px-4 py-3 bg-white border-t border-gray-100">
+        <div className="flex-none px-4 py-3 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800">
           <div className="flex items-end gap-2">
             <textarea
               ref={textareaRef}

@@ -112,4 +112,37 @@ class ContactRequestController extends Controller
 
         return response()->json($contactRequest);
     }
+
+    /**
+     * GET /api/me/contact-requests
+     * Toutes les demandes envoyees PAR l'utilisateur courant (Chercheur).
+     */
+    public function myRequests(Request $request)
+    {
+        return response()->json(
+            ContactRequest::where('user_id', $request->user()->id)
+                ->with(['post:id,name_partial,location,status,documents,created_at,user_id'])
+                ->orderByDesc('created_at')
+                ->get()
+        );
+    }
+
+    /**
+     * GET /api/me/incoming-requests
+     * Toutes les demandes recues sur les annonces du Retrouveur.
+     */
+    public function incomingRequests(Request $request)
+    {
+        return response()->json(
+            ContactRequest::whereHas('post', function ($q) use ($request) {
+                $q->where('user_id', $request->user()->id);
+            })
+            ->with([
+                'post:id,name_partial,location,status,documents,created_at',
+                'user:id,name,email,phone',
+            ])
+            ->orderByDesc('created_at')
+            ->get()
+        );
+    }
 }

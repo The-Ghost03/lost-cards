@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { MapPin, Calendar, FileText, CheckCircle, ArrowRight } from 'lucide-react'
+import { MapPin, Calendar, FileText, CheckCircle, ArrowRight, Camera, Clock, XCircle } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { fr } from 'date-fns/locale'
 
@@ -14,14 +14,27 @@ const DOC_LABELS = {
   autre:      { label: 'Autre',          color: 'bg-gray-100 text-gray-600' },
 }
 
+const MY_REQ_BADGE = {
+  pending:  { icon: Clock,       label: 'Selfie envoyé · En attente', cls: 'bg-yellow-100 text-yellow-700 border-yellow-200' },
+  approved: { icon: CheckCircle, label: 'Approuvé · Chat ouvert',     cls: 'bg-green-100 text-green-700 border-green-200' },
+  rejected: { icon: XCircle,     label: 'Refusé — réessayez',          cls: 'bg-red-100 text-red-600 border-red-200' },
+}
+
 export default function PostCard({ post }) {
   const age = formatDistanceToNow(new Date(post.created_at), { addSuffix: true, locale: fr })
+  const my  = post.my_request
+  const myBadge = my && MY_REQ_BADGE[my.status]
 
   return (
-    <Link to={`/posts/${post.id}`} className="card-hover block group">
+    <Link
+      to={`/posts/${post.id}`}
+      className={`card-hover block group ${my ? 'border-l-4 border-orange-400' : ''}`}
+    >
       <div className="flex items-start justify-between gap-2 mb-3">
         <div className="min-w-0">
-          <p className="font-semibold text-gray-800 text-base group-hover:text-orange-600 transition-colors">{post.name_partial}</p>
+          <p className="font-semibold text-gray-800 text-base group-hover:text-orange-600 transition-colors">
+            {post.name_partial}
+          </p>
           <p className="text-xs text-gray-400 flex items-center gap-1 mt-0.5">
             <MapPin size={11} /> {post.location}
           </p>
@@ -33,6 +46,14 @@ export default function PostCard({ post }) {
           : <ArrowRight size={16} className="text-gray-300 group-hover:text-orange-500 group-hover:translate-x-1 transition-all shrink-0 mt-1" />
         }
       </div>
+
+      {/* Badge "ma demande" si l'utilisateur a déjà interagi */}
+      {myBadge && (
+        <div className={`mb-3 inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full border ${myBadge.cls}`}>
+          <myBadge.icon size={12} />
+          {myBadge.label}
+        </div>
+      )}
 
       <div className="flex flex-wrap gap-1.5 mb-3">
         {post.documents.map(doc => {

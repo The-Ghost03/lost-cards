@@ -42,6 +42,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/alerts',        [AlertSubscriptionController::class, 'store']);
     Route::delete('/alerts/{id}', [AlertSubscriptionController::class, 'destroy']);
 
+    Route::get('/me/contact-requests',  [ContactRequestController::class, 'myRequests']);
+    Route::get('/me/incoming-requests', [ContactRequestController::class, 'incomingRequests']);
+
     Route::middleware('admin')->prefix('admin')->group(function () {
         Route::get('/stats',           [DashboardController::class, 'stats']);
         Route::get('/posts',           [DashboardController::class, 'posts']);

@@ -22,3 +22,7 @@ export const getContactRequests = (postId) =>
 
 export const approveContact = (postId, requestId) =>
   api.patch(`/posts/${postId}/contact/${requestId}/approve`)
+
+// — Suivi global —
+export const getMyContactRequests  = () => api.get('/me/contact-requests')
+export const getMyIncomingRequests = () => api.get('/me/incoming-requests')

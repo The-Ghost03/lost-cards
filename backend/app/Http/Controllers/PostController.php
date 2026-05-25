@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AlertSubscription;
+use App\Models\ContactRequest;
 use App\Models\Post;
 use App\Models\User;
 use App\Mail\WalletFoundNotification;
@@ -26,7 +27,30 @@ class PostController extends Controller
             $query->where('status', 'active');
         }
 
-        return response()->json($query->paginate($request->input('limit', 12)));
+        $result = $query->paginate($request->input('limit', 12));
+
+        // Enrichir avec my_request (statut de la demande du user courant sur chaque post)
+        $authUser = auth('sanctum')->user();
+        if ($authUser) {
+            $userId  = $authUser->id;
+            $postIds = $result->getCollection()->pluck('id');
+            $mine    = ContactRequest::where('user_id', $userId)
+                ->whereIn('post_id', $postIds)
+                ->get(['id', 'post_id', 'status', 'created_at'])
+                ->keyBy('post_id');
+
+            $result->getCollection()->transform(function ($post) use ($mine) {
+                $r = $mine->get($post->id);
+                $post->my_request = $r ? [
+                    'id'         => $r->id,
+                    'status'     => $r->status,
+                    'created_at' => $r->created_at,
+                ] : null;
+                return $post;
+            });
+        }
+
+        return response()->json($result);
     }
 
     public function show(Request $request, Post $post)

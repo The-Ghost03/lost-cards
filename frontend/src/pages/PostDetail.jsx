@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import SEO from '../components/SEO'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { getPost, submitContact, approveContact, rejectContact, getContactRequests, markRecovered, getSelfie } from '../api/posts'
 import { getMessages, sendMessage } from '../api/messages'
@@ -137,7 +138,13 @@ export default function PostDetail() {
   const canChat   = isOwner || approved
 
   return (
-    <div className="pt-6">
+    <>
+      <SEO
+        title={post?.name_partial ? `Portefeuille "${post.name_partial}" trouve a ${post.location}` : 'Annonce de portefeuille trouve'}
+        description={post?.name_partial ? `Un portefeuille au nom de "${post.name_partial}" a ete trouve a ${post.location}. Reclamez-le sur LostCards avec verification selfie.` : "Annonce sur LostCards — plateforme de portefeuilles retrouves a Abidjan."}
+        path={`/posts/${id}`}
+      />
+      <div className="pt-6">
       <Link to="/" className="flex items-center gap-1 text-gray-500 text-sm mb-4 hover:text-gray-700">
         <ChevronLeft size={16} /> Toutes les annonces
       </Link>
@@ -358,5 +365,6 @@ export default function PostDetail() {
         </div>
       )}
     </div>
+    </>
   )
 }

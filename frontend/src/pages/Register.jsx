@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import SEO from '../components/SEO'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { Wallet, Search, Handshake } from 'lucide-react'
@@ -36,7 +37,9 @@ export default function Register() {
   const set = (field) => (e) => setForm({ ...form, [field]: e.target.value })
 
   return (
-    <div className="max-w-sm mx-auto pt-10 pb-16">
+    <>
+      <SEO title="Inscription" path="/register" description="Inscrivez-vous sur LostCards — chercheur (j'ai perdu) ou retrouveur (j'ai trouve). Inscription gratuite, securisee." />
+      <div className="max-w-sm mx-auto pt-10 pb-16">
       <div className="text-center mb-8">
         <div className="inline-flex items-center gap-2 text-orange-500 font-bold text-xl mb-1">
           <Wallet size={24} /> LostCards
@@ -106,5 +109,6 @@ export default function Register() {
         <Link to="/login" className="text-orange-500 font-medium">Se connecter</Link>
       </p>
     </div>
+    </>
   )
 }

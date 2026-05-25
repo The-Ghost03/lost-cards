@@ -4,6 +4,7 @@ import { Search, Wallet, Shield, Bell, ArrowRight } from 'lucide-react'
 import { getPosts } from '../api/posts'
 import PostCard from '../components/PostCard'
 import { useAuth } from '../context/AuthContext'
+import SEO from '../components/SEO'
 
 export default function Home() {
   const [query, setQuery]   = useState('')
@@ -40,7 +41,13 @@ export default function Home() {
   }, [])
 
   return (
-    <div>
+    <>
+      <SEO
+        title="Retrouvez vos pieces perdues a Abidjan"
+        description="LostCards connecte ceux qui ont perdu un portefeuille (CNI, permis, carte bancaire) avec ceux qui l'ont retrouve, a Abidjan. Verification selfie obligatoire, chat prive, 100% gratuit."
+        path="/"
+      />
+      <div>
       {/* Hero */}
       <div className="py-10 text-center">
         <div className="inline-flex items-center gap-2 bg-orange-50 text-orange-600 text-xs font-semibold px-3 py-1.5 rounded-full mb-4">
@@ -128,5 +135,6 @@ export default function Home() {
         </div>
       </div>
     </div>
+    </>
   )
 }

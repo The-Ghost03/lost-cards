@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /messages
+Disallow: /profile
+Disallow: /reset-password
+Disallow: /forgot-password
+
+Sitemap: https://lost-card.softskills.ci/sitemap.xml

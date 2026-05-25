@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import SEO from '../components/SEO'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { Wallet, Mail, Lock } from 'lucide-react'
@@ -29,7 +30,9 @@ export default function Login() {
   const set = (field) => (e) => setForm({ ...form, [field]: e.target.value })
 
   return (
-    <div className="max-w-sm mx-auto pt-10 page-enter">
+    <>
+      <SEO title="Connexion" path="/login" description="Connectez-vous a LostCards pour suivre vos demandes et gerer vos annonces de portefeuilles." />
+      <div className="max-w-sm mx-auto pt-10 page-enter">
       <div className="text-center mb-8 animate-slide-down">
         <div className="inline-flex items-center gap-2 text-orange-500 font-bold text-xl mb-1">
           <Wallet size={24} /> LostCards
@@ -66,5 +69,6 @@ export default function Login() {
         <Link to="/register" className="text-orange-500 font-medium">S'inscrire</Link>
       </p>
     </div>
+    </>
   )
 }

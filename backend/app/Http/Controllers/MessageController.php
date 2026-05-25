@@ -18,7 +18,7 @@ class MessageController extends Controller
         $postIds = Post::where('user_id', $userId)->pluck('id')
             ->merge(
                 \App\Models\ContactRequest::where('user_id', $userId)
-                    ->where('status', 'approved')
+                    ->whereIn('status', ['pending', 'approved'])
                     ->pluck('post_id')
             )
             ->unique();
@@ -47,15 +47,31 @@ class MessageController extends Controller
     public function index(Request $request, Post $post)
     {
         $this->authorizeAccess($request, $post);
+        $userId  = $request->user()->id;
+        $isOwner = $post->user_id === $userId;
 
+        // Marquer comme lu les messages adressés à moi
         $post->messages()
-            ->where('receiver_id', $request->user()->id)
+            ->where('receiver_id', $userId)
             ->whereNull('read_at')
             ->update(['read_at' => now()]);
 
-        return response()->json(
-            $post->messages()->with('sender:id,name')->orderBy('created_at')->get()
-        );
+        $query = $post->messages()->with('sender:id,name');
+
+        if (!$isOwner) {
+            // Non-owner : isoler le fil "moi ↔ propriétaire"
+            $query->where(function ($q) use ($userId, $post) {
+                $q->where(function ($q2) use ($userId, $post) {
+                    $q2->where('sender_id', $userId)
+                       ->where('receiver_id', $post->user_id);
+                })->orWhere(function ($q2) use ($userId, $post) {
+                    $q2->where('sender_id', $post->user_id)
+                       ->where('receiver_id', $userId);
+                });
+            });
+        }
+
+        return response()->json($query->orderBy('created_at')->get());
     }
 
     public function store(Request $request, Post $post)
@@ -65,15 +81,16 @@ class MessageController extends Controller
         $request->validate(['content' => 'required|string|max:2000']);
 
         if ($post->user_id === $request->user()->id) {
+            // Owner peut écrire à un demandeur approuvé OU pending (relance pré-approbation)
             $receiverId = $post->contactRequests()
-                ->where('status', 'approved')
+                ->whereIn('status', ['approved', 'pending'])
                 ->latest()
                 ->value('user_id');
 
             abort_if(
                 is_null($receiverId),
                 422,
-                'Aucune demande approuvée sur cette annonce. Approuvez d\'abord une demande pour ouvrir le chat.'
+                'Aucune demande de contact sur cette annonce. Attendez qu\'un chercheur envoie son selfie.'
             );
         } else {
             $receiverId = $post->user_id;
@@ -101,13 +118,13 @@ class MessageController extends Controller
 
     private function authorizeAccess(Request $request, Post $post): void
     {
-        $userId     = $request->user()->id;
-        $isOwner    = $post->user_id === $userId;
-        $isApproved = $post->contactRequests()
+        $userId  = $request->user()->id;
+        $isOwner = $post->user_id === $userId;
+        $hasReq  = $post->contactRequests()
             ->where('user_id', $userId)
-            ->where('status', 'approved')
+            ->whereIn('status', ['pending', 'approved'])
             ->exists();
 
-        abort_unless($isOwner || $isApproved, 403, 'Accès non autorisé.');
+        abort_unless($isOwner || $hasReq, 403, 'Accès non autorisé.');
     }
 }

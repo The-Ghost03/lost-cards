@@ -234,16 +234,16 @@ export default function Chat() {
           <Lock size={13} className="text-gray-400" />
           <p className="text-xs text-gray-400 font-medium">Cette conversation est clôturée</p>
         </div>
-      ) : (post?.user_id === user?.id && !requests.some(r => r.status === 'approved')) ? (
+      ) : (post?.user_id === user?.id && !requests.some(r => ['pending','approved'].includes(r.status))) ? (
         <div className="flex-none px-4 py-4 bg-yellow-50 border-t border-yellow-200">
           <p className="text-xs text-yellow-800 font-medium text-center leading-relaxed">
-            Approuvez d'abord une demande de contact pour ouvrir la conversation.
+            Aucun chercheur n'a encore envoyé son selfie pour cette annonce. Le chat s'ouvrira automatiquement à la première demande.
           </p>
           <button
             onClick={() => navigate(`/posts/${postId}`)}
             className="mt-2 w-full text-xs font-semibold text-yellow-900 bg-yellow-200 hover:bg-yellow-300 px-3 py-2 rounded-lg transition-colors"
           >
-            Voir les demandes reçues →
+            Voir l'annonce →
           </button>
         </div>
       ) : (

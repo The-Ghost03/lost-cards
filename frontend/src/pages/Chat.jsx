@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { getMessages, sendMessage } from '../api/messages'
-import { getPost } from '../api/posts'
+import { getPost, getContactRequests } from '../api/posts'
 import { useAuth }   from '../context/AuthContext'
 import { useUnread } from '../context/UnreadContext'
 import { t }  from '../lib/toast'
@@ -32,6 +32,7 @@ export default function Chat() {
   const navigate                = useNavigate()
 
   const [post,     setPost]     = useState(null)
+  const [requests, setRequests] = useState([])
   const [messages, setMessages] = useState([])
   const [text,     setText]     = useState('')
   const [loading,  setLoading]  = useState(true)
@@ -62,10 +63,15 @@ export default function Chat() {
 
   /* ── Initial load ─────────────────────────────────────────────────*/
   useEffect(() => {
-    Promise.all([getPost(postId), getMessages(postId)])
-      .then(([p, m]) => {
+    Promise.all([
+      getPost(postId),
+      getMessages(postId),
+      getContactRequests(postId).catch(() => ({ data: [] })),
+    ])
+      .then(([p, m, r]) => {
         setPost(p.data)
         setMessages(m.data)
+        setRequests(r.data || [])
         lastCountRef.current = m.data.length
         refreshBadge()
       })
@@ -120,11 +126,12 @@ export default function Chat() {
         if (without.some(m => m.id === res.data.id)) return without
         return [...without, res.data]
       })
-    } catch {
+    } catch (err) {
       // Roll back on failure
       setMessages(prev => prev.filter(m => m.id !== tempId))
       setText(content)
-      t.error("Erreur d'envoi")
+      const msg = err.response?.data?.message || "Erreur d'envoi"
+      t.error(msg)
     } finally {
       isSending.current = false
     }
@@ -226,6 +233,18 @@ export default function Chat() {
         <div className="flex-none px-4 py-4 bg-gray-50 border-t border-gray-200 flex items-center justify-center gap-2">
           <Lock size={13} className="text-gray-400" />
           <p className="text-xs text-gray-400 font-medium">Cette conversation est clôturée</p>
+        </div>
+      ) : (post?.user_id === user?.id && !requests.some(r => r.status === 'approved')) ? (
+        <div className="flex-none px-4 py-4 bg-yellow-50 border-t border-yellow-200">
+          <p className="text-xs text-yellow-800 font-medium text-center leading-relaxed">
+            Approuvez d'abord une demande de contact pour ouvrir la conversation.
+          </p>
+          <button
+            onClick={() => navigate(`/posts/${postId}`)}
+            className="mt-2 w-full text-xs font-semibold text-yellow-900 bg-yellow-200 hover:bg-yellow-300 px-3 py-2 rounded-lg transition-colors"
+          >
+            Voir les demandes reçues →
+          </button>
         </div>
       ) : (
         <div className="flex-none px-4 py-3 bg-white border-t border-gray-100">

@@ -21,7 +21,12 @@ api.interceptors.response.use(
     if (err.response?.status === 401) {
       localStorage.removeItem('user')
       localStorage.removeItem('token')
-      window.location.href = '/login'
+      // Don't redirect if already on a public page — avoids infinite reload loop
+      const pub = ['/login', '/register', '/forgot-password', '/reset-password']
+      const onPublic = pub.some(p => window.location.pathname.startsWith(p))
+      if (!onPublic) {
+        window.location.href = '/login'
+      }
     }
     return Promise.reject(err)
   }

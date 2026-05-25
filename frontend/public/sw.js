@@ -1,4 +1,4 @@
-const CACHE = 'lostcards-v1'
+const CACHE = 'lostcards-v2'
 const PRECACHE = ['/', '/index.html']
 
 self.addEventListener('install', e => {
@@ -16,8 +16,7 @@ self.addEventListener('activate', e => {
 })
 
 self.addEventListener('fetch', e => {
-  // Ne pas intercepter les requêtes API
-  if (e.request.url.includes('/api/')) return
+  if (e.request.url.includes('/api/') || e.request.url.includes('/sanctum/')) return
 
   e.respondWith(
     caches.match(e.request).then(cached => {

@@ -62,7 +62,7 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
-        try { $request->user()->currentAccessToken()->delete(); } catch (\Exception) {}
+        try { $request->user()->currentAccessToken()->delete(); } catch (\Throwable) {}
         return response()->json(['message' => 'Déconnecté.']);
     }
 
@@ -106,7 +106,7 @@ class AuthController extends Controller
 
         try {
             Mail::to($user->email)->send(new PasswordResetNotification($user, $resetUrl));
-        } catch (\Exception) {}
+        } catch (\Throwable) {}
 
         return response()->json(['message' => 'Si un compte existe, un email a été envoyé.']);
     }

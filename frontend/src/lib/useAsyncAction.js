@@ -1,8 +1,8 @@
-import { useState, useCallback, useRef } from 'react'
+import { useState, useRef, useCallback } from 'react'
 
 /**
- * Wraps an async function and exposes { run, loading }.
- * Calls are no-ops while the previous call is in flight.
+ * Prevents double-clicks / double-submissions.
+ * While a call is in-flight, subsequent calls are silently dropped.
  */
 export function useAsyncAction(fn) {
   const [loading, setLoading] = useState(false)

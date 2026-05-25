@@ -1,73 +1,83 @@
-import { createContext, useContext, useState, useCallback } from 'react'
-import { AlertTriangle, X } from 'lucide-react'
+import { createContext, useContext, useRef, useState } from 'react'
+import { AlertTriangle, HelpCircle } from 'lucide-react'
 
-const Ctx = createContext(null)
+const ConfirmContext = createContext(null)
 
 export function ConfirmProvider({ children }) {
-  const [state, setState] = useState(null)
+  const [state, setState]   = useState(null)
+  const resolverRef         = useRef(null)
 
-  const confirm = useCallback((options) => new Promise((resolve) => {
-    setState({ ...options, resolve })
-  }), [])
+  const confirm = (options = {}) =>
+    new Promise((resolve) => {
+      resolverRef.current = resolve
+      setState({
+        title:        options.title        || 'Confirmer',
+        message:      options.message      || 'Êtes-vous sûr ?',
+        danger:       options.danger       ?? false,
+        confirmLabel: options.confirmLabel || 'Confirmer',
+        cancelLabel:  options.cancelLabel  || 'Annuler',
+      })
+    })
 
-  const close = (result) => {
-    state?.resolve(result)
+  const answer = (result) => {
     setState(null)
+    resolverRef.current?.(result)
+    resolverRef.current = null
   }
 
   return (
-    <Ctx.Provider value={{ confirm }}>
+    <ConfirmContext.Provider value={confirm}>
       {children}
+
       {state && (
-        <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-fade-in"
-          onClick={() => close(false)}
-        >
+        <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-4">
+          {/* Backdrop */}
           <div
-            className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-5 animate-scale-in relative"
-            onClick={e => e.stopPropagation()}
-          >
-            <button
-              onClick={() => close(false)}
-              className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100 transition-colors"
-            >
-              <X size={18} />
-            </button>
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => answer(false)}
+          />
 
-            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-3 ${
-              state.danger ? 'bg-red-50 text-red-500' : 'bg-orange-50 text-orange-500'
-            }`}>
-              <AlertTriangle size={22} />
+          {/* Sheet */}
+          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6"
+               style={{ animation: 'slideUp 0.22s ease' }}>
+            <div className="flex gap-3 mb-4">
+              <div className={`shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
+                state.danger ? 'bg-red-100' : 'bg-orange-100'
+              }`}>
+                {state.danger
+                  ? <AlertTriangle size={20} className="text-red-500" />
+                  : <HelpCircle    size={20} className="text-orange-500" />
+                }
+              </div>
+              <div>
+                <p className="font-bold text-gray-900 text-sm">{state.title}</p>
+                <p className="text-gray-500 text-xs mt-0.5 leading-relaxed">{state.message}</p>
+              </div>
             </div>
-
-            <h3 className="font-bold text-lg text-gray-900 mb-1">{state.title}</h3>
-            {state.message && (
-              <p className="text-sm text-gray-500 mb-5">{state.message}</p>
-            )}
 
             <div className="flex gap-2">
               <button
-                onClick={() => close(false)}
-                className="btn-secondary flex-1 text-sm py-2.5"
+                onClick={() => answer(false)}
+                className="flex-1 btn-secondary text-sm py-2.5"
               >
-                {state.cancelLabel || 'Annuler'}
+                {state.cancelLabel}
               </button>
               <button
-                onClick={() => close(true)}
-                className={`flex-1 text-sm py-2.5 px-4 rounded-xl font-semibold transition-all active:scale-95 ${
+                onClick={() => answer(true)}
+                className={`flex-1 text-sm font-semibold py-2.5 px-4 rounded-xl transition-colors ${
                   state.danger
                     ? 'bg-red-500 hover:bg-red-600 text-white'
                     : 'bg-orange-500 hover:bg-orange-600 text-white'
                 }`}
               >
-                {state.confirmLabel || 'Confirmer'}
+                {state.confirmLabel}
               </button>
             </div>
           </div>
         </div>
       )}
-    </Ctx.Provider>
+    </ConfirmContext.Provider>
   )
 }
 
-export const useConfirm = () => useContext(Ctx).confirm
+export const useConfirm = () => useContext(ConfirmContext)

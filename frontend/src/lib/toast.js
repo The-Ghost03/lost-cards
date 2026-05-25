@@ -1,7 +1,10 @@
-import toast from 'react-hot-toast'
+import { toast } from 'react-hot-toast'
 
+/**
+ * Deduplicated toast — same message can't appear twice within COOLDOWN ms.
+ */
 const recent = new Map()
-const COOLDOWN = 3000 // ms
+const COOLDOWN = 3000
 
 function show(type, message, options = {}) {
   const key = `${type}:${message}`
@@ -15,8 +18,4 @@ function show(type, message, options = {}) {
 export const t = {
   success: (msg, opts) => show('success', msg, opts),
   error:   (msg, opts) => show('error',   msg, opts),
-  loading: (msg, opts) => toast.loading(msg, opts),
-  dismiss: (id) => toast.dismiss(id),
 }
-
-export default t

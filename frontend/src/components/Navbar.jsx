@@ -1,84 +1,140 @@
-import { useState } from 'react'
-import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext'
-import { Wallet, MessageCircle, LayoutDashboard, PlusCircle, LogOut, Search, Handshake } from 'lucide-react'
-import toast from 'react-hot-toast'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { useAuth }   from '../context/AuthContext'
+import { useUnread } from '../context/UnreadContext'
+import {
+  Wallet, PlusCircle, MessageCircle, LayoutDashboard,
+  Bell, Shield, User, LogOut, Search,
+} from 'lucide-react'
+import { t } from '../lib/toast'
 
-const STATUS_BADGE = {
-  chercheur:  { label: 'Chercheur',  Icon: Search,    cls: 'bg-blue-50 text-blue-600'   },
-  retrouveur: { label: 'Retrouveur', Icon: Handshake, cls: 'bg-green-50 text-green-600' },
+/* ── Badge dot ──────────────────────────────────────────────────── */
+function UnreadBadge({ count, small = false }) {
+  if (!count) return null
+  if (small) return <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white" />
+  return (
+    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center leading-none border border-white">
+      {count > 9 ? '9+' : count}
+    </span>
+  )
 }
 
 export default function Navbar() {
   const { user, logout } = useAuth()
-  const navigate = useNavigate()
-  const location = useLocation()
+  const { total }        = useUnread()
+  const location         = useLocation()
+  const navigate         = useNavigate()
+
+  const isRetrouveur = user?.status === 'retrouveur' || user?.role === 'admin'
+  const isAdmin      = user?.role === 'admin'
 
   const handleLogout = async () => {
     await logout()
-    toast.success('Déconnecté')
+    t.success('Déconnecté')
     navigate('/')
   }
 
-  const is = (path) => location.pathname === path
-  const badge = user?.status ? STATUS_BADGE[user.status] : null
+  const isActive = (path) => location.pathname === path || location.pathname.startsWith(path + '/')
+
+  /* ── Tab definitions ────────────────────────────────────────────── */
+  const tabs = user ? [
+    isRetrouveur
+      ? { to: '/posts/create', icon: PlusCircle,      label: 'Signaler'   }
+      : { to: '/',             icon: Search,           label: 'Rechercher' },
+    { to: '/messages',  icon: MessageCircle,   label: 'Messages', badge: total },
+    isRetrouveur
+      ? { to: '/dashboard',    icon: LayoutDashboard, label: 'Tableau'    }
+      : { to: '/alerts',       icon: Bell,            label: 'Alertes'    },
+    { to: '/profile',   icon: User,            label: 'Profil'     },
+    ...(isAdmin ? [{ to: '/admin', icon: Shield, label: 'Admin' }] : []),
+  ] : []
 
   return (
-    <nav className="bg-white border-b border-gray-100 sticky top-0 z-50 backdrop-blur-sm bg-white/95">
-      <div className="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between gap-2">
-        {/* Logo */}
-        <Link to="/" className="flex items-center gap-2 font-bold text-orange-500 text-lg shrink-0">
-          <Wallet size={22} />
-          <span className="hidden sm:inline">LostCards</span>
-        </Link>
+    <>
+      {/* ── Top bar ──────────────────────────────────────────────── */}
+      <nav className="bg-white border-b border-gray-100 sticky top-0 z-50">
+        <div className="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between">
+          {/* Logo */}
+          <Link to="/" className="flex items-center gap-2 font-bold text-orange-500 text-lg">
+            <Wallet size={22} />
+            <span>LostCards</span>
+          </Link>
 
-        {/* Main nav — Signaler, Messages, Dashboard */}
-        {user ? (
-          <div className="flex items-center gap-1 sm:gap-2 flex-1 justify-center sm:justify-end">
-            <NavLink to="/posts/create" icon={<PlusCircle size={16} />} label="Signaler"  active={is('/posts/create')} />
-            <NavLink to="/messages"     icon={<MessageCircle size={16} />} label="Messages" active={is('/messages')} />
-            <NavLink to="/dashboard"    icon={<LayoutDashboard size={16} />} label="Tableau" active={is('/dashboard')} />
+          {/* Desktop nav */}
+          {user ? (
+            <div className="hidden sm:flex items-center gap-5 text-sm">
+              {tabs.map(({ to, icon: Icon, label, badge }) => (
+                <Link
+                  key={to}
+                  to={to}
+                  className={`flex items-center gap-1.5 transition-colors ${
+                    isActive(to) ? 'text-orange-500 font-semibold' : 'text-gray-500 hover:text-gray-800'
+                  }`}
+                >
+                  <div className="relative">
+                    <Icon size={15} />
+                    <UnreadBadge count={badge} small />
+                  </div>
+                  {label}
+                  {/* Inline count for desktop */}
+                  {badge > 0 && (
+                    <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full leading-none">
+                      {badge > 9 ? '9+' : badge}
+                    </span>
+                  )}
+                </Link>
+              ))}
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-1.5 text-gray-400 hover:text-red-500 transition-colors text-sm"
+              >
+                <LogOut size={15} /> Déconnexion
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-3 text-sm">
+              <Link to="/login"    className="text-gray-600 hover:text-orange-500">Connexion</Link>
+              <Link to="/register" className="btn-primary text-sm py-1.5 px-3">S'inscrire</Link>
+            </div>
+          )}
+        </div>
+      </nav>
 
-            {/* Status badge → /profile */}
-            <Link
-              to="/profile"
-              className={`hidden sm:inline-flex text-xs px-2.5 py-1 rounded-full font-medium transition-transform hover:scale-105 ${badge?.cls ?? 'bg-gray-100 text-gray-500'}`}
-            >
-              {badge ? <span className="inline-flex items-center gap-1"><badge.Icon size={12} />{badge.label}</span> : 'Profil'}
-            </Link>
+      {/* ── Mobile bottom tab bar ────────────────────────────────── */}
+      {user && (
+        <nav className="sm:hidden fixed bottom-0 inset-x-0 z-50 bg-white border-t border-gray-100">
+          <div className="flex safe-area-pb">
+            {tabs.map(({ to, icon: Icon, label, badge }) => {
+              const active = isActive(to)
+              return (
+                <Link
+                  key={to}
+                  to={to}
+                  className={`flex-1 flex flex-col items-center justify-center py-2 gap-0.5 transition-colors ${
+                    active ? 'text-orange-500' : 'text-gray-400 hover:text-gray-600'
+                  }`}
+                >
+                  <div className="relative">
+                    <Icon size={21} strokeWidth={active ? 2.5 : 1.8} />
+                    <UnreadBadge count={badge} />
+                  </div>
+                  <span className={`text-[10px] ${active ? 'font-semibold' : 'font-medium'}`}>
+                    {label}
+                  </span>
+                </Link>
+              )
+            })}
 
+            {/* Logout */}
             <button
               onClick={handleLogout}
-              className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-              aria-label="Déconnexion"
-              title="Déconnexion"
+              className="flex-1 flex flex-col items-center justify-center py-2 gap-0.5 text-gray-400 hover:text-red-500 transition-colors"
             >
-              <LogOut size={16} />
+              <LogOut size={21} strokeWidth={1.8} />
+              <span className="text-[10px] font-medium">Sortir</span>
             </button>
           </div>
-        ) : (
-          <div className="flex items-center gap-2 text-sm">
-            <Link to="/login" className="text-gray-600 hover:text-orange-500 transition-colors">Connexion</Link>
-            <Link to="/register" className="btn-primary text-sm py-1.5 px-3">S'inscrire</Link>
-          </div>
-        )}
-      </div>
-    </nav>
-  )
-}
-
-function NavLink({ to, icon, label, active }) {
-  return (
-    <Link
-      to={to}
-      className={`flex flex-col sm:flex-row items-center gap-0.5 sm:gap-1.5 text-[10px] sm:text-sm font-medium px-2.5 sm:px-3 py-1.5 rounded-lg transition-all ${
-        active
-          ? 'text-orange-600 bg-orange-50'
-          : 'text-gray-600 hover:text-orange-500 hover:bg-orange-50/50'
-      }`}
-    >
-      {icon}
-      <span>{label}</span>
-    </Link>
+        </nav>
+      )}
+    </>
   )
 }

@@ -1,72 +1,73 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
-import { Mail, KeyRound, ArrowLeft } from 'lucide-react'
-import api from '../api/axios'
-import { t } from '../lib/toast'
+import { Link }     from 'react-router-dom'
+import { forgotPassword } from '../api/auth'
 import { useAsyncAction } from '../lib/useAsyncAction'
+import { t }              from '../lib/toast'
+import { Mail, ArrowLeft, CheckCircle } from 'lucide-react'
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState('')
-  const [sent, setSent]   = useState(false)
+  const [sent,  setSent]  = useState(false)
 
-  const { run, loading } = useAsyncAction(async (e) => {
+  const { run: submit, loading } = useAsyncAction(async (e) => {
     e.preventDefault()
     try {
-      await api.post('/forgot-password', { email })
+      await forgotPassword(email)
       setSent(true)
-    } catch {
-      t.error('Une erreur est survenue')
+    } catch (err) {
+      t.error(err?.response?.data?.message || 'Erreur, réessayez.')
     }
   })
 
-  return (
-    <div className="max-w-sm mx-auto pt-10 page-enter">
-      <Link to="/login" className="inline-flex items-center gap-1 text-gray-400 text-sm mb-5 hover:text-gray-600 transition-colors">
-        <ArrowLeft size={14} /> Retour
-      </Link>
-
-      <div className="text-center mb-8">
-        <div className="w-14 h-14 mx-auto rounded-2xl bg-orange-100 text-orange-500 flex items-center justify-center mb-3 animate-float">
-          <KeyRound size={26} />
+  if (sent) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <div className="card text-center max-w-sm w-full py-10">
+          <CheckCircle size={48} className="mx-auto text-green-500 mb-4" />
+          <h2 className="font-bold text-gray-900 mb-2">Email envoyé !</h2>
+          <p className="text-sm text-gray-500 mb-6">
+            Vérifiez votre boîte mail. Le lien expire dans 60 minutes.
+          </p>
+          <Link to="/login" className="btn-primary text-sm">Retour à la connexion</Link>
         </div>
-        <h1 className="text-2xl font-bold text-gray-900">Mot de passe oublié ?</h1>
-        <p className="text-gray-500 text-sm mt-1">
-          {sent
-            ? 'Vérifiez votre boîte mail pour le lien de réinitialisation.'
-            : 'Entrez votre email, on vous envoie un lien pour le réinitialiser.'
-          }
-        </p>
       </div>
+    )
+  }
 
-      {!sent && (
-        <form onSubmit={run} className="card flex flex-col gap-4 animate-slide-up">
-          <div>
-            <label className="text-xs font-medium text-gray-700 mb-1 block">Email</label>
-            <div className="relative">
-              <Mail size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+  return (
+    <div className="min-h-[60vh] flex items-center justify-center">
+      <div className="w-full max-w-sm">
+        <Link to="/login" className="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-600 mb-6">
+          <ArrowLeft size={15} /> Retour
+        </Link>
+
+        <div className="card">
+          <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mb-4">
+            <Mail size={24} className="text-orange-500" />
+          </div>
+          <h1 className="text-lg font-bold text-gray-900 mb-1">Mot de passe oublié</h1>
+          <p className="text-sm text-gray-500 mb-5">
+            Entrez votre email et nous vous enverrons un lien de réinitialisation.
+          </p>
+
+          <form onSubmit={submit} className="space-y-4">
+            <div>
+              <label className="label">Adresse email</label>
               <input
                 type="email"
-                required
-                className="input pl-9"
-                placeholder="votre@email.com"
+                placeholder="vous@example.com"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
+                className="input"
+                required
               />
             </div>
-          </div>
-          <button type="submit" className="btn-primary w-full py-2.5" disabled={loading}>
-            {loading ? 'Envoi...' : 'Envoyer le lien'}
-          </button>
-        </form>
-      )}
-
-      {sent && (
-        <div className="card text-center py-8 animate-scale-in">
-          <Mail size={32} className="mx-auto text-green-500 mb-3" />
-          <p className="text-sm text-gray-600 mb-4">Si un compte existe avec cet email, vous recevrez un lien sous peu.</p>
-          <Link to="/login" className="btn-primary inline-flex text-sm">Retour à la connexion</Link>
+            <button type="submit" disabled={loading} className="btn-primary w-full">
+              {loading ? 'Envoi...' : 'Envoyer le lien'}
+            </button>
+          </form>
         </div>
-      )}
+      </div>
     </div>
   )
 }

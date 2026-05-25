@@ -2,9 +2,8 @@ import { useState, useEffect } from 'react'
 import SEO from '../components/SEO'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { getPost, submitContact, approveContact, rejectContact, getContactRequests, markRecovered, getSelfie } from '../api/posts'
-import { getMessages, sendMessage } from '../api/messages'
 import { useAuth } from '../context/AuthContext'
-import { MapPin, FileText, Calendar, HelpCircle, Send, CheckCircle, XCircle, MessageCircle, ChevronLeft, Camera } from 'lucide-react'
+import { MapPin, FileText, Calendar, HelpCircle, CheckCircle, XCircle, MessageCircle, ChevronLeft, ChevronRight, Camera } from 'lucide-react'
 import SelfieCapture from '../components/SelfieCapture'
 import { formatDistanceToNow } from 'date-fns'
 import { fr } from 'date-fns/locale'
@@ -26,12 +25,10 @@ export default function PostDetail() {
 
   const [post, setPost]       = useState(null)
   const [requests, setReqs]   = useState([])
-  const [messages, setMsgs]   = useState([])
   const [selfie, setSelfie]         = useState(null)
   const [selfiePreview, setPreview]  = useState(null)
   const [selfieUrls, setSelfieUrls]  = useState({})
   const [enlargedSelfie, setEnlargedSelfie] = useState(null)
-  const [msgText, setMsgText] = useState('')
   const [loading, setLoading] = useState(true)
   const [sending, setSending] = useState(false)
   const [myRequest, setMyReq] = useState(null)
@@ -40,11 +37,9 @@ export default function PostDetail() {
     Promise.all([
       getPost(id),
       user ? getContactRequests(id).catch(() => ({ data: [] })) : Promise.resolve({ data: [] }),
-      user ? getMessages(id).catch(() => ({ data: [] }))       : Promise.resolve({ data: [] }),
-    ]).then(([p, r, m]) => {
+    ]).then(([p, r]) => {
       setPost(p.data)
       setReqs(r.data)
-      setMsgs(m.data)
       if (user) {
         setMyReq(r.data.find(req => req.user_id === user.id) || null)
       }
@@ -107,18 +102,6 @@ export default function PostDetail() {
     }
   })
 
-  const { run: handleSendMsg, loading: sendingMsg } = useAsyncAction(async (e) => {
-    e.preventDefault()
-    if (!msgText.trim()) return
-    try {
-      const res = await sendMessage(id, msgText)
-      setMsgs(prev => [...prev, res.data])
-      setMsgText('')
-    } catch {
-      t.error('Erreur d\'envoi')
-    }
-  })
-
   const { run: handleRecover } = useAsyncAction(async () => {
     if (!(await confirm({ title: 'Marquer ce portefeuille comme récupéré ?', message: 'L\'annonce sera archivée.', confirmLabel: 'Confirmer' }))) return
     try {
@@ -133,9 +116,11 @@ export default function PostDetail() {
   if (loading) return <div className="flex justify-center pt-20"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500" /></div>
   if (!post)   return <div className="pt-10 text-center text-gray-500">Annonce introuvable</div>
 
-  const isOwner   = user?.id === post.user_id
-  const approved  = myRequest?.status === 'approved'
-  const canChat   = isOwner || approved
+  const isOwner    = user?.id === post.user_id
+  const approved   = myRequest?.status === 'approved'
+  const pending    = myRequest?.status === 'pending'
+  const hasReqOpen = requests.some(r => ['pending','approved'].includes(r.status))
+  const canChat    = (isOwner && hasReqOpen) || approved || pending
 
   return (
     <>
@@ -174,8 +159,8 @@ export default function PostDetail() {
           ))}
         </div>
 
-        {/* Recovered address (shown only after approval) */}
-        {canChat && (
+        {/* Recovered address (shown only after approval, backend gate sur canRevealAddress) */}
+        {post.pickup_address && (
           <div className="bg-green-50 border border-green-200 rounded-xl p-3 text-sm">
             <p className="font-semibold text-green-800 mb-1">Adresse de récupération</p>
             <p className="text-green-700">{post.pickup_address}</p>
@@ -291,49 +276,29 @@ export default function PostDetail() {
         </div>
       )}
 
-      {/* Chat */}
+      {/* CTA Conversation — remplace la messagerie inline */}
       {canChat && (
-        <div className="card">
-          <h2 className="font-semibold text-gray-800 text-sm mb-3 flex items-center gap-2">
-            <MessageCircle size={16} className="text-orange-500" /> Messagerie
-          </h2>
-
-          {isOwner && !requests.some(r => r.status === 'approved') && (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-3 text-xs text-yellow-700 mb-3">
-              Approuvez une demande ci-dessus pour pouvoir envoyer des messages.
-            </div>
-          )}
-          <div className="flex flex-col gap-2 max-h-64 overflow-y-auto mb-3 pr-1">
-            {messages.length === 0 && (
-              <p className="text-xs text-gray-400 text-center py-4">Démarrez la conversation</p>
-            )}
-            {messages.map(msg => {
-              const mine = msg.sender_id === user?.id
-              return (
-                <div key={msg.id} className={`flex ${mine ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`max-w-[75%] px-3 py-2 rounded-2xl text-sm ${
-                    mine ? 'bg-orange-500 text-white' : 'bg-gray-100 text-gray-800'
-                  }`}>
-                    {msg.content}
-                  </div>
-                </div>
-              )
-            })}
+        <Link
+          to={`/messages/${id}`}
+          className="card-hover flex items-center gap-3 group mb-4"
+        >
+          <div className="w-12 h-12 rounded-xl bg-orange-100 flex items-center justify-center shrink-0">
+            <MessageCircle size={22} className="text-orange-500" />
           </div>
-
-          <form onSubmit={handleSendMsg} className="flex gap-2">
-            <input
-              type="text"
-              className="input flex-1"
-              placeholder="Votre message..."
-              value={msgText}
-              onChange={e => setMsgText(e.target.value)}
-            />
-            <button type="submit" className="btn-primary px-3" disabled={sendingMsg}>
-              <Send size={16} />
-            </button>
-          </form>
-        </div>
+          <div className="flex-1 min-w-0">
+            <p className="font-semibold text-gray-800 text-sm group-hover:text-orange-600 transition-colors">
+              Ouvrir la conversation
+            </p>
+            <p className="text-xs text-gray-400 mt-0.5 truncate">
+              {isOwner
+                ? 'Échanger avec le chercheur'
+                : approved
+                  ? 'Échanger avec le retrouveur'
+                  : 'Votre selfie est en attente — vous pouvez déjà échanger'}
+            </p>
+          </div>
+          <ChevronRight size={18} className="text-gray-300 group-hover:text-orange-500 group-hover:translate-x-1 transition-all shrink-0" />
+        </Link>
       )}
 
       {!user && post.status !== 'recovered' && (

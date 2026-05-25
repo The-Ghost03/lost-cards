@@ -16,12 +16,12 @@
 </head>
 <body>
   <div class="card">
-    <div class="logo">🔑 LostCards</div>
+    <div class="logo">LostCards</div>
     <h1>Bonne nouvelle, {{ $requester->name }} !</h1>
     <p>Votre identité a été vérifiée par le retrouveur. Vous pouvez maintenant accéder à l'adresse de récupération et contacter le retrouveur directement.</p>
 
     <div class="highlight">
-      <p style="margin:0"><strong>✅ Identité confirmée</strong></p>
+      <p style="margin:0"><strong>Identité confirmée</strong></p>
       <p style="margin:8px 0 0"><strong>Portefeuille :</strong> {{ $post->name_partial }}</p>
       <p style="margin:8px 0 0"><strong>Lieu de trouvaille :</strong> {{ $post->location }}</p>
     </div>

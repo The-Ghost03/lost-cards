@@ -22,7 +22,7 @@ class ContactApprovedNotification extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: '✅ Votre identité est vérifiée — Récupérez votre portefeuille !',
+            subject: 'Votre identité a été vérifiée - Récupérez votre portefeuille',
         );
     }
 

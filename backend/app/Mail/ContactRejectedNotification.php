@@ -22,7 +22,7 @@ class ContactRejectedNotification extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: '❌ Selfie non validé — LostCards',
+            subject: 'Selfie non validé - LostCards',
         );
     }
 

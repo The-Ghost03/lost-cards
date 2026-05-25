@@ -16,7 +16,7 @@
 </head>
 <body>
   <div class="card">
-    <div class="logo">🔑 LostCards</div>
+    <div class="logo">LostCards</div>
     <h1>Bonjour {{ $recipient->name }} !</h1>
     <p>Bonne nouvelle — un portefeuille correspondant à votre alerte vient d'être signalé sur LostCards.</p>
 

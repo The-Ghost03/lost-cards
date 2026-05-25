@@ -16,7 +16,7 @@
 </head>
 <body>
   <div class="card">
-    <div class="logo">🔑 LostCards</div>
+    <div class="logo">LostCards</div>
     <h1>Nouveau selfie reçu !</h1>
     <p>Bonjour {{ $finder->name }},</p>
     <p><strong>{{ $requester->name }}</strong> vient d'envoyer un selfie pour réclamer le portefeuille de votre annonce.</p>

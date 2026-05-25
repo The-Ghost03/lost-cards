@@ -16,12 +16,12 @@
 </head>
 <body>
   <div class="card">
-    <div class="logo">🔑 LostCards</div>
+    <div class="logo">LostCards</div>
     <h1>Bonjour {{ $requester->name }},</h1>
     <p>Malheureusement, le retrouveur n'a pas pu confirmer votre identité avec le selfie envoyé.</p>
 
     <div class="highlight">
-      <p style="margin:0"><strong>❌ Selfie non validé</strong></p>
+      <p style="margin:0"><strong>Selfie non validé</strong></p>
       <p style="margin:8px 0 0"><strong>Annonce :</strong> {{ $post->name_partial }}</p>
     </div>
 

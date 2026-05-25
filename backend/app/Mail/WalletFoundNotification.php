@@ -22,7 +22,7 @@ class WalletFoundNotification extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: '🔔 Un portefeuille avec votre nom a été retrouvé — LostCards',
+            subject: 'Un portefeuille avec votre nom a ete retrouve - LostCards',
         );
     }
 

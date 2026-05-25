@@ -20,7 +20,7 @@ class PasswordResetNotification extends Mailable
 
     public function envelope(): Envelope
     {
-        return new Envelope(subject: '🔑 Réinitialisation de votre mot de passe — LostCards');
+        return new Envelope(subject: 'Réinitialisation de votre mot de passe - LostCards');
     }
 
     public function content(): Content

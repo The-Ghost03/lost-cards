@@ -24,7 +24,7 @@ class NewMessageNotification extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: '💬 Nouveau message de ' . $this->sender->name . ' — LostCards',
+            subject: 'Nouveau message de ' . $this->sender->name . ' — LostCards',
         );
     }
 

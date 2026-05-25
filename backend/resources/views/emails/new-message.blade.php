@@ -15,7 +15,7 @@
 </head>
 <body>
   <div class="card">
-    <div class="logo">🔑 LostCards</div>
+    <div class="logo">LostCards</div>
     <h1>Nouveau message !</h1>
     <p>Bonjour {{ $receiver->name }},</p>
     <p><strong>{{ $sender->name }}</strong> vous a envoyé un message concernant l'annonce <strong>{{ $post->name_partial }}</strong> :</p>

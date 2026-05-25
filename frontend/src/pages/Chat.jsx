@@ -4,10 +4,9 @@ import { getMessages, sendMessage } from '../api/messages'
 import { getPost } from '../api/posts'
 import { useAuth }   from '../context/AuthContext'
 import { useUnread } from '../context/UnreadContext'
-import { useAsyncAction } from '../lib/useAsyncAction'
 import { t }  from '../lib/toast'
 import { ChevronLeft, Send, Wallet, CheckCircle } from 'lucide-react'
-import { formatDistanceToNow, format, isToday, isYesterday } from 'date-fns'
+import { format, isToday, isYesterday } from 'date-fns'
 import { fr } from 'date-fns/locale'
 
 /* ── Helpers ──────────────────────────────────────────────────────── */
@@ -22,7 +21,7 @@ function needsSeparator(msgs, i) {
   if (i === 0) return true
   const prev = new Date(msgs[i - 1].created_at)
   const curr = new Date(msgs[i].created_at)
-  return curr - prev > 10 * 60 * 1000 // 10 min gap
+  return curr - prev > 10 * 60 * 1000
 }
 
 /* ── Component ────────────────────────────────────────────────────── */
@@ -37,17 +36,21 @@ export default function Chat() {
   const [text,     setText]     = useState('')
   const [loading,  setLoading]  = useState(true)
 
-  const bottomRef   = useRef(null)
-  const textareaRef = useRef(null)
+  const bottomRef    = useRef(null)
+  const textareaRef  = useRef(null)
   const lastCountRef = useRef(0)
+  const isSending    = useRef(false)
 
-  /* ── Load messages (also marks as read on backend) ────────────────*/
+  /* ── Load messages ────────────────────────────────────────────────*/
   const loadMessages = useCallback(async (silent = false) => {
     try {
       const res = await getMessages(postId)
       const msgs = res.data
-      setMessages(msgs)
-      // Only refresh badge if count changed (avoids redundant calls)
+      setMessages(prev => {
+        // Keep any in-flight optimistic messages so they don't flicker
+        const pending = prev.filter(m => m._pending)
+        return pending.length > 0 ? [...msgs, ...pending] : msgs
+      })
       if (msgs.length !== lastCountRef.current) {
         lastCountRef.current = msgs.length
         refreshBadge()
@@ -75,7 +78,7 @@ export default function Chat() {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  /* ── Poll for new messages every 5 s ─────────────────────────────*/
+  /* ── Poll every 5 s ───────────────────────────────────────────────*/
   useEffect(() => {
     const timer = setInterval(() => loadMessages(true), 5000)
     return () => clearInterval(timer)
@@ -89,19 +92,43 @@ export default function Chat() {
     el.style.height = Math.min(el.scrollHeight, 120) + 'px'
   }, [text])
 
-  /* ── Send ─────────────────────────────────────────────────────────*/
-  const { run: handleSend, loading: sending } = useAsyncAction(async () => {
+  /* ── Send — optimistic update ─────────────────────────────────────*/
+  const handleSend = async () => {
     const content = text.trim()
-    if (!content) return
+    if (!content || isSending.current) return
+
+    isSending.current = true
+
+    // 1. Show message instantly in UI
+    const tempId = `temp-${Date.now()}`
+    const tempMsg = {
+      id:         tempId,
+      content,
+      sender_id:  user?.id,
+      created_at: new Date().toISOString(),
+      _pending:   true,
+    }
     setText('')
+    setMessages(prev => [...prev, tempMsg])
+
+    // 2. Send to server in background
     try {
       const res = await sendMessage(postId, content)
-      setMessages(prev => [...prev, res.data])
+      // Replace temp with real message (or drop if poll already got it)
+      setMessages(prev => {
+        const without = prev.filter(m => m.id !== tempId)
+        if (without.some(m => m.id === res.data.id)) return without
+        return [...without, res.data]
+      })
     } catch {
-      t.error("Erreur d'envoi")
+      // Roll back on failure
+      setMessages(prev => prev.filter(m => m.id !== tempId))
       setText(content)
+      t.error("Erreur d'envoi")
+    } finally {
+      isSending.current = false
     }
-  })
+  }
 
   const handleKey = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -120,7 +147,6 @@ export default function Chat() {
   }
 
   return (
-    /* Full-height column between top-nav and bottom-tabs */
     <div
       className="flex flex-col -mx-4"
       style={{ height: 'calc(100svh - 3.5rem - 4rem)' }}
@@ -166,7 +192,7 @@ export default function Chat() {
         )}
 
         {messages.map((msg, i) => {
-          const mine = msg.sender_id === user?.id
+          const mine    = msg.sender_id === user?.id
           const showSep = needsSeparator(messages, i)
 
           return (
@@ -179,11 +205,11 @@ export default function Chat() {
 
               <div className={`flex ${mine ? 'justify-end' : 'justify-start'} mb-1`}>
                 <div
-                  className={`max-w-[78%] px-3.5 py-2.5 text-sm leading-relaxed ${
+                  className={`max-w-[78%] px-3.5 py-2.5 text-sm leading-relaxed transition-opacity ${
                     mine
                       ? 'bg-orange-500 text-white rounded-2xl rounded-br-sm'
                       : 'bg-white text-gray-800 shadow-sm rounded-2xl rounded-bl-sm'
-                  }`}
+                  } ${msg._pending ? 'opacity-60' : 'opacity-100'}`}
                 >
                   {msg.content}
                 </div>
@@ -210,7 +236,7 @@ export default function Chat() {
           />
           <button
             onClick={handleSend}
-            disabled={!text.trim() || sending}
+            disabled={!text.trim()}
             className="shrink-0 w-11 h-11 rounded-xl bg-orange-500 hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed text-white flex items-center justify-center transition-colors"
           >
             <Send size={18} />

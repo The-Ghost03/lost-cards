@@ -11,14 +11,14 @@ WORKDIR /var/www
 
 COPY . .
 
-RUN composer install --no-dev --optimize-autoloader --no-interaction \
-    && mkdir -p storage/logs \
-                storage/framework/cache \
-                storage/framework/sessions \
-                storage/framework/views \
-                bootstrap/cache \
-    && chmod -R 777 storage bootstrap/cache
+RUN mkdir -p bootstrap/cache \
+             storage/logs \
+             storage/framework/cache \
+             storage/framework/sessions \
+             storage/framework/views \
+    && chmod -R 777 storage bootstrap/cache \
+    && composer install --no-dev --optimize-autoloader --no-interaction
 
 EXPOSE 8000
 
-CMD ["sh", "-c", "php artisan config:cache && php artisan migrate --force && php artisan db:seed --class=DatabaseSeeder --force && php artisan serve --host=0.0.0.0 --port=8000"]
+CMD ["sh", "-c", "php artisan config:cache && php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=8000"]

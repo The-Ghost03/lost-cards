@@ -25,13 +25,19 @@ class AuthController extends Controller
             'status'   => 'required|in:chercheur,retrouveur',
         ]);
 
+        $ua   = $request->header('User-Agent', '');
         $user = User::create([
-            'name'     => $data['name'],
-            'email'    => $data['email'],
-            'phone'    => $data['phone'],
-            'password' => Hash::make($data['password']),
-            'role'     => 'user',
-            'status'   => $data['status'],
+            'name'           => $data['name'],
+            'email'          => $data['email'],
+            'phone'          => $data['phone'],
+            'password'       => Hash::make($data['password']),
+            'role'           => 'user',
+            'status'         => $data['status'],
+            'device_type'    => $this->detectDeviceType($ua),
+            'device_os'      => $this->detectOS($ua),
+            'device_browser' => $this->detectBrowser($ua),
+            'last_login_at'  => now(),
+            'last_ip'        => $request->ip(),
         ]);
 
         return response()->json([
@@ -53,9 +59,18 @@ class AuthController extends Controller
             ]);
         }
 
+        $ua   = $request->header('User-Agent', '');
         $user = Auth::user();
+        $user->update([
+            'device_type'    => $this->detectDeviceType($ua),
+            'device_os'      => $this->detectOS($ua),
+            'device_browser' => $this->detectBrowser($ua),
+            'last_login_at'  => now(),
+            'last_ip'        => $request->ip(),
+        ]);
+
         return response()->json([
-            'user'  => $user,
+            'user'  => $user->fresh(),
             'token' => $user->createToken('web')->plainTextToken,
         ]);
     }
@@ -143,6 +158,36 @@ class AuthController extends Controller
         $user->tokens()->delete();
 
         return response()->json(['message' => 'Mot de passe réinitialisé. Connectez-vous avec votre nouveau mot de passe.']);
+    }
+
+    /* ── Device detection helpers ──────────────────────────────────── */
+
+    private function detectDeviceType(string $ua): string
+    {
+        if (preg_match('/tablet|ipad/i', $ua)) return 'tablet';
+        if (preg_match('/mobile|android|iphone|ipod/i', $ua)) return 'mobile';
+        return 'desktop';
+    }
+
+    private function detectOS(string $ua): string
+    {
+        if (preg_match('/iphone|ipad|ipod/i', $ua)) return 'iOS';
+        if (preg_match('/android/i', $ua))           return 'Android';
+        if (preg_match('/windows/i', $ua))           return 'Windows';
+        if (preg_match('/macintosh|mac os x/i', $ua)) return 'macOS';
+        if (preg_match('/linux/i', $ua))             return 'Linux';
+        return 'Inconnu';
+    }
+
+    private function detectBrowser(string $ua): string
+    {
+        if (preg_match('/SamsungBrowser/i', $ua)) return 'Samsung';
+        if (preg_match('/Edg\//i', $ua))          return 'Edge';
+        if (preg_match('/OPR\/|Opera/i', $ua))    return 'Opera';
+        if (preg_match('/Firefox/i', $ua))        return 'Firefox';
+        if (preg_match('/Chrome/i', $ua))         return 'Chrome';
+        if (preg_match('/Safari/i', $ua))         return 'Safari';
+        return 'Inconnu';
     }
 
     public function deleteAccount(Request $request)

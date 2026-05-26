@@ -11,12 +11,16 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
-    protected $fillable = ['name', 'email', 'phone', 'password', 'role', 'status'];
+    protected $fillable = [
+        'name', 'email', 'phone', 'password', 'role', 'status',
+        'device_type', 'device_os', 'device_browser', 'last_login_at', 'last_ip',
+    ];
 
     protected $hidden = ['password', 'remember_token'];
 
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'last_login_at'     => 'datetime',
         'password'          => 'hashed',
     ];
 

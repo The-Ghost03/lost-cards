@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../../api/axios'
 import { deletePost } from '../../api/posts'
-import { Shield, Trash2, CheckCircle, Users, FileText, Eye, BarChart3, Search, TrendingUp, MessageSquare, Bell, UserCog } from 'lucide-react'
-import { formatDistanceToNow } from 'date-fns'
+import { Shield, Trash2, CheckCircle, Users, FileText, Eye, BarChart3, Search, TrendingUp, MessageSquare, Bell, UserCog, Smartphone, Monitor, Tablet } from 'lucide-react'
+import { formatDistanceToNow, format } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { t } from '../../lib/toast'
 import { useAsyncAction } from '../../lib/useAsyncAction'
@@ -186,6 +186,7 @@ export default function AdminDashboard() {
             {users.length === 0 && <div className="card text-center py-8 text-sm text-gray-500">Aucun utilisateur</div>}
             {users.map((u, i) => (
               <div key={u.id} className="card animate-slide-up" style={{ animationDelay: `${i * 30}ms` }}>
+                {/* Header row */}
                 <div className="flex items-start justify-between gap-2 mb-2">
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
@@ -199,12 +200,43 @@ export default function AdminDashboard() {
                     </div>
                     <p className="text-xs text-gray-400 truncate">{u.email}</p>
                     <p className="text-xs text-gray-400">{u.phone}</p>
-                    <p className="text-xs text-gray-400 mt-1">
-                      {u.posts_count} annonce(s) · {u.contact_requests_count} demande(s) · {u.alert_subscriptions_count} alerte(s)
-                    </p>
                   </div>
+                  {/* Device icon */}
+                  <DeviceIcon type={u.device_type} />
                 </div>
-                <div className="flex gap-2 mt-2">
+
+                {/* Activity counts */}
+                <div className="flex gap-3 text-xs text-gray-500 mb-2.5 flex-wrap">
+                  <span><span className="font-semibold text-gray-700">{u.posts_count}</span> annonce(s)</span>
+                  <span><span className="font-semibold text-gray-700">{u.contact_requests_count}</span> demande(s)</span>
+                  <span><span className="font-semibold text-gray-700">{u.alert_subscriptions_count}</span> alerte(s)</span>
+                </div>
+
+                {/* Device / connection info */}
+                <div className="bg-gray-50 dark:bg-gray-900 rounded-xl px-3 py-2 mb-3 grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+                  <InfoRow label="OS"       value={<OsBadge os={u.device_os} />} />
+                  <InfoRow label="Navigateur" value={u.device_browser || '—'} />
+                  <InfoRow label="Dernière connexion" value={
+                    u.last_login_at
+                      ? formatDistanceToNow(new Date(u.last_login_at), { addSuffix: true, locale: fr })
+                      : '—'
+                  } />
+                  <InfoRow label="Inscrit le" value={format(new Date(u.created_at), 'd MMM yyyy', { locale: fr })} />
+                  <InfoRow label="IP" value={
+                    u.last_ip
+                      ? <span className="font-mono text-gray-600">{u.last_ip}</span>
+                      : '—'
+                  } />
+                  <InfoRow label="Appareil" value={
+                    u.device_type === 'mobile' ? '📱 Mobile'
+                    : u.device_type === 'tablet' ? '📟 Tablette'
+                    : u.device_type === 'desktop' ? '💻 Desktop'
+                    : '—'
+                  } />
+                </div>
+
+                {/* Actions */}
+                <div className="flex gap-2">
                   <button onClick={() => toggleRole(u)} className="btn-secondary text-xs flex items-center gap-1">
                     <UserCog size={12} /> {u.role === 'admin' ? 'Retirer admin' : 'Promouvoir admin'}
                   </button>
@@ -227,5 +259,38 @@ function Metric({ label, value, color }) {
       <p className={`text-2xl font-bold ${color}`}>{value}</p>
       <p className="text-xs text-gray-500 mt-0.5">{label}</p>
     </div>
+  )
+}
+
+function DeviceIcon({ type }) {
+  if (type === 'mobile')  return <Smartphone size={18} className="text-blue-400 shrink-0 mt-0.5" />
+  if (type === 'tablet')  return <Tablet      size={18} className="text-purple-400 shrink-0 mt-0.5" />
+  if (type === 'desktop') return <Monitor     size={18} className="text-gray-400 shrink-0 mt-0.5" />
+  return null
+}
+
+function OsBadge({ os }) {
+  const map = {
+    'iOS':     { emoji: '🍎', cls: 'bg-gray-100 text-gray-700' },
+    'Android': { emoji: '🤖', cls: 'bg-green-50 text-green-700' },
+    'Windows': { emoji: '🪟', cls: 'bg-blue-50 text-blue-700' },
+    'macOS':   { emoji: '🍎', cls: 'bg-gray-100 text-gray-700' },
+    'Linux':   { emoji: '🐧', cls: 'bg-yellow-50 text-yellow-700' },
+  }
+  if (!os || !map[os]) return <span className="text-gray-400">—</span>
+  const { emoji, cls } = map[os]
+  return (
+    <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-xs font-medium ${cls}`}>
+      {emoji} {os}
+    </span>
+  )
+}
+
+function InfoRow({ label, value }) {
+  return (
+    <>
+      <span className="text-gray-400">{label}</span>
+      <span className="text-gray-700 truncate">{value}</span>
+    </>
   )
 }

@@ -1,243 +1,291 @@
-<div align="center">
+# LostCards 🔑
 
-<img src="frontend/public/logo.png" alt="LostCards Logo" width="80" height="80" />
+> **Plateforme citoyenne de recouvrement de portefeuilles & pièces d'identité perdus à Abidjan, Côte d'Ivoire.**
+> Quand quelqu'un trouve un portefeuille, il publie une annonce. Le propriétaire cherche son nom, prouve son identité par selfie, et entre en contact via une messagerie sécurisée.
 
-# LostCards
+[![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)](https://react.dev)
+[![Laravel](https://img.shields.io/badge/Laravel-11-FF2D20?logo=laravel&logoColor=white)](https://laravel.com)
+[![Tailwind](https://img.shields.io/badge/Tailwind-3.4-38B2AC?logo=tailwind-css&logoColor=white)](https://tailwindcss.com)
+[![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?logo=mysql&logoColor=white)](https://www.mysql.com)
+[![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)](https://docs.docker.com/compose/)
+[![PWA](https://img.shields.io/badge/PWA-mobile--first-5A0FC8)](https://web.dev/progressive-web-apps/)
 
-**Plateforme de recouvrement de portefeuilles et pièces d'identité perdus à Abidjan, Côte d'Ivoire.**
-
-[![Live](https://img.shields.io/badge/Live-lost--card.softskills.ci-orange?style=flat-square&logo=vercel)](https://lost-card.softskills.ci)
-[![React](https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react)](https://react.dev)
-[![Laravel](https://img.shields.io/badge/Laravel-11-FF2D20?style=flat-square&logo=laravel)](https://laravel.com)
-[![Docker](https://img.shields.io/badge/Docker-ready-2496ED?style=flat-square&logo=docker)](https://docker.com)
-
-</div>
-
----
-
-## 🎯 Concept
-
-Quelqu'un a trouvé un portefeuille contenant des pièces d'identité à Abidjan ? Il publie une annonce sur LostCards. Le propriétaire recherche son nom, prouve son identité par **selfie**, et récupère ses documents.
-
-Tout le processus se fait de façon sécurisée : l'adresse de remise n'est révélée qu'après validation, et une messagerie intégrée permet d'organiser la récupération.
+🌐 **Production** — [lost-card.softskills.ci](https://lost-card.softskills.ci)
 
 ---
 
 ## ✨ Fonctionnalités
 
-### Pour le retrouveur
-- 📢 Publier une annonce avec le nom partiel, la commune et les documents trouvés
-- 📸 Recevoir et comparer le selfie du réclamant avec les pièces trouvées
-- ✅ Approuver ou refuser les demandes de contact
-- 💬 Messagerie sécurisée avec le propriétaire validé (disponible dès la demande en attente)
-- ✔️ Marquer le portefeuille comme récupéré pour archiver l'annonce
-- 📊 Dashboard personnel avec statistiques
+### Pour les chercheurs (proprios)
+- 🔍 Recherche par nom partiel sur les pièces
+- 🔔 Alertes email automatiques si un portefeuille correspondant est publié
+- 📸 Réclamation d'une annonce via **selfie** (comparé visuellement à la photo de la pièce)
+- 💬 Messagerie chiffrée après validation par le retrouveur
+- 🔁 Bascule libre vers le mode Retrouveur
 
-### Pour le chercheur (propriétaire)
-- 🔍 Recherche par nom parmi toutes les annonces actives
-- 🔔 Alertes email automatiques si un portefeuille correspondant est signalé
-- 🤳 Envoi de selfie pour vérification d'identité
-- 💬 Chat avec le retrouveur dès l'envoi du selfie
-- 📍 Accès à l'adresse de remise après approbation
+### Pour les retrouveurs
+- 📢 Publication rapide d'une annonce (nom partiel, commune, documents, adresse de récupération)
+- ✅ Validation/refus du selfie d'un demandeur
+- 💬 Chat 1-1 sécurisé
+- 📦 Marquage "récupéré" pour archiver l'annonce
+- 📊 Tableau de bord avec compteurs (actives / récupérées)
 
 ### Plateforme
-- 🛡️ **Vérification par selfie** — comparaison visuelle avant de révéler l'adresse
-- 🔐 **Auth sécurisée** — Laravel Sanctum (Bearer token)
-- 📱 **PWA mobile-first** — installable sur Android/iOS, icônes, splash screen
-- 🔎 **SEO complet** — meta OpenGraph, Twitter Cards, JSON-LD, sitemap.xml, robots.txt
-- 📧 **Emails transactionnels** — alertes et notifications via SMTP
-- 🛠️ **Admin panel** — modération des annonces et statistiques
-- ⚡ **UX soignée** — spinners, skeleton loaders, feedback en temps réel, confirm dialogs
+- 🌓 **Dark mode** complet avec toggle persistant
+- 📱 **PWA mobile-first** installable, gestes natifs
+- ⚡ **Squelettes & spinners** sur toutes les actions asynchrones
+- 🔐 Tokens **Sanctum** (Bearer), pas de session cookie
+- 📧 Notifications email (selfie reçu, contact approuvé/refusé, nouveau message, alerte)
+
+### Administration
+- 🛡️ **Tableau de bord admin** (`/admin`) avec 4 onglets : Statistiques, Analytiques, Annonces, Utilisateurs
+- 📊 **Statistiques globales** — annonces actives/récupérées, comptes par rôle, engagement (vérifications, messages, alertes)
+- 📈 **Analytiques temps réel** (custom, sans service tiers) — voir [Analytiques](#-analytiques)
+- 👥 **Gestion utilisateurs** — recherche, promotion admin, suppression en cascade, **détection appareil/OS/navigateur** sur chaque compte
+- 📋 **Gestion annonces** — vue admin sur n'importe quelle annonce : voir les messages, voir les demandes de contact, supprimer (l'admin ne peut pas approuver de selfie ni envoyer de message)
 
 ---
 
-## 🛠️ Stack technique
+## 📊 Analytiques
 
-| Couche | Technologies |
-|--------|-------------|
-| **Frontend** | React 19 · Vite · Tailwind CSS · React Router · Axios |
-| **UI / UX** | Lucide Icons · react-hot-toast · date-fns · react-helmet-async |
-| **Backend** | Laravel 11 · PHP 8.2 · Sanctum · Laravel Mail |
-| **Base de données** | MySQL 8 |
-| **Infrastructure** | Docker · Nginx · VPS (Debian) |
-| **Dev tools** | Mailpit (test emails) |
+Module d'analytics **maison** intégré au backend Laravel — pas de Google Analytics, pas de dépendance externe, RGPD-friendly (aucun PII, juste un session ID anonyme stocké en `sessionStorage`).
+
+**KPIs** sur 7/30/90 jours :
+- 👁 Pages vues totales · 👤 Visiteurs uniques · ⏱ Durée moyenne · ↩ Taux de rebond
+
+**Visualisations** :
+- 📈 Sparkline SVG inline (pages vues + visiteurs sur la période)
+- 🏆 Top 10 des pages les plus visitées
+- 🌐 Sources de trafic catégorisées : 🔗 Direct / 🔍 Recherche organique (Google, Bing…) / 📱 Réseaux sociaux (Facebook, WhatsApp…) / 🌐 Sites référents
+- 📱 Répartition appareils (Mobile / Desktop / Tablette) + OS (iOS / Android / Windows / macOS / Linux)
+
+**Tracking** : hook `usePageTracking` côté React, throttle 120 req/min, filtre bots côté backend (Googlebot, Bingbot, etc.).
 
 ---
 
-## 🚀 Lancer le projet
+## 🧱 Stack technique
 
-### Avec Docker (recommandé)
+| Couche | Tech |
+|---|---|
+| Frontend | React 19, Vite, Tailwind CSS 3.4, React Router 6, lucide-react, date-fns, react-hot-toast |
+| Backend | Laravel 11, Sanctum, Eloquent, Mail |
+| DB | MySQL 8 |
+| Infra | Docker Compose (dev & prod), Nginx (reverse proxy + static), php-cli (serve) |
+| Hébergement | VPS Contabo Ubuntu 24.04 |
+
+---
+
+## 🚀 Lancement rapide (Docker)
+
+### Développement local
 
 ```bash
-git clone https://github.com/The-Ghost03/lost-cards.git
+git clone git@github.com:The-Ghost03/lost-cards.git
 cd lost-cards
 docker compose up --build
 ```
 
-| Service   | URL                       |
-|-----------|---------------------------|
-| Frontend  | http://localhost:3000     |
-| API       | http://localhost:8000/api |
-| Mailpit   | http://localhost:8025     |
+| Service   | URL                        |
+|-----------|----------------------------|
+| Frontend  | http://localhost:3000      |
+| API       | http://localhost:8000/api  |
+| Mailpit   | http://localhost:8025      |
 
-**Comptes de démonstration (seeder) :**
+**Comptes seedés** :
 
-| Rôle        | Email              | Mot de passe |
-|-------------|---------------------|--------------|
-| Admin       | admin@lostcards.ci  | Admin@1234   |
-| Démo        | demo@lostcards.ci   | Demo@1234    |
+| Rôle  | Email                | Mot de passe |
+|-------|----------------------|--------------|
+| Admin | admin@lostcards.ci   | Admin@1234   |
+| Demo  | demo@lostcards.ci    | Demo@1234    |
+
+### Production
+
+```bash
+docker compose -f docker-compose.prod.yml up -d --build
+```
+
+Le `docker-compose.prod.yml` build un bundle Vite figé servi par Nginx (couche statique + proxy `/api → backend:8000`).
 
 ---
 
-### Installation manuelle
+## 🔧 Installation manuelle
 
-#### Prérequis
-- PHP 8.2+ (`pdo_mysql`, `mbstring`, `openssl`, `gd`)
-- Composer
-- Node 20+
+### Prérequis
+- PHP 8.2+ (`pdo_mysql`, `mbstring`, `openssl`, `gd` ou `imagick`)
+- Composer 2
+- Node 20+ (24 recommandé)
 - MySQL 8
 
-#### Backend
+### Backend
 
 ```bash
 cd backend
 composer install
 cp .env.example .env
 php artisan key:generate
-
-# Configurer .env :
-#   DB_DATABASE, DB_USERNAME, DB_PASSWORD
-#   MAIL_* (SMTP ou Mailpit)
-#   FRONTEND_URL=http://localhost:3000
-
+# Renseigner DB_* + MAIL_* dans .env
 php artisan migrate --seed
-php artisan serve
+php artisan serve --host=0.0.0.0 --port=8000
 ```
 
-#### Frontend
+### Frontend
 
 ```bash
 cd frontend
-npm install --legacy-peer-deps
-npm run dev
+npm install
+npm run dev   # http://localhost:5173
+npm run build # production → dist/
 ```
 
 ---
 
-## 🗂️ Architecture API
+## 🗺 Architecture API
 
+### Public
 ```
 POST   /api/register
 POST   /api/login
-POST   /api/logout
+POST   /api/forgot-password
+POST   /api/reset-password
+GET    /api/posts                      # Recherche ?name=… ou récents
+GET    /api/posts/:id
+POST   /api/analytics/track            # Tracking page (throttled)
+```
+
+### Authentifié (Sanctum Bearer)
+```
 GET    /api/me
+PATCH  /api/me/status                  # Bascule chercheur/retrouveur
+DELETE /api/me                         # Suppression compte (password requis)
+POST   /api/logout
 
-GET    /api/posts                         # Liste + recherche ?name= + ?my=1
-POST   /api/posts                         # Créer une annonce (auth · retrouveur)
-GET    /api/posts/:id                     # Détail (pickup_address masquée si non autorisé)
-PATCH  /api/posts/:id/recover             # Marquer récupéré
-DELETE /api/posts/:id                     # Supprimer
+POST   /api/posts                      # Créer annonce
+PATCH  /api/posts/:id/recover          # Marquer récupéré
+DELETE /api/posts/:id                  # Supprimer (owner ou admin)
 
-POST   /api/posts/:id/contact             # Envoyer selfie (multipart)
-GET    /api/posts/:id/contact             # Lister demandes reçues
-GET    /api/posts/:id/contact/:cid/selfie # Télécharger le selfie (owner only)
-PATCH  /api/posts/:id/contact/:cid/approve
-PATCH  /api/posts/:id/contact/:cid/reject
+GET    /api/posts/:id/contact          # Liste demandes
+POST   /api/posts/:id/contact          # Selfie + créer demande
+GET    /api/posts/:id/contact/:rid/selfie
+PATCH  /api/posts/:id/contact/:rid/approve
+PATCH  /api/posts/:id/contact/:rid/reject
 
-GET    /api/conversations                 # Mes conversations actives
-GET    /api/posts/:id/messages            # Messages d'un fil (owner + requester pending/approved)
-POST   /api/posts/:id/messages            # Envoyer un message
+GET    /api/conversations
+GET    /api/conversations/:postId/messages
+POST   /api/conversations/:postId/messages
 
-GET    /api/alerts                        # Mes alertes email
+GET    /api/alerts
 POST   /api/alerts
 DELETE /api/alerts/:id
+```
 
-GET    /api/admin/stats                   # Admin only
+### Admin (rôle `admin`)
+```
+GET    /api/admin/stats                # Compteurs globaux
 GET    /api/admin/posts
+GET    /api/admin/users                # Avec device_type, device_os, last_login_at, last_ip
+PATCH  /api/admin/users/:id            # Toggle rôle
+DELETE /api/admin/users/:id            # Cascade supprime annonces, messages, alertes
+GET    /api/admin/analytics?days=7|30|90
 ```
 
 ---
 
-## 📁 Structure du projet
+## 🌳 Structure du projet
 
 ```
 lost-cards/
-├── backend/                  # Laravel 11
+├── backend/                      # Laravel 11
 │   ├── app/
-│   │   ├── Http/Controllers/ # PostController, MessageController, AlertController…
-│   │   ├── Models/           # User, Post, ContactRequest, Message, Alert
-│   │   └── Notifications/    # AlertNotification (email)
+│   │   ├── Http/Controllers/
+│   │   │   ├── AuthController.php
+│   │   │   ├── PostController.php
+│   │   │   ├── ContactRequestController.php
+│   │   │   ├── MessageController.php
+│   │   │   ├── AlertSubscriptionController.php
+│   │   │   ├── AnalyticsController.php
+│   │   │   └── Admin/DashboardController.php
+│   │   ├── Mail/                 # NewMessageNotification, etc.
+│   │   └── Models/
 │   ├── database/
 │   │   ├── migrations/
 │   │   └── seeders/
 │   └── routes/api.php
 │
-├── frontend/                 # React 19 + Vite
+├── frontend/                     # React 19 + Vite
 │   ├── src/
-│   │   ├── api/              # posts.js, messages.js, alerts.js
-│   │   ├── components/       # Navbar, PostCard, SelfieCapture, LogoIcon, Spinner, SEO…
-│   │   ├── context/          # AuthContext, UnreadContext
-│   │   ├── lib/              # useAsyncAction, toast
-│   │   └── pages/            # Home, Login, Register, PostDetail, PostCreate,
-│   │                         # Dashboard, Chat, Messages, Alerts, Profile, Admin
-│   ├── public/               # robots.txt, sitemap.xml, PWA icons
-│   └── Dockerfile            # Multi-stage : Node build → Nginx serve
+│   │   ├── api/                  # axios instance + endpoints
+│   │   ├── components/           # Navbar, ProtectedRoute, ConfirmDialog,
+│   │   │                         # SelfieCapture, Spinner, ThemeToggle
+│   │   ├── context/              # Auth, Theme, Unread, Confirm
+│   │   ├── lib/                  # toast, useAsyncAction, usePageTracking
+│   │   ├── pages/
+│   │   │   ├── Home, Login, Register, ForgotPassword, ResetPassword
+│   │   │   ├── PostCreate, PostDetail
+│   │   │   ├── Messages, Chat
+│   │   │   ├── Dashboard, Alerts, Profile
+│   │   │   └── admin/Dashboard.jsx
+│   │   └── App.jsx
+│   ├── public/                   # PWA manifest, icons, sw.js
+│   ├── nginx.conf                # Reverse proxy /api → backend
+│   └── Dockerfile
 │
-├── docker-compose.yml        # Dev (volumes + hot-reload)
-└── docker-compose.prod.yml   # Prod (build + Nginx)
+├── docker-compose.yml            # Dev (hot-reload, volume mount)
+└── docker-compose.prod.yml       # Prod (multi-stage build)
 ```
 
 ---
 
 ## 🔐 Sécurité & vie privée
 
-- Les selfies sont stockés en dehors du dossier public et accessibles uniquement au retrouveur concerné
-- L'adresse de récupération (`pickup_address`) n'est jamais renvoyée par l'API à un utilisateur non autorisé (uniquement owner et chercheur approuvé)
-- Les messages sont filtrés par paire (owner ↔ requester) — aucun accès aux conversations d'autrui
-- Tokens Sanctum révoqués à la déconnexion
+- **Hash bcrypt** (Laravel default) pour les mots de passe
+- **Tokens Sanctum** révoqués au logout et à la suppression de compte
+- **Selfies** stockés en disque local non-public (`storage/app/selfies`), accessibles uniquement au propriétaire de l'annonce via endpoint authentifié
+- **Données partielles** — le nom complet sur les cartes n'est jamais exposé en clair, seul un fragment est visible (`name_partial`)
+- **Adresse de récupération** masquée jusqu'à approbation explicite du selfie
+- **Throttle** sur `/api/analytics/track` (120 req/min) et bots filtrés
+- **CORS** restrictif sur le domaine production
+- **HTTPS** géré au niveau du reverse proxy (Caddy/Nginx hôte) avec certificat Let's Encrypt
+- **Analytics anonymes** — session ID aléatoire en `sessionStorage`, aucun cookie, aucun PII
 
 ---
 
-## 🌍 Déploiement production
-
-Le site tourne sur un VPS Debian avec Docker :
+## 🚢 Déploiement (VPS)
 
 ```bash
-# Build l'image de production (multi-stage)
-docker compose -f docker-compose.prod.yml build frontend
-
-# Relancer le conteneur
-docker compose -f docker-compose.prod.yml up -d --no-deps --force-recreate frontend
+# Sur le VPS, à la racine du projet
+git pull origin main
+docker compose -f docker-compose.prod.yml build backend frontend
+docker compose -f docker-compose.prod.yml up -d --force-recreate backend frontend
+docker exec lostcards-backend-1 php artisan migrate --force
 ```
 
-Le frontend est servi par **Nginx** (port 8083) derrière un reverse proxy.  
-Le backend Laravel tourne en PHP-FPM exposé sur le port 8000.
+Le frontend est buildé en multi-stage (Node → Nginx alpine) et exposé sur le port `8083` que le reverse proxy hôte route vers `https://lost-card.softskills.ci`.
 
 ---
 
-## 📸 Aperçu
+## 🧪 Tests rapides
 
-| | |
-|---|---|
-| Recherche d'annonces | Dashboard retrouveur |
-| Vérification par selfie | Chat sécurisé |
+```bash
+# Backend
+cd backend && php artisan test
 
-> 🔗 Voir la version live : **[lost-card.softskills.ci](https://lost-card.softskills.ci)**
+# Frontend
+cd frontend && npm run lint
+```
 
 ---
 
 ## 🤝 Contribution
 
-Les contributions sont les bienvenues ! Pour proposer une amélioration :
-
 1. Fork le repo
-2. Crée une branche (`git checkout -b feature/ma-feature`)
-3. Commit (`git commit -m "feat: ma feature"`)
-4. Push (`git push origin feature/ma-feature`)
-5. Ouvre une Pull Request
+2. Crée une branche `feat/ma-feature` ou `fix/mon-bug`
+3. Commit avec un message clair (français ou anglais OK)
+4. Pull request vers `main`
+
+Style : Tailwind utility-first, composants fonctionnels uniquement, hooks pour la logique. Suivre les conventions Laravel sur le backend.
 
 ---
 
 ## 📄 Licence
 
-MIT © 2025 [The-Ghost03](https://github.com/The-Ghost03)
+Code propriétaire — © SoftSkills CI 2025. Tous droits réservés.

@@ -10,28 +10,44 @@ import { useAsyncAction } from '../../lib/useAsyncAction'
 import { useConfirm } from '../../components/ConfirmDialog'
 
 const TABS = [
-  { key: 'stats', label: 'Statistiques', icon: BarChart3 },
-  { key: 'posts', label: 'Annonces',     icon: FileText },
-  { key: 'users', label: 'Utilisateurs', icon: Users },
+  { key: 'stats',     label: 'Statistiques', icon: BarChart3 },
+  { key: 'analytics', label: 'Analytiques',  icon: TrendingUp },
+  { key: 'posts',     label: 'Annonces',     icon: FileText },
+  { key: 'users',     label: 'Utilisateurs', icon: Users },
 ]
 
 export default function AdminDashboard() {
-  const [tab, setTab]           = useState('stats')
-  const [stats, setStats]       = useState(null)
-  const [posts, setPosts]       = useState([])
-  const [users, setUsers]       = useState([])
-  const [userQ, setUserQ]       = useState('')
-  const [loading, setLoading]   = useState(true)
+  const [tab, setTab]               = useState('stats')
+  const [stats, setStats]           = useState(null)
+  const [posts, setPosts]           = useState([])
+  const [users, setUsers]           = useState([])
+  const [userQ, setUserQ]           = useState('')
+  const [loading, setLoading]       = useState(true)
+  const [analytics, setAnalytics]   = useState(null)
+  const [analyticsDays, setAnalyticsDays] = useState(30)
+  const [analyticsLoading, setAnalyticsLoading] = useState(false)
   const confirm = useConfirm()
   const navigate = useNavigate()
 
-  const loadStats = () => api.get('/admin/stats').then(r => setStats(r.data)).catch(() => t.error('Erreur stats'))
-  const loadPosts = () => api.get('/admin/posts').then(r => setPosts(r.data.data ?? r.data)).catch(() => t.error('Erreur annonces'))
-  const loadUsers = (q = '') => api.get('/admin/users', { params: q ? { q } : {} }).then(r => setUsers(r.data.data ?? r.data)).catch(() => t.error('Erreur users'))
+  const loadStats     = () => api.get('/admin/stats').then(r => setStats(r.data)).catch(() => t.error('Erreur stats'))
+  const loadPosts     = () => api.get('/admin/posts').then(r => setPosts(r.data.data ?? r.data)).catch(() => t.error('Erreur annonces'))
+  const loadUsers     = (q = '') => api.get('/admin/users', { params: q ? { q } : {} }).then(r => setUsers(r.data.data ?? r.data)).catch(() => t.error('Erreur users'))
+  const loadAnalytics = (days = analyticsDays) => {
+    setAnalyticsLoading(true)
+    return api.get('/admin/analytics', { params: { days } })
+      .then(r => setAnalytics(r.data))
+      .catch(() => t.error('Erreur analytics'))
+      .finally(() => setAnalyticsLoading(false))
+  }
 
   useEffect(() => {
     Promise.all([loadStats(), loadPosts(), loadUsers()]).finally(() => setLoading(false))
   }, [])
+
+  // Load analytics lazily when tab is first opened
+  useEffect(() => {
+    if (tab === 'analytics' && !analytics) loadAnalytics()
+  }, [tab])
 
   const { run: handleDeletePost } = useAsyncAction(async (id) => {
     if (!(await confirm({ title: 'Supprimer cette annonce ?', message: 'Action irréversible.', danger: true, confirmLabel: 'Supprimer' }))) return
@@ -131,6 +147,132 @@ export default function AdminDashboard() {
               <Metric label="Alertes"       value={stats.totals.alerts} color="text-orange-500" />
             </div>
           </div>
+        </div>
+      )}
+
+      {/* ── Analytics tab ─────────────────────────────────────────── */}
+      {tab === 'analytics' && (
+        <div className="space-y-4 animate-fade-in">
+          {/* Period selector */}
+          <div className="flex gap-1 bg-gray-100 p-1 rounded-xl">
+            {[7, 30, 90].map(d => (
+              <button
+                key={d}
+                onClick={() => { setAnalyticsDays(d); loadAnalytics(d) }}
+                className={`flex-1 text-xs font-semibold py-1.5 rounded-lg transition-all ${
+                  analyticsDays === d ? 'bg-white text-orange-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                {d === 7 ? '7 jours' : d === 30 ? '30 jours' : '90 jours'}
+              </button>
+            ))}
+          </div>
+
+          {analyticsLoading && (
+            <div className="flex justify-center py-10">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500" />
+            </div>
+          )}
+
+          {!analyticsLoading && analytics && (
+            <>
+              {/* KPI cards */}
+              <div className="grid grid-cols-2 gap-3">
+                <KpiCard label="Pages vues"        value={analytics.total_views.toLocaleString('fr')}   color="text-orange-500" icon="👁" />
+                <KpiCard label="Visiteurs uniques" value={analytics.unique_visitors.toLocaleString('fr')} color="text-blue-500"   icon="👤" />
+                <KpiCard label="Durée moy."        value={fmtDuration(analytics.avg_duration_seconds)}   color="text-purple-500"  icon="⏱" />
+                <KpiCard label="Taux de rebond"    value={`${analytics.bounce_rate}%`}                   color="text-red-400"     icon="↩" />
+              </div>
+
+              {/* Sparkline chart */}
+              <div className="card">
+                <h3 className="font-semibold text-sm text-gray-800 mb-3 flex items-center gap-1.5">
+                  <TrendingUp size={14} className="text-orange-500" /> Évolution ({analyticsDays} jours)
+                </h3>
+                <Sparkline data={analytics.daily} />
+                <div className="flex items-center gap-4 mt-2 text-xs text-gray-500 justify-center">
+                  <span className="flex items-center gap-1"><span className="inline-block w-3 h-0.5 bg-orange-400 rounded" /> Pages vues</span>
+                  <span className="flex items-center gap-1"><span className="inline-block w-3 h-0.5 bg-blue-400 rounded" /> Visiteurs</span>
+                </div>
+              </div>
+
+              {/* Top pages + Sources side by side on wider screens */}
+              <div className="grid grid-cols-1 gap-3">
+                {/* Top pages */}
+                <div className="card">
+                  <h3 className="font-semibold text-sm text-gray-800 mb-3 flex items-center gap-1.5">
+                    <FileText size={14} className="text-orange-500" /> Pages les plus visitées
+                  </h3>
+                  {analytics.top_pages.length === 0
+                    ? <p className="text-xs text-gray-400 text-center py-3">Aucune donnée</p>
+                    : <div className="flex flex-col gap-1.5">
+                        {analytics.top_pages.map((p, i) => (
+                          <div key={i} className="flex items-center gap-2 text-xs">
+                            <span className="w-4 text-gray-400 text-center shrink-0">{i + 1}</span>
+                            <span className="flex-1 text-gray-700 font-mono truncate">{p.path}</span>
+                            <span className="shrink-0 font-semibold text-orange-500">{p.views} vues</span>
+                            <span className="shrink-0 text-gray-400">{p.visitors} vis.</span>
+                          </div>
+                        ))}
+                      </div>
+                  }
+                </div>
+
+                {/* Traffic sources */}
+                <div className="card">
+                  <h3 className="font-semibold text-sm text-gray-800 mb-3 flex items-center gap-1.5">
+                    <Bell size={14} className="text-orange-500" /> Sources de trafic
+                  </h3>
+                  {analytics.sources.length === 0
+                    ? <p className="text-xs text-gray-400 text-center py-3">Aucune donnée</p>
+                    : <BarList
+                        items={analytics.sources.map(s => ({
+                          label: SOURCE_LABELS[s.source] ?? s.source ?? 'Inconnu',
+                          value: s.visitors,
+                        }))}
+                        total={analytics.unique_visitors}
+                      />
+                  }
+                </div>
+
+                {/* Referrers */}
+                {analytics.referrers.length > 0 && (
+                  <div className="card">
+                    <h3 className="font-semibold text-sm text-gray-800 mb-3">🔗 Sites référents</h3>
+                    <div className="flex flex-col gap-1.5">
+                      {analytics.referrers.map((r, i) => (
+                        <div key={i} className="flex items-center justify-between text-xs">
+                          <span className="text-gray-700 truncate flex-1">{r.domain}</span>
+                          <span className="shrink-0 font-semibold text-blue-500 ml-2">{r.visitors} vis.</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Devices */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="card">
+                    <h3 className="font-semibold text-sm text-gray-800 mb-3">📱 Appareils</h3>
+                    <BarList
+                      items={analytics.devices.map(d => ({
+                        label: d.device_type === 'mobile' ? '📱 Mobile' : d.device_type === 'tablet' ? '📟 Tablette' : '💻 Desktop',
+                        value: d.visitors,
+                      }))}
+                      total={analytics.unique_visitors}
+                    />
+                  </div>
+                  <div className="card">
+                    <h3 className="font-semibold text-sm text-gray-800 mb-3">🖥 Systèmes</h3>
+                    <BarList
+                      items={analytics.os.map(o => ({ label: o.os ?? 'Inconnu', value: o.visitors }))}
+                      total={analytics.unique_visitors}
+                    />
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       )}
 
@@ -292,5 +434,98 @@ function InfoRow({ label, value }) {
       <span className="text-gray-400">{label}</span>
       <span className="text-gray-700 truncate">{value}</span>
     </>
+  )
+}
+
+/* ── Analytics helpers ────────────────────────────────────────────────── */
+
+const SOURCE_LABELS = {
+  direct:   '🔗 Direct',
+  organic:  '🔍 Recherche organique',
+  social:   '📱 Réseaux sociaux',
+  referral: '🌐 Sites référents',
+}
+
+function fmtDuration(sec) {
+  if (!sec) return '—'
+  const m = Math.floor(sec / 60)
+  const s = sec % 60
+  if (m === 0) return `${s}s`
+  return `${m}m ${s}s`
+}
+
+/** Simple inline SVG sparkline showing views (orange) and visitors (blue) */
+function Sparkline({ data }) {
+  if (!data || data.length === 0) return null
+
+  const W = 600, H = 80, PAD = 4
+  const maxViews    = Math.max(...data.map(d => d.views), 1)
+  const maxVisitors = Math.max(...data.map(d => d.visitors), 1)
+  const maxY = Math.max(maxViews, maxVisitors)
+
+  const px = (i) => PAD + (i / (data.length - 1 || 1)) * (W - PAD * 2)
+  const py = (v) => H - PAD - ((v / maxY) * (H - PAD * 2))
+
+  const polyline = (key, color) => {
+    const pts = data.map((d, i) => `${px(i)},${py(d[key])}`).join(' ')
+    return <polyline points={pts} fill="none" stroke={color} strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
+  }
+
+  // Labels: show first, middle, last date
+  const labelIdxs = [0, Math.floor(data.length / 2), data.length - 1]
+
+  return (
+    <div className="relative w-full overflow-hidden">
+      <svg viewBox={`0 0 ${W} ${H}`} className="w-full" preserveAspectRatio="none">
+        {/* Grid lines */}
+        {[0, 0.5, 1].map(t => (
+          <line key={t} x1={PAD} x2={W - PAD} y1={py(maxY * t)} y2={py(maxY * t)}
+            stroke="#e5e7eb" strokeWidth="1" strokeDasharray="4,4" />
+        ))}
+        {polyline('views',    '#f97316')}
+        {polyline('visitors', '#60a5fa')}
+      </svg>
+      {/* X-axis labels */}
+      <div className="flex justify-between text-xs text-gray-400 mt-1 px-1">
+        {labelIdxs.map(i => (
+          <span key={i}>{new Date(data[i]?.date).toLocaleDateString('fr', { day: 'numeric', month: 'short' })}</span>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+/** Horizontal bar list with percentage fill */
+function BarList({ items, total }) {
+  const max = Math.max(...items.map(i => i.value), 1)
+  return (
+    <div className="flex flex-col gap-2">
+      {items.map((item, i) => (
+        <div key={i}>
+          <div className="flex justify-between text-xs mb-0.5">
+            <span className="text-gray-700 truncate flex-1">{item.label}</span>
+            <span className="text-gray-500 ml-2 shrink-0">
+              {item.value} <span className="text-gray-400">({total ? Math.round(item.value / total * 100) : 0}%)</span>
+            </span>
+          </div>
+          <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-orange-400 rounded-full transition-all duration-500"
+              style={{ width: `${(item.value / max) * 100}%` }}
+            />
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function KpiCard({ label, value, color, icon }) {
+  return (
+    <div className="card text-center py-3">
+      <p className="text-lg mb-0.5">{icon}</p>
+      <p className={`text-xl font-bold ${color}`}>{value}</p>
+      <p className="text-xs text-gray-400 mt-0.5 leading-tight">{label}</p>
+    </div>
   )
 }

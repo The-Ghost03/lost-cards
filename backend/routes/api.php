@@ -7,6 +7,10 @@ use App\Http\Controllers\ContactRequestController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\AlertSubscriptionController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\AnalyticsController;
+
+// Public analytics tracking (throttled, no auth required)
+Route::post('/analytics/track', [AnalyticsController::class, 'track'])->middleware('throttle:120,1');
 
 // Public auth
 Route::post('/register',         [AuthController::class, 'register']);
@@ -42,14 +46,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/alerts',        [AlertSubscriptionController::class, 'store']);
     Route::delete('/alerts/{id}', [AlertSubscriptionController::class, 'destroy']);
 
-    Route::get('/me/contact-requests',  [ContactRequestController::class, 'myRequests']);
-    Route::get('/me/incoming-requests', [ContactRequestController::class, 'incomingRequests']);
-
     Route::middleware('admin')->prefix('admin')->group(function () {
         Route::get('/stats',           [DashboardController::class, 'stats']);
         Route::get('/posts',           [DashboardController::class, 'posts']);
         Route::get('/users',           [DashboardController::class, 'users']);
         Route::patch('/users/{user}',  [DashboardController::class, 'updateUser']);
         Route::delete('/users/{user}', [DashboardController::class, 'deleteUser']);
+        Route::get('/analytics',       [AnalyticsController::class, 'stats']);
     });
 });

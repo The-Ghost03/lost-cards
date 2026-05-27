@@ -2,6 +2,7 @@ import { Routes, Route } from 'react-router-dom'
 import { Toaster }       from 'react-hot-toast'
 import Navbar            from './components/Navbar'
 import ProtectedRoute    from './components/ProtectedRoute'
+import PushPrompt        from './components/PushPrompt'
 import { ConfirmProvider } from './components/ConfirmDialog'
 import { UnreadProvider }  from './context/UnreadContext'
 import { usePageTracking } from './lib/usePageTracking'
@@ -57,6 +58,7 @@ function AppInner() {
               style: { borderRadius: '12px', fontSize: '14px' },
             }}
           />
+          <PushPrompt />
         </div>
       </UnreadProvider>
     </ConfirmProvider>

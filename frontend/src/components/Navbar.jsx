@@ -4,7 +4,7 @@ import { useUnread } from '../context/UnreadContext'
 import { useTheme }  from '../context/ThemeContext'
 import {
   PlusCircle, MessageCircle, LayoutDashboard,
-  Bell, Shield, User, LogOut, Search, Moon, Sun,
+  Bell, Shield, User, LogOut, Search, Moon, Sun, SunMoon,
 } from 'lucide-react'
 import { t } from '../lib/toast'
 import LogoIcon from './LogoIcon'
@@ -22,16 +22,31 @@ function UnreadBadge({ count, small = false }) {
   )
 }
 
-/* ── Theme toggle button ────────────────────────────────────────── */
+/* ── Theme toggle button (3-state: auto → light → dark → auto) ───── */
 function ThemeToggle() {
-  const { dark, toggle } = useTheme()
+  const { mode, toggle } = useTheme()
+
+  const icon =
+    mode === 'auto'  ? <SunMoon size={17} />
+    : mode === 'dark' ? <Sun     size={17} />
+    :                   <Moon    size={17} />
+
+  const label =
+    mode === 'auto'  ? 'Mode auto (sombre la nuit) — cliquer pour forcer clair'
+    : mode === 'light' ? 'Mode clair — cliquer pour forcer sombre'
+    :                    'Mode sombre — cliquer pour repasser en auto'
+
   return (
     <button
       onClick={toggle}
-      className="p-2 rounded-xl text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-      aria-label={dark ? 'Passer en mode clair' : 'Passer en mode sombre'}
+      className="p-2 rounded-xl text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors relative"
+      aria-label={label}
+      title={label}
     >
-      {dark ? <Sun size={17} /> : <Moon size={17} />}
+      {icon}
+      {mode === 'auto' && (
+        <span className="absolute bottom-0.5 right-0.5 w-1.5 h-1.5 bg-orange-400 rounded-full" />
+      )}
     </button>
   )
 }

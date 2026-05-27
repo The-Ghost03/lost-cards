@@ -1,11 +1,13 @@
 import { useRef, useState, useEffect } from 'react'
 import toast from 'react-hot-toast'
+import { RefreshCw } from 'lucide-react'
 
 export default function SelfieCapture({ onCapture, preview }) {
   const videoRef  = useRef(null)
   const canvasRef = useRef(null)
   const streamRef = useRef(null)
   const [phase, setPhase] = useState('idle') // idle | streaming | captured
+  const [facingMode, setFacingMode] = useState('user')   // user (avant) | environment (arrière)
 
   const stopStream = () => {
     streamRef.current?.getTracks().forEach(t => t.stop())
@@ -14,18 +16,25 @@ export default function SelfieCapture({ onCapture, preview }) {
 
   useEffect(() => () => stopStream(), [])
 
-  const startCamera = async () => {
+  const startCamera = async (mode = facingMode) => {
+    stopStream()
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 960 } },
+        video: { facingMode: { ideal: mode }, width: { ideal: 1280 }, height: { ideal: 960 } },
         audio: false,
       })
       streamRef.current = stream
       if (videoRef.current) videoRef.current.srcObject = stream
+      setFacingMode(mode)
       setPhase('streaming')
     } catch {
       toast.error("Impossible d'accéder à la caméra. Vérifiez les autorisations.")
     }
+  }
+
+  const flipCamera = async () => {
+    const next = facingMode === 'user' ? 'environment' : 'user'
+    await startCamera(next)
   }
 
   const capture = () => {
@@ -51,14 +60,28 @@ export default function SelfieCapture({ onCapture, preview }) {
     <div className="flex flex-col gap-3">
       <canvas ref={canvasRef} className="hidden" />
 
-      {/* Video stream */}
-      <video
-        ref={videoRef}
-        autoPlay
-        playsInline
-        muted
-        className={phase === 'streaming' ? 'w-full rounded-2xl bg-black object-cover' : 'hidden'}
-      />
+      {/* Video stream + bouton flip caméra en overlay */}
+      <div className={phase === 'streaming' ? 'relative' : 'hidden'}>
+        <video
+          ref={videoRef}
+          autoPlay
+          playsInline
+          muted
+          className="w-full rounded-2xl bg-black object-cover"
+        />
+        <button
+          type="button"
+          onClick={flipCamera}
+          aria-label="Retourner la caméra"
+          title="Retourner la caméra"
+          className="absolute top-3 right-3 w-10 h-10 rounded-full bg-black/60 hover:bg-black/80 text-white flex items-center justify-center backdrop-blur-sm transition-all active:scale-95"
+        >
+          <RefreshCw size={18} />
+        </button>
+        <span className="absolute bottom-3 left-3 text-[10px] font-semibold text-white bg-black/60 px-2 py-1 rounded-full backdrop-blur-sm">
+          {facingMode === 'user' ? '🤳 Caméra avant' : '📷 Caméra arrière'}
+        </span>
+      </div>
 
       {/* Captured preview */}
       {phase === 'captured' && preview && (

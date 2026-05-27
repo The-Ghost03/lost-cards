@@ -36,6 +36,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/posts/{post}/recover', [PostController::class, 'recover']);
     Route::delete('/posts/{post}',        [PostController::class, 'destroy']);
 
+    // Toutes les demandes du chercheur connecté (pour son dashboard)
+    Route::get('/me/contacts',                                             [ContactRequestController::class, 'myContacts']);
     Route::get('/posts/{post}/contact',                                    [ContactRequestController::class, 'index']);
     Route::post('/posts/{post}/contact',                                   [ContactRequestController::class, 'store']);
     Route::patch('/posts/{post}/contact/{contactRequest}/approve',         [ContactRequestController::class, 'approve']);

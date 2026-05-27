@@ -8,6 +8,7 @@ use App\Mail\SelfieSubmittedNotification;
 use App\Models\ContactRequest;
 use App\Models\Post;
 use App\Models\User;
+use App\Services\PushService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
@@ -25,6 +26,38 @@ class ContactRequestController extends Controller
         return response()->json(
             $post->contactRequests()->where('user_id', $request->user()->id)->get()
         );
+    }
+
+    /**
+     * Liste les demandes de l'utilisateur connecté (toutes annonces confondues).
+     * Utilisé pour afficher "Mes demandes en cours" sur le dashboard chercheur.
+     */
+    public function myContacts(Request $request)
+    {
+        $userId = $request->user()->id;
+        $rows = ContactRequest::where('user_id', $userId)
+            ->with(['post' => fn($q) => $q->select('id','name_partial','location','status','pickup_address','user_id','created_at')])
+            ->orderByDesc('created_at')
+            ->get()
+            ->map(function ($r) use ($userId) {
+                // Compte des messages non lus sur cette conversation (si approuvée)
+                $unread = 0;
+                if ($r->status === 'approved' && $r->post) {
+                    $unread = $r->post->messages()
+                        ->where('receiver_id', $userId)
+                        ->whereNull('read_at')
+                        ->count();
+                }
+                return [
+                    'id'         => $r->id,
+                    'status'     => $r->status,
+                    'created_at' => $r->created_at,
+                    'post'       => $r->post,
+                    'unread'     => $unread,
+                ];
+            });
+
+        return response()->json($rows);
     }
 
     public function store(Request $request, Post $post)
@@ -58,14 +91,27 @@ class ContactRequestController extends Controller
             'status'      => 'pending',
         ]);
 
-        // Notify the finder (post owner)
-        try {
-            $finder    = User::find($post->user_id);
-            $requester = $request->user();
-            Mail::to($finder->email)->send(
-                new SelfieSubmittedNotification($post, $finder, $requester, $contactRequest)
-            );
-        } catch (\Exception) {}
+        // Notif finder en queue — la requête répond immédiatement
+        $finderId    = $post->user_id;
+        $requesterId = $request->user()->id;
+        $crId        = $contactRequest->id;
+        $postId      = $post->id;
+        dispatch(function () use ($finderId, $requesterId, $crId, $postId) {
+            $finder    = User::find($finderId);
+            $requester = User::find($requesterId);
+            $cr        = ContactRequest::find($crId);
+            $post      = Post::find($postId);
+            if (!$finder || !$post) return;
+            try { Mail::to($finder->email)->send(new SelfieSubmittedNotification($post, $finder, $requester, $cr)); } catch (\Throwable) {}
+            try {
+                app(PushService::class)->sendToUser(
+                    $finder,
+                    "📸 Nouvelle demande sur votre annonce",
+                    "{$requester->name} a envoyé un selfie pour vérifier l'identité.",
+                    "/posts/{$postId}"
+                );
+            } catch (\Throwable) {}
+        });
 
         return response()->json($contactRequest, 201);
     }
@@ -87,13 +133,23 @@ class ContactRequestController extends Controller
         abort_unless($request->user()->id === $post->user_id, 403, 'Action non autorisée.');
         $contactRequest->update(['status' => 'approved']);
 
-        // Notify the requester
-        try {
-            $requester = User::find($contactRequest->user_id);
-            Mail::to($requester->email)->send(
-                new ContactApprovedNotification($post, $requester)
-            );
-        } catch (\Exception) {}
+        // Notif en queue — réponse immédiate
+        $requesterId = $contactRequest->user_id;
+        $postId      = $post->id;
+        dispatch(function () use ($requesterId, $postId) {
+            $requester = User::find($requesterId);
+            $post      = Post::find($postId);
+            if (!$requester || !$post) return;
+            try { Mail::to($requester->email)->send(new ContactApprovedNotification($post, $requester)); } catch (\Throwable) {}
+            try {
+                app(PushService::class)->sendToUser(
+                    $requester,
+                    "✅ Votre identité a été vérifiée",
+                    "Vous pouvez maintenant discuter avec le retrouveur.",
+                    "/messages/{$postId}"
+                );
+            } catch (\Throwable) {}
+        });
 
         return response()->json($contactRequest);
     }
@@ -103,13 +159,23 @@ class ContactRequestController extends Controller
         abort_unless($request->user()->id === $post->user_id, 403, 'Action non autorisée.');
         $contactRequest->update(['status' => 'rejected']);
 
-        // Notify the requester
-        try {
-            $requester = User::find($contactRequest->user_id);
-            Mail::to($requester->email)->send(
-                new ContactRejectedNotification($post, $requester)
-            );
-        } catch (\Exception) {}
+        // Notif en queue — réponse immédiate
+        $requesterId = $contactRequest->user_id;
+        $postId      = $post->id;
+        dispatch(function () use ($requesterId, $postId) {
+            $requester = User::find($requesterId);
+            $post      = Post::find($postId);
+            if (!$requester || !$post) return;
+            try { Mail::to($requester->email)->send(new ContactRejectedNotification($post, $requester)); } catch (\Throwable) {}
+            try {
+                app(PushService::class)->sendToUser(
+                    $requester,
+                    "ℹ️ Votre selfie n'a pas été validé",
+                    "Le retrouveur n'a pas reconnu votre visage. Vous pouvez réessayer.",
+                    "/posts/{$postId}"
+                );
+            } catch (\Throwable) {}
+        });
 
         return response()->json($contactRequest);
     }

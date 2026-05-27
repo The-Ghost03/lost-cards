@@ -5,11 +5,11 @@ import { useAuth }        from '../context/AuthContext'
 import { useAsyncAction } from '../lib/useAsyncAction'
 import { useConfirm }     from '../components/ConfirmDialog'
 import { t }              from '../lib/toast'
-import { Spinner, SkeletonCard } from '../components/Spinner'
+import api                from '../api/axios'
 import {
   PlusCircle, Wallet, CheckCircle, Trash2, Eye,
   Bell, MessageCircle, User, Search, Handshake,
-  Shield,
+  LayoutDashboard, Shield, Clock, XCircle, ChevronRight,
 } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { fr }                  from 'date-fns/locale'
@@ -43,6 +43,7 @@ export default function Dashboard() {
   const navigate   = useNavigate()
   const confirm    = useConfirm()
   const [posts, setPosts]     = useState([])
+  const [myContacts, setMyContacts] = useState([])
   const [loading, setLoading] = useState(true)
 
   const isRetrouveur = user?.status === 'retrouveur' || user?.role === 'admin'
@@ -50,17 +51,25 @@ export default function Dashboard() {
   const firstName    = user?.name?.split(' ')[0]
 
   const load = () => {
-    if (!isRetrouveur) { setLoading(false); return }
-    getPosts({ my: 1 })
-      .then(r => setPosts(r.data.data ?? r.data))
-      .catch(() => {})
-      .finally(() => setLoading(false))
+    if (isRetrouveur) {
+      getPosts({ my: 1 })
+        .then(r => setPosts(r.data.data ?? r.data))
+        .catch(() => {})
+        .finally(() => setLoading(false))
+    } else if (isChercheur) {
+      api.get('/me/contacts')
+        .then(r => setMyContacts(r.data))
+        .catch(() => {})
+        .finally(() => setLoading(false))
+    } else {
+      setLoading(false)
+    }
   }
 
   useEffect(() => { load() }, [user?.status])
 
   /* ── Recover ────────────────────────────────────────────────────── */
-  const { run: handleRecover, loading: recovering } = useAsyncAction(async (id) => {
+  const { run: handleRecover } = useAsyncAction(async (id) => {
     const ok = await confirm({
       title:        'Marquer comme récupéré ?',
       message:      'Le propriétaire a récupéré ses pièces.',
@@ -74,9 +83,9 @@ export default function Dashboard() {
   })
 
   /* ── Delete ─────────────────────────────────────────────────────── */
-  const { run: handleDelete, loading: deleting } = useAsyncAction(async (id) => {
+  const { run: handleDelete } = useAsyncAction(async (id) => {
     const ok = await confirm({
-      title:        "Supprimer l'annonce ?",
+      title:        'Supprimer l\'annonce ?',
       message:      'Cette annonce sera retirée définitivement.',
       danger:       true,
       confirmLabel: 'Supprimer',
@@ -92,6 +101,7 @@ export default function Dashboard() {
   if (isChercheur) {
     return (
       <div className="pt-6 space-y-5">
+        {/* Header */}
         <div>
           <div className="flex items-center gap-2 mb-1">
             <h1 className="text-xl font-bold text-gray-900">Bonjour, {firstName} 👋</h1>
@@ -101,16 +111,69 @@ export default function Dashboard() {
           </div>
         </div>
 
+        {/* Quick actions */}
         <div>
           <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Actions</p>
           <div className="flex flex-col gap-3">
-            <QuickAction to="/alerts"   icon={Bell}        label="Créer une alerte"          desc="Soyez notifié dès qu'un portefeuille vous correspond" color="bg-orange-500" />
-            <QuickAction to="/"         icon={Search}      label="Rechercher"                desc="Chercher votre nom dans les annonces publiées"        color="bg-blue-500"   />
-            <QuickAction to="/messages" icon={MessageCircle} label="Mes messages"            desc="Discussions avec des retrouveurs"                     color="bg-purple-500" />
-            <QuickAction to="/profile"  icon={Handshake}   label="Passer en mode Retrouveur" desc="Vous avez trouvé un portefeuille ? Changez de profil" color="bg-green-500"  />
+            <QuickAction
+              to="/alerts"
+              icon={Bell}
+              label="Créer une alerte"
+              desc="Soyez notifié dès qu'un portefeuille vous correspond"
+              color="bg-orange-500"
+            />
+            <QuickAction
+              to="/"
+              icon={Search}
+              label="Rechercher"
+              desc="Chercher votre nom dans les annonces publiées"
+              color="bg-blue-500"
+            />
+            <QuickAction
+              to="/messages"
+              icon={MessageCircle}
+              label="Mes messages"
+              desc="Discussions avec des retrouveurs"
+              color="bg-purple-500"
+            />
+            <QuickAction
+              to="/profile"
+              icon={Handshake}
+              label="Passer en mode Retrouveur"
+              desc="Vous avez trouvé un portefeuille ? Changez de profil"
+              color="bg-green-500"
+            />
           </div>
         </div>
 
+        {/* Mes demandes en cours */}
+        <div>
+          <h2 className="font-semibold text-gray-800 text-sm mb-3 flex items-center justify-between">
+            <span>Mes demandes</span>
+            <span className="text-xs font-normal text-gray-400">{myContacts.length} annonce{myContacts.length > 1 ? 's' : ''}</span>
+          </h2>
+
+          {loading ? (
+            <div className="text-center py-6 text-gray-400 text-sm">Chargement...</div>
+          ) : myContacts.length === 0 ? (
+            <div className="card text-center py-8">
+              <Search size={28} className="mx-auto text-gray-300 mb-2" />
+              <p className="text-sm text-gray-600 font-medium">Aucune demande en cours</p>
+              <p className="text-xs text-gray-400 mt-1 mb-3">
+                Trouvez votre nom dans une annonce et envoyez votre selfie pour entrer en contact.
+              </p>
+              <Link to="/" className="btn-primary text-xs inline-flex items-center gap-1">
+                <Search size={12} /> Chercher mon nom
+              </Link>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-2">
+              {myContacts.map(c => <ContactCard key={c.id} contact={c} navigate={navigate} />)}
+            </div>
+          )}
+        </div>
+
+        {/* Info card */}
         <div className="bg-orange-50 border border-orange-100 rounded-2xl p-4">
           <p className="text-sm font-semibold text-orange-700 mb-1">Comment retrouver votre portefeuille ?</p>
           <ol className="text-xs text-orange-600 space-y-1 list-decimal list-inside leading-relaxed">
@@ -145,11 +208,11 @@ export default function Dashboard() {
       {/* Stats */}
       <div className="grid grid-cols-2 gap-3">
         <div className="card text-center py-4">
-          <p className="text-2xl font-bold text-orange-500">{loading ? '—' : active}</p>
+          <p className="text-2xl font-bold text-orange-500">{active}</p>
           <p className="text-xs text-gray-400 mt-0.5">Annonces actives</p>
         </div>
         <div className="card text-center py-4">
-          <p className="text-2xl font-bold text-green-500">{loading ? '—' : recovered}</p>
+          <p className="text-2xl font-bold text-green-500">{recovered}</p>
           <p className="text-xs text-gray-400 mt-0.5">Portefeuilles rendus</p>
         </div>
       </div>
@@ -158,11 +221,35 @@ export default function Dashboard() {
       <div>
         <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Actions rapides</p>
         <div className="grid grid-cols-2 gap-3">
-          <QuickAction to="/posts/create" icon={PlusCircle}    label="Signaler" desc="Publier une nouvelle annonce" color="bg-orange-500" />
-          <QuickAction to="/messages"     icon={MessageCircle} label="Messages" desc="Vos conversations"           color="bg-purple-500" />
-          <QuickAction to="/profile"      icon={User}          label="Profil"   desc="Gérer votre compte"          color="bg-gray-500"   />
+          <QuickAction
+            to="/posts/create"
+            icon={PlusCircle}
+            label="Signaler"
+            desc="Publier une nouvelle annonce"
+            color="bg-orange-500"
+          />
+          <QuickAction
+            to="/messages"
+            icon={MessageCircle}
+            label="Messages"
+            desc="Vos conversations"
+            color="bg-purple-500"
+          />
+          <QuickAction
+            to="/profile"
+            icon={User}
+            label="Profil"
+            desc="Gérer votre compte"
+            color="bg-gray-500"
+          />
           {user?.role === 'admin' && (
-            <QuickAction to="/admin" icon={Shield} label="Admin" desc="Tableau de bord admin" color="bg-red-500" />
+            <QuickAction
+              to="/admin"
+              icon={Shield}
+              label="Admin"
+              desc="Tableau de bord admin"
+              color="bg-red-500"
+            />
           )}
         </div>
       </div>
@@ -171,11 +258,8 @@ export default function Dashboard() {
       <div>
         <h2 className="font-semibold text-gray-800 text-sm mb-3">Mes annonces</h2>
 
-        {/* Skeleton placeholders while loading */}
         {loading && (
-          <div className="flex flex-col gap-3">
-            {[1, 2, 3].map(n => <SkeletonCard key={n} />)}
-          </div>
+          <div className="text-center py-8 text-gray-400 text-sm">Chargement...</div>
         )}
 
         {!loading && posts.length === 0 && (
@@ -216,22 +300,16 @@ export default function Dashboard() {
                 {post.status === 'active' && (
                   <button
                     onClick={() => handleRecover(post.id)}
-                    disabled={recovering || deleting}
-                    className="btn-secondary text-xs flex items-center justify-center gap-1 flex-1 text-green-600 border-green-200 hover:bg-green-50 disabled:opacity-50"
+                    className="btn-secondary text-xs flex items-center gap-1 flex-1 text-green-600 border-green-200 hover:bg-green-50"
                   >
-                    {recovering
-                      ? <Spinner size={12} className="text-green-600" />
-                      : <CheckCircle size={13} />
-                    }
-                    Récupéré
+                    <CheckCircle size={13} /> Récupéré
                   </button>
                 )}
                 <button
                   onClick={() => handleDelete(post.id)}
-                  disabled={recovering || deleting}
-                  className="btn-secondary text-xs flex items-center justify-center gap-1 text-red-500 border-red-100 hover:bg-red-50 px-3 disabled:opacity-50"
+                  className="btn-secondary text-xs flex items-center gap-1 text-red-500 border-red-100 hover:bg-red-50 px-3"
                 >
-                  {deleting ? <Spinner size={12} className="text-red-400" /> : <Trash2 size={13} />}
+                  <Trash2 size={13} />
                 </button>
               </div>
             </div>
@@ -239,5 +317,62 @@ export default function Dashboard() {
         </div>
       </div>
     </div>
+  )
+}
+
+/* ── Carte d'une demande envoyée par le chercheur ──────────────────────── */
+function ContactCard({ contact, navigate }) {
+  const post = contact.post
+  if (!post) return null
+
+  const statusMeta = {
+    pending:  { label: 'En attente',  color: 'bg-yellow-100 text-yellow-700', icon: <Clock      size={11} /> },
+    approved: { label: 'Approuvé ✓',  color: 'bg-green-100 text-green-700',   icon: <CheckCircle size={11} /> },
+    rejected: { label: 'Refusé',      color: 'bg-red-100 text-red-600',       icon: <XCircle    size={11} /> },
+  }[contact.status] ?? { label: contact.status, color: 'bg-gray-100 text-gray-500', icon: null }
+
+  // Approved → chat ; sinon → fiche annonce
+  const targetUrl = contact.status === 'approved' ? `/messages/${post.id}` : `/posts/${post.id}`
+
+  return (
+    <button
+      onClick={() => navigate(targetUrl)}
+      className="card text-left hover:shadow-md transition-shadow active:scale-[.99] cursor-pointer"
+    >
+      <div className="flex items-start justify-between gap-2 mb-2">
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2 flex-wrap mb-0.5">
+            <p className="font-semibold text-gray-800 text-sm truncate">{post.name_partial}</p>
+            <span className={`badge text-xs ${statusMeta.color}`}>
+              {statusMeta.icon} {statusMeta.label}
+            </span>
+            {contact.unread > 0 && (
+              <span className="badge bg-orange-500 text-white">
+                {contact.unread} nouveau{contact.unread > 1 ? 'x' : ''}
+              </span>
+            )}
+          </div>
+          <p className="text-xs text-gray-400">
+            {post.location} · Envoyé {formatDistanceToNow(new Date(contact.created_at), { addSuffix: true, locale: fr })}
+          </p>
+          {contact.status === 'approved' && (
+            <p className="text-xs text-green-600 mt-1.5 flex items-center gap-1">
+              <MessageCircle size={11} /> Ouvrir la conversation
+            </p>
+          )}
+          {contact.status === 'pending' && (
+            <p className="text-xs text-yellow-700 mt-1.5">
+              ⏳ Le retrouveur vérifie votre selfie
+            </p>
+          )}
+          {contact.status === 'rejected' && (
+            <p className="text-xs text-red-600 mt-1.5">
+              Non reconnu — vous pouvez réessayer
+            </p>
+          )}
+        </div>
+        <ChevronRight size={16} className="text-gray-300 shrink-0 mt-1" />
+      </div>
+    </button>
   )
 }

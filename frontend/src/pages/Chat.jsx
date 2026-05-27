@@ -1,13 +1,14 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { getMessages, sendMessage } from '../api/messages'
-import { getPost, getContactRequests } from '../api/posts'
+import { getPost } from '../api/posts'
 import { useAuth }   from '../context/AuthContext'
 import { useUnread } from '../context/UnreadContext'
+import { useAsyncAction } from '../lib/useAsyncAction'
 import { t }  from '../lib/toast'
-import { ChevronLeft, Send, Wallet, CheckCircle, Lock } from 'lucide-react'
-import { format, isToday, isYesterday } from 'date-fns'
+import { ChevronLeft, Send, Wallet, CheckCircle } from 'lucide-react'
 import { Spinner } from '../components/Spinner'
+import { formatDistanceToNow, format, isToday, isYesterday } from 'date-fns'
 import { fr } from 'date-fns/locale'
 
 /* ── Helpers ──────────────────────────────────────────────────────── */
@@ -22,7 +23,7 @@ function needsSeparator(msgs, i) {
   if (i === 0) return true
   const prev = new Date(msgs[i - 1].created_at)
   const curr = new Date(msgs[i].created_at)
-  return curr - prev > 10 * 60 * 1000
+  return curr - prev > 10 * 60 * 1000 // 10 min gap
 }
 
 /* ── Component ────────────────────────────────────────────────────── */
@@ -33,26 +34,21 @@ export default function Chat() {
   const navigate                = useNavigate()
 
   const [post,     setPost]     = useState(null)
-  const [requests, setRequests] = useState([])
   const [messages, setMessages] = useState([])
   const [text,     setText]     = useState('')
   const [loading,  setLoading]  = useState(true)
 
-  const bottomRef    = useRef(null)
-  const textareaRef  = useRef(null)
+  const bottomRef   = useRef(null)
+  const textareaRef = useRef(null)
   const lastCountRef = useRef(0)
-  const isSending    = useRef(false)
 
-  /* ── Load messages ────────────────────────────────────────────────*/
+  /* ── Load messages (also marks as read on backend) ────────────────*/
   const loadMessages = useCallback(async (silent = false) => {
     try {
       const res = await getMessages(postId)
       const msgs = res.data
-      setMessages(prev => {
-        // Keep any in-flight optimistic messages so they don't flicker
-        const pending = prev.filter(m => m._pending)
-        return pending.length > 0 ? [...msgs, ...pending] : msgs
-      })
+      setMessages(msgs)
+      // Only refresh badge if count changed (avoids redundant calls)
       if (msgs.length !== lastCountRef.current) {
         lastCountRef.current = msgs.length
         refreshBadge()
@@ -64,15 +60,10 @@ export default function Chat() {
 
   /* ── Initial load ─────────────────────────────────────────────────*/
   useEffect(() => {
-    Promise.all([
-      getPost(postId),
-      getMessages(postId),
-      getContactRequests(postId).catch(() => ({ data: [] })),
-    ])
-      .then(([p, m, r]) => {
+    Promise.all([getPost(postId), getMessages(postId)])
+      .then(([p, m]) => {
         setPost(p.data)
         setMessages(m.data)
-        setRequests(r.data || [])
         lastCountRef.current = m.data.length
         refreshBadge()
       })
@@ -85,7 +76,7 @@ export default function Chat() {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  /* ── Poll every 5 s ───────────────────────────────────────────────*/
+  /* ── Poll for new messages every 5 s ─────────────────────────────*/
   useEffect(() => {
     const timer = setInterval(() => loadMessages(true), 5000)
     return () => clearInterval(timer)
@@ -99,44 +90,19 @@ export default function Chat() {
     el.style.height = Math.min(el.scrollHeight, 120) + 'px'
   }, [text])
 
-  /* ── Send — optimistic update ─────────────────────────────────────*/
-  const handleSend = async () => {
+  /* ── Send ─────────────────────────────────────────────────────────*/
+  const { run: handleSend, loading: sending } = useAsyncAction(async () => {
     const content = text.trim()
-    if (!content || isSending.current) return
-
-    isSending.current = true
-
-    // 1. Show message instantly in UI
-    const tempId = `temp-${Date.now()}`
-    const tempMsg = {
-      id:         tempId,
-      content,
-      sender_id:  user?.id,
-      created_at: new Date().toISOString(),
-      _pending:   true,
-    }
+    if (!content) return
     setText('')
-    setMessages(prev => [...prev, tempMsg])
-
-    // 2. Send to server in background
     try {
       const res = await sendMessage(postId, content)
-      // Replace temp with real message (or drop if poll already got it)
-      setMessages(prev => {
-        const without = prev.filter(m => m.id !== tempId)
-        if (without.some(m => m.id === res.data.id)) return without
-        return [...without, res.data]
-      })
-    } catch (err) {
-      // Roll back on failure
-      setMessages(prev => prev.filter(m => m.id !== tempId))
+      setMessages(prev => [...prev, res.data])
+    } catch {
+      t.error("Erreur d'envoi")
       setText(content)
-      const msg = err.response?.data?.message || "Erreur d'envoi"
-      t.error(msg)
-    } finally {
-      isSending.current = false
     }
-  }
+  })
 
   const handleKey = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -155,12 +121,13 @@ export default function Chat() {
   }
 
   return (
+    /* Full-height column between top-nav and bottom-tabs */
     <div
       className="flex flex-col -mx-4"
       style={{ height: 'calc(100svh - 3.5rem - 4rem)' }}
     >
       {/* ── Chat header ─────────────────────────────────────────── */}
-      <div className="flex-none flex items-center gap-3 px-4 py-3 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 shadow-sm">
+      <div className="flex-none flex items-center gap-3 px-4 py-3 bg-white border-b border-gray-100 shadow-sm">
         <button
           onClick={() => navigate('/messages')}
           className="p-1 text-gray-500 hover:text-gray-700 transition-colors"
@@ -192,7 +159,7 @@ export default function Chat() {
       </div>
 
       {/* ── Messages ────────────────────────────────────────────── */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 bg-gray-50 dark:bg-gray-950 space-y-1">
+      <div className="flex-1 overflow-y-auto px-4 py-4 bg-gray-50 space-y-1">
         {messages.length === 0 && (
           <p className="text-center text-gray-400 text-sm pt-10">
             Démarrez la conversation
@@ -200,7 +167,7 @@ export default function Chat() {
         )}
 
         {messages.map((msg, i) => {
-          const mine    = msg.sender_id === user?.id
+          const mine = msg.sender_id === user?.id
           const showSep = needsSeparator(messages, i)
 
           return (
@@ -213,11 +180,11 @@ export default function Chat() {
 
               <div className={`flex ${mine ? 'justify-end' : 'justify-start'} mb-1`}>
                 <div
-                  className={`max-w-[78%] px-3.5 py-2.5 text-sm leading-relaxed transition-opacity ${
+                  className={`max-w-[78%] px-3.5 py-2.5 text-sm leading-relaxed ${
                     mine
                       ? 'bg-orange-500 text-white rounded-2xl rounded-br-sm'
-                      : 'bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 shadow-sm rounded-2xl rounded-bl-sm'
-                  } ${msg._pending ? 'opacity-60' : 'opacity-100'}`}
+                      : 'bg-white text-gray-800 shadow-sm rounded-2xl rounded-bl-sm'
+                  }`}
                 >
                   {msg.content}
                 </div>
@@ -230,46 +197,27 @@ export default function Chat() {
       </div>
 
       {/* ── Input bar ───────────────────────────────────────────── */}
-      {post?.status === 'recovered' ? (
-        <div className="flex-none px-4 py-4 bg-gray-50 border-t border-gray-200 flex items-center justify-center gap-2">
-          <Lock size={13} className="text-gray-400" />
-          <p className="text-xs text-gray-400 font-medium">Cette conversation est clôturée</p>
-        </div>
-      ) : (post?.user_id === user?.id && !requests.some(r => ['pending','approved'].includes(r.status))) ? (
-        <div className="flex-none px-4 py-4 bg-yellow-50 border-t border-yellow-200">
-          <p className="text-xs text-yellow-800 font-medium text-center leading-relaxed">
-            Aucun chercheur n'a encore envoyé son selfie pour cette annonce. Le chat s'ouvrira automatiquement à la première demande.
-          </p>
+      <div className="flex-none px-4 py-3 bg-white border-t border-gray-100">
+        <div className="flex items-end gap-2">
+          <textarea
+            ref={textareaRef}
+            rows={1}
+            placeholder="Votre message..."
+            value={text}
+            onChange={e => setText(e.target.value)}
+            onKeyDown={handleKey}
+            className="flex-1 input resize-none py-2.5 text-sm overflow-hidden"
+            style={{ minHeight: '44px', maxHeight: '120px' }}
+          />
           <button
-            onClick={() => navigate(`/posts/${postId}`)}
-            className="mt-2 w-full text-xs font-semibold text-yellow-900 bg-yellow-200 hover:bg-yellow-300 px-3 py-2 rounded-lg transition-colors"
+            onClick={handleSend}
+            disabled={!text.trim() || sending}
+            className="shrink-0 w-11 h-11 rounded-xl bg-orange-500 hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed text-white flex items-center justify-center transition-colors"
           >
-            Voir l'annonce →
+            {sending ? <Spinner size={16} /> : <Send size={18} />}
           </button>
         </div>
-      ) : (
-        <div className="flex-none px-4 py-3 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800">
-          <div className="flex items-end gap-2">
-            <textarea
-              ref={textareaRef}
-              rows={1}
-              placeholder="Votre message..."
-              value={text}
-              onChange={e => setText(e.target.value)}
-              onKeyDown={handleKey}
-              className="flex-1 input resize-none py-2.5 text-sm overflow-hidden"
-              style={{ minHeight: '44px', maxHeight: '120px' }}
-            />
-            <button
-              onClick={handleSend}
-              disabled={!text.trim()}
-              className="shrink-0 w-11 h-11 rounded-xl bg-orange-500 hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed text-white flex items-center justify-center transition-colors"
-            >
-              {sending ? <Spinner size={16} /> : <Send size={18} />}
-            </button>
-          </div>
-        </div>
-      )}
+      </div>
     </div>
   )
 }

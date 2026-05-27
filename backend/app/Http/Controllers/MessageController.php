@@ -6,6 +6,7 @@ use App\Mail\NewMessageNotification;
 use App\Models\Message;
 use App\Models\Post;
 use App\Models\User;
+use App\Services\PushService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 
@@ -91,15 +92,25 @@ class MessageController extends Controller
             'content'     => $request->content,
         ]);
 
-        // Notify the receiver by email
-        try {
+        // Notif (email + push) dispatchée en queue — réponse instantanée
+        $senderId = $request->user()->id;
+        $postId   = $post->id;
+        $preview  = mb_strimwidth($request->content, 0, 120, '…');
+        dispatch(function () use ($receiverId, $senderId, $postId, $preview) {
             $receiver = User::find($receiverId);
-            $sender   = $request->user();
-            $preview  = mb_strimwidth($request->content, 0, 120, '…');
-            Mail::to($receiver->email)->send(
-                new NewMessageNotification($post, $sender, $receiver, $preview)
-            );
-        } catch (\Exception) {}
+            $sender   = User::find($senderId);
+            $post     = Post::find($postId);
+            if (!$receiver || !$sender || !$post) return;
+            try { Mail::to($receiver->email)->send(new NewMessageNotification($post, $sender, $receiver, $preview)); } catch (\Throwable) {}
+            try {
+                app(PushService::class)->sendToUser(
+                    $receiver,
+                    "💬 {$sender->name}",
+                    $preview,
+                    "/messages/{$postId}"
+                );
+            } catch (\Throwable) {}
+        });
 
         return response()->json($message->load('sender:id,name'), 201);
     }

@@ -46,11 +46,15 @@ export default function Chat() {
   const loadMessages = useCallback(async (silent = false) => {
     try {
       const res = await getMessages(postId)
-      const msgs = res.data
-      setMessages(msgs)
-      // Only refresh badge if count changed (avoids redundant calls)
-      if (msgs.length !== lastCountRef.current) {
-        lastCountRef.current = msgs.length
+      const serverMsgs = res.data
+      // Préserve les messages optimistes (en attente) qui n'ont pas encore
+      // été remplacés par leur version serveur
+      setMessages(prev => {
+        const pending = prev.filter(m => m._pending)
+        return [...serverMsgs, ...pending]
+      })
+      if (serverMsgs.length !== lastCountRef.current) {
+        lastCountRef.current = serverMsgs.length
         refreshBadge()
       }
     } catch {
@@ -90,19 +94,43 @@ export default function Chat() {
     el.style.height = Math.min(el.scrollHeight, 120) + 'px'
   }, [text])
 
-  /* ── Send ─────────────────────────────────────────────────────────*/
-  const { run: handleSend, loading: sending } = useAsyncAction(async () => {
+  /* ── Send (optimistic UI) ─────────────────────────────────────────
+     Le message s'affiche INSTANTANÉMENT avec un ID temporaire (négatif).
+     L'API call part en parallèle ; au retour on remplace l'optimiste par
+     le vrai message (ou on le retire en cas d'erreur).
+  */
+  const handleSend = () => {
     const content = text.trim()
     if (!content) return
-    setText('')
-    try {
-      const res = await sendMessage(postId, content)
-      setMessages(prev => [...prev, res.data])
-    } catch {
-      t.error("Erreur d'envoi")
-      setText(content)
+
+    // ID temporaire négatif pour distinguer du backend
+    const tmpId = -Date.now()
+    const optimistic = {
+      id:         tmpId,
+      post_id:    Number(postId),
+      sender_id:  user?.id,
+      content,
+      created_at: new Date().toISOString(),
+      _pending:   true,   // flag pour ajuster l'affichage si on veut
     }
-  })
+
+    setMessages(prev => [...prev, optimistic])
+    setText('')
+
+    // Envoi non bloquant — résultat traité en arrière-plan
+    sendMessage(postId, content)
+      .then(res => {
+        // Remplace l'optimiste par le vrai message du serveur
+        setMessages(prev => prev.map(m => m.id === tmpId ? res.data : m))
+      })
+      .catch(() => {
+        // Retire l'optimiste, restaure le texte
+        setMessages(prev => prev.filter(m => m.id !== tmpId))
+        setText(content)
+        t.error("Erreur d'envoi")
+      })
+  }
+  const sending = false   // gardé pour compat avec l'attribut disabled
 
   const handleKey = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -180,11 +208,11 @@ export default function Chat() {
 
               <div className={`flex ${mine ? 'justify-end' : 'justify-start'} mb-1`}>
                 <div
-                  className={`max-w-[78%] px-3.5 py-2.5 text-sm leading-relaxed ${
+                  className={`max-w-[78%] px-3.5 py-2.5 text-sm leading-relaxed transition-opacity ${
                     mine
                       ? 'bg-orange-500 text-white rounded-2xl rounded-br-sm'
                       : 'bg-white text-gray-800 shadow-sm rounded-2xl rounded-bl-sm'
-                  }`}
+                  } ${msg._pending ? 'opacity-70' : ''}`}
                 >
                   {msg.content}
                 </div>

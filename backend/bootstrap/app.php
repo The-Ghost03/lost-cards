@@ -20,6 +20,11 @@ return Application::configure(basePath: dirname(__DIR__))
             \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
         ]);
 
+        // Public tracking endpoint — no CSRF required
+        $middleware->validateCsrfTokens(except: [
+            'api/analytics/track',
+        ]);
+
         $middleware->alias([
             'admin' => \App\Http\Middleware\IsAdmin::class,
         ]);

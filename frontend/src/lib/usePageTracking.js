@@ -22,9 +22,12 @@ function send(path, referrer, duration) {
   if (duration != null) payload.duration = duration
 
   // Use sendBeacon when available (survives page unload)
+  // IMPORTANT: wrap JSON in a Blob with type "application/json" so Laravel
+  //            parses the body. Plain strings default to text/plain.
   const url = (import.meta.env.VITE_API_URL ?? '/api') + '/analytics/track'
   if (navigator.sendBeacon) {
-    navigator.sendBeacon(url, JSON.stringify(payload))
+    const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' })
+    navigator.sendBeacon(url, blob)
   } else {
     api.post('/analytics/track', payload).catch(() => {})
   }

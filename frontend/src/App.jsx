@@ -3,6 +3,7 @@ import { Toaster }       from 'react-hot-toast'
 import Navbar            from './components/Navbar'
 import ProtectedRoute    from './components/ProtectedRoute'
 import PushPrompt        from './components/PushPrompt'
+import ErrorBoundary     from './components/ErrorBoundary'
 import { ConfirmProvider } from './components/ConfirmDialog'
 import { UnreadProvider }  from './context/UnreadContext'
 import { usePageTracking } from './lib/usePageTracking'
@@ -66,5 +67,9 @@ function AppInner() {
 }
 
 export default function App() {
-  return <AppInner />
+  return (
+    <ErrorBoundary>
+      <AppInner />
+    </ErrorBoundary>
+  )
 }

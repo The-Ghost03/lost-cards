@@ -1,9 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { Mail, Lock } from 'lucide-react'
-import LogoIcon from '../components/LogoIcon'
-import { Spinner } from '../components/Spinner'
+import { Wallet, Mail, Lock } from 'lucide-react'
 import { t } from '../lib/toast'
 import { useAsyncAction } from '../lib/useAsyncAction'
 
@@ -17,7 +15,7 @@ export default function Login() {
     try {
       await login(form)
       t.success('Connecté !')
-      navigate('/dashboard')
+      navigate('/')
     } catch (err) {
       const errors = err.response?.data?.errors
       if (errors) {
@@ -34,7 +32,7 @@ export default function Login() {
     <div className="max-w-sm mx-auto pt-10 page-enter">
       <div className="text-center mb-8 animate-slide-down">
         <div className="inline-flex items-center gap-2 text-orange-500 font-bold text-xl mb-1">
-          <LogoIcon size={26} /> LostCards
+          <Wallet size={24} /> LostCards
         </div>
         <h1 className="text-2xl font-bold text-gray-900">Content de vous revoir</h1>
         <p className="text-gray-500 text-sm mt-1">Connectez-vous à votre compte</p>
@@ -58,12 +56,8 @@ export default function Login() {
             <input type="password" required className="input pl-9" placeholder="••••••••" value={form.password} onChange={set('password')} />
           </div>
         </div>
-        <button
-          type="submit"
-          className="btn-primary w-full mt-1 flex items-center justify-center gap-2"
-          disabled={loading}
-        >
-          {loading ? <><Spinner size={15} /> Connexion...</> : 'Se connecter'}
+        <button type="submit" className="btn-primary w-full mt-1" disabled={loading}>
+          {loading ? 'Connexion...' : 'Se connecter'}
         </button>
       </form>
 

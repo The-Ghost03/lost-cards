@@ -22,6 +22,14 @@ export default function AdminDashboard() {
   const [posts, setPosts]           = useState([])
   const [users, setUsers]           = useState([])
   const [userQ, setUserQ]           = useState('')
+  const [userFilters, setUserFilters] = useState({
+    role:     'all',  // all | admin | user
+    status:   'all',  // all | chercheur | retrouveur
+    device:   'all',  // all | mobile | desktop | tablet
+    os:       'all',  // all | iOS | Android | Windows | other
+    activity: 'all',  // all | active | inactive
+    login:    'all',  // all | recent | old | never
+  })
   const [loading, setLoading]       = useState(true)
   const [analytics, setAnalytics]   = useState(null)
   const [analyticsDays, setAnalyticsDays] = useState(30)
@@ -310,7 +318,10 @@ export default function AdminDashboard() {
         </div>
       )}
 
-      {tab === 'users' && (
+      {tab === 'users' && (() => {
+        const filtered = applyUserFilters(users, userFilters)
+        const hasActiveFilter = Object.values(userFilters).some(v => v !== 'all')
+        return (
         <div className="animate-fade-in">
           {/* Search */}
           <div className="relative mb-3">
@@ -324,9 +335,76 @@ export default function AdminDashboard() {
             />
           </div>
 
+          {/* ── Filtres ── */}
+          <div className="card mb-3 space-y-2.5">
+            <FilterRow label="Rôle" value={userFilters.role}
+              onChange={v => setUserFilters(f => ({ ...f, role: v }))}
+              options={[
+                { v: 'all',   l: 'Tous' },
+                { v: 'admin', l: '🛡 Admin' },
+                { v: 'user',  l: 'Utilisateur' },
+              ]} />
+            <FilterRow label="Statut" value={userFilters.status}
+              onChange={v => setUserFilters(f => ({ ...f, status: v }))}
+              options={[
+                { v: 'all',         l: 'Tous' },
+                { v: 'chercheur',   l: 'Chercheur' },
+                { v: 'retrouveur',  l: 'Retrouveur' },
+              ]} />
+            <FilterRow label="Appareil" value={userFilters.device}
+              onChange={v => setUserFilters(f => ({ ...f, device: v }))}
+              options={[
+                { v: 'all',     l: 'Tous' },
+                { v: 'mobile',  l: '📱 Mobile' },
+                { v: 'desktop', l: '💻 Desktop' },
+                { v: 'tablet',  l: '📟 Tablette' },
+              ]} />
+            <FilterRow label="OS" value={userFilters.os}
+              onChange={v => setUserFilters(f => ({ ...f, os: v }))}
+              options={[
+                { v: 'all',     l: 'Tous' },
+                { v: 'iOS',     l: '🍎 iOS' },
+                { v: 'Android', l: '🤖 Android' },
+                { v: 'Windows', l: '🪟 Windows' },
+                { v: 'other',   l: 'Autres' },
+              ]} />
+            <FilterRow label="Activité" value={userFilters.activity}
+              onChange={v => setUserFilters(f => ({ ...f, activity: v }))}
+              options={[
+                { v: 'all',      l: 'Tous' },
+                { v: 'active',   l: '✓ Actifs' },
+                { v: 'inactive', l: 'Inactifs' },
+              ]} />
+            <FilterRow label="Connexion" value={userFilters.login}
+              onChange={v => setUserFilters(f => ({ ...f, login: v }))}
+              options={[
+                { v: 'all',    l: 'Tous' },
+                { v: 'recent', l: '7j' },
+                { v: 'old',    l: '>30j' },
+                { v: 'never',  l: 'Jamais' },
+              ]} />
+
+            {hasActiveFilter && (
+              <button
+                onClick={() => setUserFilters({ role: 'all', status: 'all', device: 'all', os: 'all', activity: 'all', login: 'all' })}
+                className="text-xs text-orange-500 font-medium hover:underline mt-1"
+              >
+                ↻ Réinitialiser les filtres
+              </button>
+            )}
+          </div>
+
+          {/* Count */}
+          <p className="text-xs text-gray-500 mb-2 px-1">
+            {filtered.length} utilisateur{filtered.length > 1 ? 's' : ''}
+            {(hasActiveFilter || userQ) && users.length !== filtered.length && (
+              <span className="text-gray-400"> · {users.length} au total</span>
+            )}
+          </p>
+
           <div className="flex flex-col gap-2">
-            {users.length === 0 && <div className="card text-center py-8 text-sm text-gray-500">Aucun utilisateur</div>}
-            {users.map((u, i) => (
+            {filtered.length === 0 && <div className="card text-center py-8 text-sm text-gray-500">Aucun utilisateur ne correspond</div>}
+            {filtered.map((u, i) => (
               <div key={u.id} className="card animate-slide-up" style={{ animationDelay: `${i * 30}ms` }}>
                 {/* Header row */}
                 <div className="flex items-start justify-between gap-2 mb-2">
@@ -390,7 +468,65 @@ export default function AdminDashboard() {
             ))}
           </div>
         </div>
-      )}
+        )
+      })()}
+    </div>
+  )
+}
+
+/* ── User filter helpers ────────────────────────────────────────────────── */
+
+function applyUserFilters(users, f) {
+  return users.filter(u => {
+    if (f.role !== 'all' && (u.role || 'user') !== f.role) return false
+    if (f.status !== 'all' && u.status !== f.status) return false
+    if (f.device !== 'all' && u.device_type !== f.device) return false
+    if (f.os !== 'all') {
+      if (f.os === 'other') {
+        if (['iOS', 'Android', 'Windows'].includes(u.device_os)) return false
+      } else if (u.device_os !== f.os) return false
+    }
+    if (f.activity !== 'all') {
+      const isActive = (u.posts_count > 0) || (u.contact_requests_count > 0) || (u.alert_subscriptions_count > 0)
+      if (f.activity === 'active' && !isActive) return false
+      if (f.activity === 'inactive' && isActive) return false
+    }
+    if (f.login !== 'all') {
+      if (f.login === 'never' && u.last_login_at) return false
+      if (f.login === 'recent') {
+        if (!u.last_login_at) return false
+        const days = (Date.now() - new Date(u.last_login_at).getTime()) / 86400000
+        if (days > 7) return false
+      }
+      if (f.login === 'old') {
+        if (!u.last_login_at) return false
+        const days = (Date.now() - new Date(u.last_login_at).getTime()) / 86400000
+        if (days <= 30) return false
+      }
+    }
+    return true
+  })
+}
+
+function FilterRow({ label, value, onChange, options }) {
+  return (
+    <div className="flex items-center gap-2">
+      <span className="text-xs font-semibold text-gray-500 w-20 shrink-0">{label}</span>
+      <div className="flex gap-1 overflow-x-auto flex-1 pb-0.5 -mb-0.5">
+        {options.map(opt => (
+          <button
+            key={opt.v}
+            onClick={() => onChange(opt.v)}
+            className={`shrink-0 text-xs px-2.5 py-1 rounded-full border transition-all whitespace-nowrap ${
+              value === opt.v
+                ? 'bg-orange-500 text-white border-orange-500 font-semibold'
+                : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:border-gray-300'
+            }`}
+          >
+            {opt.l}
+          </button>
+        ))}
+      </div>
     </div>
   )
 }

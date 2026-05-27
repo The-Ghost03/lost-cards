@@ -37,33 +37,57 @@ export function usePush() {
   useEffect(() => { refreshStatus() }, [refreshStatus])
 
   const subscribe = useCallback(async () => {
-    if (!supported) throw new Error('Push non supporté sur ce navigateur')
+    if (!supported) return { ok: false, reason: 'unsupported', step: 'support' }
     setLoading(true)
     try {
       // 1. Permission
       const perm = await Notification.requestPermission()
       setPermission(perm)
-      if (perm !== 'granted') return { ok: false, reason: 'denied' }
+      if (perm !== 'granted') return { ok: false, reason: 'denied', step: 'permission' }
 
       // 2. Service worker ready
-      const reg = await navigator.serviceWorker.ready
+      let reg
+      try {
+        reg = await navigator.serviceWorker.ready
+      } catch (e) {
+        console.error('[push] SW not ready:', e)
+        return { ok: false, reason: 'sw-failed', step: 'service-worker', error: e?.message }
+      }
 
       // 3. Récupère la clé publique VAPID
-      const { data } = await api.get('/push/public-key')
-      const applicationServerKey = urlBase64ToUint8Array(data.public_key)
+      let applicationServerKey
+      try {
+        const { data } = await api.get('/push/public-key')
+        if (!data?.public_key) throw new Error('clé VAPID vide')
+        applicationServerKey = urlBase64ToUint8Array(data.public_key)
+      } catch (e) {
+        console.error('[push] VAPID fetch failed:', e)
+        return { ok: false, reason: 'vapid-failed', step: 'vapid', error: e?.message }
+      }
 
-      // 4. Subscribe
-      const sub = await reg.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey,
-      })
+      // 4. Subscribe (browser-side, via push service of Apple/Google/Mozilla)
+      let sub
+      try {
+        sub = await reg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey,
+        })
+      } catch (e) {
+        console.error('[push] pushManager.subscribe failed:', e)
+        return { ok: false, reason: 'subscribe-failed', step: 'pushManager', error: e?.message }
+      }
 
       // 5. Envoie au backend
-      const payload = sub.toJSON()
-      await api.post('/push/subscribe', {
-        endpoint: payload.endpoint,
-        keys: payload.keys,
-      })
+      try {
+        const payload = sub.toJSON()
+        await api.post('/push/subscribe', {
+          endpoint: payload.endpoint,
+          keys: payload.keys,
+        })
+      } catch (e) {
+        console.error('[push] backend POST failed:', e)
+        return { ok: false, reason: 'backend-failed', step: 'backend', error: e?.message, status: e?.response?.status }
+      }
 
       setSubscribed(true)
       return { ok: true }

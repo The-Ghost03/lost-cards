@@ -64,10 +64,11 @@ class PostController extends Controller
         // L'utilisateur publie une annonce → il n'est plus latent
         $request->user()->update(['latent_at' => null]);
 
-        // Notifications envoyées APRÈS la réponse HTTP — l'API répond immédiatement
+        // Notifications dispatchées en queue (worker en background) —
+        // l'API répond immédiatement, les emails+push partent en parallèle
         dispatch(function () use ($post) {
             app(AlertNotifier::class)->notifyMatching($post);
-        })->afterResponse();
+        });
 
         return response()->json($post->load('user:id,name,phone'), 201);
     }

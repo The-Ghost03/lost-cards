@@ -21,4 +21,4 @@ RUN mkdir -p bootstrap/cache \
 
 EXPOSE 8000
 
-CMD ["sh", "-c", "php artisan config:cache && php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=8000"]
+CMD ["sh", "-c", "php artisan config:cache && php artisan migrate --force && php artisan db:seed --class=DatabaseSeeder --force && php artisan queue:work --sleep=3 --tries=3 --timeout=120 > /tmp/queue.log 2>&1 & php artisan serve --host=0.0.0.0 --port=8000"]

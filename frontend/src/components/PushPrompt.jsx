@@ -68,12 +68,22 @@ export default function PushPrompt() {
       if (r?.ok) {
         toast.success('Notifications activées 🔔')
         markDone()
-      } else if (r?.reason === 'denied') {
-        toast.error('Permission refusée — vous pouvez l\'autoriser plus tard dans les réglages')
+      } else {
+        const msg =
+          r?.reason === 'denied'           ? 'Permission refusée — autorisez-les dans les réglages du navigateur'
+          : r?.reason === 'unsupported'    ? 'Push non supporté sur ce navigateur'
+          : r?.reason === 'sw-failed'      ? `Service worker indisponible (${r?.error || 'inconnu'})`
+          : r?.reason === 'vapid-failed'   ? `Clé VAPID introuvable (${r?.error || 'inconnu'})`
+          : r?.reason === 'subscribe-failed' ? `Échec navigateur : ${r?.error || 'inconnu'}`
+          : r?.reason === 'backend-failed' ? `Échec serveur (HTTP ${r?.status || '?'}) : ${r?.error || 'inconnu'}`
+          : 'Échec de l\'activation'
+        toast.error(msg, { duration: 6000 })
+        console.error('[push] subscription failed:', r)
         snooze()
       }
-    } catch {
-      toast.error('Une erreur est survenue')
+    } catch (e) {
+      console.error('[push] handleActivate threw:', e)
+      toast.error('Une erreur inattendue est survenue', { duration: 6000 })
       snooze()
     }
     setShow(false)

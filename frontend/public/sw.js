@@ -1,4 +1,4 @@
-const CACHE = 'lostcards-v2'
+const CACHE = 'lostcards-v3'
 const PRECACHE = ['/', '/index.html']
 
 self.addEventListener('install', e => {
@@ -28,6 +28,46 @@ self.addEventListener('fetch', e => {
         return res
       })
       return cached || network
+    })
+  )
+})
+
+// ── Web Push ──────────────────────────────────────────────────────
+self.addEventListener('push', event => {
+  let data = { title: 'LostCards', body: 'Nouvelle notification', url: '/' }
+  try {
+    if (event.data) data = { ...data, ...event.data.json() }
+  } catch {}
+
+  event.waitUntil(
+    self.registration.showNotification(data.title, {
+      body:    data.body,
+      icon:    data.icon  || '/icons/pwa-192.png',
+      badge:   data.badge || '/icons/pwa-192.png',
+      data:    { url: data.url || '/' },
+      vibrate: [200, 100, 200],
+      tag:     data.tag || 'lostcards',
+      renotify: true,
+    })
+  )
+})
+
+// Clic sur la notification → focus ou ouverture de l'app sur l'URL voulue
+self.addEventListener('notificationclick', event => {
+  event.notification.close()
+  const url = event.notification.data?.url || '/'
+
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clients => {
+      // S'il y a déjà un onglet de l'app, on le focus + navigate
+      for (const c of clients) {
+        if ('focus' in c) {
+          c.navigate(url).catch(() => {})
+          return c.focus()
+        }
+      }
+      // Sinon on ouvre une nouvelle fenêtre
+      if (self.clients.openWindow) return self.clients.openWindow(url)
     })
   )
 })

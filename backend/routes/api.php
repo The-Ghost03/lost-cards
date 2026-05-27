@@ -8,9 +8,13 @@ use App\Http\Controllers\MessageController;
 use App\Http\Controllers\AlertSubscriptionController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\AnalyticsController;
+use App\Http\Controllers\PushController;
 
 // Public analytics tracking (throttled, no auth required)
 Route::post('/analytics/track', [AnalyticsController::class, 'track'])->middleware('throttle:120,1');
+
+// Public — VAPID public key for browsers to subscribe
+Route::get('/push/public-key', [PushController::class, 'publicKey']);
 
 // Public auth
 Route::post('/register',         [AuthController::class, 'register']);
@@ -45,6 +49,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/alerts',         [AlertSubscriptionController::class, 'index']);
     Route::post('/alerts',        [AlertSubscriptionController::class, 'store']);
     Route::delete('/alerts/{id}', [AlertSubscriptionController::class, 'destroy']);
+
+    // Web push subscriptions
+    Route::post('/push/subscribe',   [PushController::class, 'subscribe']);
+    Route::post('/push/unsubscribe', [PushController::class, 'unsubscribe']);
+    Route::post('/push/test',        [PushController::class, 'test']);
 
     Route::middleware('admin')->prefix('admin')->group(function () {
         Route::get('/stats',           [DashboardController::class, 'stats']);

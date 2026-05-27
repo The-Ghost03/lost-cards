@@ -25,6 +25,7 @@ export default function AdminDashboard() {
   const [userFilters, setUserFilters] = useState({
     role:     'all',  // all | admin | user
     status:   'all',  // all | chercheur | retrouveur
+    latent:   'all',  // all | latent | not-latent
     device:   'all',  // all | mobile | desktop | tablet
     os:       'all',  // all | iOS | Android | Windows | other
     activity: 'all',  // all | active | inactive
@@ -351,6 +352,13 @@ export default function AdminDashboard() {
                 { v: 'chercheur',   l: 'Chercheur' },
                 { v: 'retrouveur',  l: 'Retrouveur' },
               ]} />
+            <FilterRow label="Latent" value={userFilters.latent}
+              onChange={v => setUserFilters(f => ({ ...f, latent: v }))}
+              options={[
+                { v: 'all',        l: 'Tous' },
+                { v: 'latent',     l: '💤 Latent' },
+                { v: 'not-latent', l: 'Actif' },
+              ]} />
             <FilterRow label="Appareil" value={userFilters.device}
               onChange={v => setUserFilters(f => ({ ...f, device: v }))}
               options={[
@@ -386,7 +394,7 @@ export default function AdminDashboard() {
 
             {hasActiveFilter && (
               <button
-                onClick={() => setUserFilters({ role: 'all', status: 'all', device: 'all', os: 'all', activity: 'all', login: 'all' })}
+                onClick={() => setUserFilters({ role: 'all', status: 'all', latent: 'all', device: 'all', os: 'all', activity: 'all', login: 'all' })}
                 className="text-xs text-orange-500 font-medium hover:underline mt-1"
               >
                 ↻ Réinitialiser les filtres
@@ -417,6 +425,11 @@ export default function AdminDashboard() {
                       <span className={`badge ${u.status === 'chercheur' ? 'bg-blue-50 text-blue-600' : 'bg-green-50 text-green-600'}`}>
                         {u.status === 'chercheur' ? 'Chercheur' : 'Retrouveur'}
                       </span>
+                      {u.latent_at && (
+                        <span className="badge bg-yellow-100 text-yellow-700" title={`Latent depuis ${format(new Date(u.latent_at), 'd MMM', { locale: fr })}`}>
+                          💤 Latent
+                        </span>
+                      )}
                     </div>
                     <p className="text-xs text-gray-400 truncate">{u.email}</p>
                     <p className="text-xs text-gray-400">{u.phone}</p>
@@ -480,6 +493,8 @@ function applyUserFilters(users, f) {
   return users.filter(u => {
     if (f.role !== 'all' && (u.role || 'user') !== f.role) return false
     if (f.status !== 'all' && u.status !== f.status) return false
+    if (f.latent === 'latent' && !u.latent_at) return false
+    if (f.latent === 'not-latent' && u.latent_at) return false
     if (f.device !== 'all' && u.device_type !== f.device) return false
     if (f.os !== 'all') {
       if (f.os === 'other') {

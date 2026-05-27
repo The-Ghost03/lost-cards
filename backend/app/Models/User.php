@@ -14,6 +14,7 @@ class User extends Authenticatable
     protected $fillable = [
         'name', 'email', 'phone', 'password', 'role', 'status',
         'device_type', 'device_os', 'device_browser', 'last_login_at', 'last_ip',
+        'latent_at', 'last_reminder_at',
     ];
 
     protected $hidden = ['password', 'remember_token'];
@@ -21,6 +22,8 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'last_login_at'     => 'datetime',
+        'latent_at'         => 'datetime',
+        'last_reminder_at'  => 'datetime',
         'password'          => 'hashed',
     ];
 

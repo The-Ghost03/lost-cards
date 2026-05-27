@@ -6,6 +6,7 @@ use App\Models\AlertSubscription;
 use App\Models\Post;
 use App\Models\User;
 use App\Mail\WalletFoundNotification;
+use App\Services\PushService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 
@@ -60,6 +61,9 @@ class PostController extends Controller
             'status'  => 'active',
         ]);
 
+        // L'utilisateur publie une annonce → il n'est plus latent
+        $request->user()->update(['latent_at' => null]);
+
         $this->notifySubscribers($post);
 
         return response()->json($post->load('user:id,name,phone'), 201);
@@ -104,7 +108,22 @@ class PostController extends Controller
 
         if (empty($postWords)) return;
 
+        $push        = app(PushService::class);
         $notifiedIds = collect();
+
+        $sendAlert = function ($user) use ($post, $push) {
+            try {
+                Mail::to($user->email)->send(new WalletFoundNotification($post, $user));
+            } catch (\Exception) {}
+            try {
+                $push->sendToUser(
+                    $user,
+                    "🔑 Un portefeuille à votre nom a été trouvé",
+                    "Un retrouveur a signalé un portefeuille à {$post->location}. Vérifiez si c'est le vôtre.",
+                    "/posts/{$post->id}"
+                );
+            } catch (\Exception) {}
+        };
 
         // 1. Alert subscribers — word-level match (accent-insensitive)
         AlertSubscription::with('user')
@@ -113,11 +132,9 @@ class PostController extends Controller
                 $subWords = $this->extractWords($sub->name);
                 return !empty(array_intersect($postWords, $subWords));
             })
-            ->each(function ($sub) use ($post, $notifiedIds) {
-                try {
-                    Mail::to($sub->user->email)->send(new WalletFoundNotification($post, $sub->user));
-                    $notifiedIds->push($sub->user_id);
-                } catch (\Exception) {}
+            ->each(function ($sub) use ($sendAlert, $notifiedIds) {
+                $sendAlert($sub->user);
+                $notifiedIds->push($sub->user_id);
             });
 
         // 2. Chercheur users without explicit alert whose name matches
@@ -129,11 +146,7 @@ class PostController extends Controller
                 $nameWords = $this->extractWords($user->name);
                 return !empty(array_intersect($postWords, $nameWords));
             })
-            ->each(function ($user) use ($post) {
-                try {
-                    Mail::to($user->email)->send(new WalletFoundNotification($post, $user));
-                } catch (\Exception) {}
-            });
+            ->each(fn ($user) => $sendAlert($user));
     }
 
     /**

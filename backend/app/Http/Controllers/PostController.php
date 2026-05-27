@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\AlertSubscription;
-use App\Models\ContactRequest;
 use App\Models\Post;
 use App\Models\User;
 use App\Mail\WalletFoundNotification;
@@ -21,37 +20,13 @@ class PostController extends Controller
             $query->where('name_on_cards', 'like', '%'.$request->name.'%');
         }
 
-        $authUserEarly = auth('sanctum')->user();
-        if ($request->boolean('my') && $authUserEarly) {
-            $query->where('user_id', $authUserEarly->id);
+        if ($request->boolean('my')) {
+            $query->where('user_id', $request->user()->id);
         } else {
             $query->where('status', 'active');
         }
 
-        $result = $query->paginate($request->input('limit', 12));
-
-        // Enrichir avec my_request (statut de la demande du user courant sur chaque post)
-        $authUser = auth('sanctum')->user();
-        if ($authUser) {
-            $userId  = $authUser->id;
-            $postIds = $result->getCollection()->pluck('id');
-            $mine    = ContactRequest::where('user_id', $userId)
-                ->whereIn('post_id', $postIds)
-                ->get(['id', 'post_id', 'status', 'created_at'])
-                ->keyBy('post_id');
-
-            $result->getCollection()->transform(function ($post) use ($mine) {
-                $r = $mine->get($post->id);
-                $post->my_request = $r ? [
-                    'id'         => $r->id,
-                    'status'     => $r->status,
-                    'created_at' => $r->created_at,
-                ] : null;
-                return $post;
-            });
-        }
-
-        return response()->json($result);
+        return response()->json($query->paginate($request->input('limit', 12)));
     }
 
     public function show(Request $request, Post $post)
@@ -124,24 +99,18 @@ class PostController extends Controller
 
     private function notifySubscribers(Post $post): void
     {
-        // Split post name into significant words (min 2 chars)
-        $postWords = array_values(array_filter(
-            preg_split('/[\s\-\.]+/', strtolower($post->name_on_cards)),
-            fn($w) => mb_strlen($w) >= 2
-        ));
+        // Split post name into significant words (accent-folded, min 2 chars)
+        $postWords = $this->extractWords($post->name_on_cards);
 
         if (empty($postWords)) return;
 
         $notifiedIds = collect();
 
-        // 1. Alert subscribers — word-level match
+        // 1. Alert subscribers — word-level match (accent-insensitive)
         AlertSubscription::with('user')
             ->get()
             ->filter(function ($sub) use ($postWords) {
-                $subWords = array_values(array_filter(
-                    preg_split('/[\s\-\.]+/', strtolower($sub->name)),
-                    fn($w) => mb_strlen($w) >= 2
-                ));
+                $subWords = $this->extractWords($sub->name);
                 return !empty(array_intersect($postWords, $subWords));
             })
             ->each(function ($sub) use ($post, $notifiedIds) {
@@ -157,10 +126,7 @@ class PostController extends Controller
             ->whereNotIn('id', $notifiedIds->all())
             ->get()
             ->filter(function ($user) use ($postWords) {
-                $nameWords = array_values(array_filter(
-                    preg_split('/[\s\-\.]+/', strtolower($user->name)),
-                    fn($w) => mb_strlen($w) >= 2
-                ));
+                $nameWords = $this->extractWords($user->name);
                 return !empty(array_intersect($postWords, $nameWords));
             })
             ->each(function ($user) use ($post) {
@@ -168,5 +134,32 @@ class PostController extends Controller
                     Mail::to($user->email)->send(new WalletFoundNotification($post, $user));
                 } catch (\Exception) {}
             });
+    }
+
+    /**
+     * Lowercase + accent-fold a string, then split into significant words.
+     * "KOUAMÉ Jean-Marc" → ["kouame", "jean", "marc"]
+     */
+    private function extractWords(string $input): array
+    {
+        $normalized = $this->normalize($input);
+        return array_values(array_filter(
+            preg_split('/[\s\-\.]+/', $normalized),
+            fn ($w) => mb_strlen($w) >= 2
+        ));
+    }
+
+    /**
+     * Lowercase and strip diacritics so "Kouamé" matches "kouame".
+     * Covers French/Ivorian common accents.
+     */
+    private function normalize(string $s): string
+    {
+        $s = mb_strtolower($s, 'UTF-8');
+        $from = ['à','á','â','ã','ä','å','ā','ç','è','é','ê','ë','ē','ì','í','î','ï','ī',
+                'ñ','ò','ó','ô','õ','ö','ø','ō','ù','ú','û','ü','ū','ý','ÿ','œ','æ'];
+        $to   = ['a','a','a','a','a','a','a','c','e','e','e','e','e','i','i','i','i','i',
+                'n','o','o','o','o','o','o','o','u','u','u','u','u','y','y','oe','ae'];
+        return str_replace($from, $to, $s);
     }
 }

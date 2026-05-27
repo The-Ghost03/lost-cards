@@ -23,8 +23,9 @@ Route::post('/forgot-password',  [AuthController::class, 'forgotPassword']);
 Route::post('/reset-password',   [AuthController::class, 'resetPassword']);
 
 // Public posts
-Route::get('/posts',        [PostController::class, 'index']);
-Route::get('/posts/{post}', [PostController::class, 'show']);
+Route::get('/posts',                            [PostController::class, 'index']);
+Route::get('/posts/{post}',                     [PostController::class, 'show']);
+Route::get('/posts/{post}/photos/{photo}',      [PostController::class, 'photo']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout',     [AuthController::class, 'logout']);

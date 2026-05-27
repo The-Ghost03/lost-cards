@@ -49,6 +49,11 @@ class Post extends Model
         return $this->hasMany(Message::class);
     }
 
+    public function photos()
+    {
+        return $this->hasMany(PostPhoto::class)->orderBy('position');
+    }
+
     // Reveal pickup address only to approved requesters or the post owner
     public function canRevealAddress(User $user): bool
     {

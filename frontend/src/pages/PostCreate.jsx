@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { createPost } from '../api/posts'
-import { MapPin, FileText, Phone, CheckSquare, Square } from 'lucide-react'
+import { MapPin, FileText, Phone, CheckSquare, Square, Camera, X, ImagePlus } from 'lucide-react'
 import { Spinner } from '../components/Spinner'
 import { useAsyncAction } from '../lib/useAsyncAction'
 import { t } from '../lib/toast'
@@ -26,13 +26,33 @@ const COMMUNES = [
 
 export default function PostCreate() {
   const navigate = useNavigate()
-  const [createdPost, setCreatedPost] = useState(null)   // open the share modal on success
+  const [createdPost, setCreatedPost] = useState(null)
+  const [photos, setPhotos] = useState([])   // [{ file, previewUrl }]
   const [form, setForm] = useState({
     name_on_cards:   '',
     location:        '',
     documents:       [],
     pickup_address:  '',
   })
+
+  const MAX_PHOTOS = 5
+
+  const addPhotos = (files) => {
+    const list = Array.from(files)
+    if (photos.length + list.length > MAX_PHOTOS) {
+      t.error(`Maximum ${MAX_PHOTOS} photos`)
+      return
+    }
+    const next = list.map(file => ({ file, previewUrl: URL.createObjectURL(file) }))
+    setPhotos(prev => [...prev, ...next])
+  }
+
+  const removePhoto = (idx) => {
+    setPhotos(prev => {
+      URL.revokeObjectURL(prev[idx]?.previewUrl)
+      return prev.filter((_, i) => i !== idx)
+    })
+  }
 
   const toggleDoc = (key) => {
     setForm(f => ({
@@ -47,7 +67,8 @@ export default function PostCreate() {
     e.preventDefault()
     if (form.documents.length === 0) { t.error('Sélectionnez au moins un type de document'); return }
     try {
-      const res = await createPost(form)
+      const payload = { ...form, photos: photos.map(p => p.file) }
+      const res = await createPost(payload)
       t.success('Annonce publiée ! Merci pour votre geste.')
       setCreatedPost(res.data)   // open the share modal
     } catch (err) {
@@ -122,6 +143,51 @@ export default function PostCreate() {
               )
             })}
           </div>
+        </div>
+
+        {/* Photos (optionnel, max 5) */}
+        <div className="card">
+          <label className="flex items-center gap-2 text-sm font-semibold text-gray-800 mb-1">
+            <Camera size={16} className="text-orange-500" /> Photos du portefeuille (optionnel)
+          </label>
+          <p className="text-xs text-gray-400 mb-3">
+            Ajoutez des photos floutées des pièces ou du portefeuille pour aider à l'identification ({photos.length}/{MAX_PHOTOS}).
+          </p>
+
+          {/* Grille de previews */}
+          {photos.length > 0 && (
+            <div className="grid grid-cols-3 gap-2 mb-3">
+              {photos.map((p, i) => (
+                <div key={i} className="relative aspect-square rounded-xl overflow-hidden bg-gray-100">
+                  <img src={p.previewUrl} alt="" className="w-full h-full object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => removePhoto(i)}
+                    className="absolute top-1 right-1 w-6 h-6 rounded-full bg-black/70 text-white flex items-center justify-center hover:bg-black/90"
+                    aria-label="Supprimer"
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Bouton ajouter */}
+          {photos.length < MAX_PHOTOS && (
+            <label className="block">
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                className="hidden"
+                onChange={e => { addPhotos(e.target.files); e.target.value = '' }}
+              />
+              <span className="flex items-center justify-center gap-2 w-full py-3 rounded-xl border-2 border-dashed border-orange-200 text-orange-600 text-sm font-medium cursor-pointer hover:bg-orange-50 hover:border-orange-300 transition-colors">
+                <ImagePlus size={16} /> Ajouter des photos
+              </span>
+            </label>
+          )}
         </div>
 
         {/* Adresse de récupération */}

@@ -162,6 +162,28 @@ export default function PostDetail() {
         <ChevronLeft size={16} /> Toutes les annonces
       </Link>
 
+      {/* Galerie photos (si présentes) */}
+      {post.photos && post.photos.length > 0 && (
+        <div className="mb-4">
+          <div className={`grid gap-2 ${post.photos.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
+            {post.photos.map(photo => (
+              <button
+                key={photo.id}
+                onClick={() => setEnlargedSelfie(photo.url)}
+                className="aspect-square rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800 cursor-zoom-in"
+              >
+                <img
+                  src={photo.url}
+                  alt="Photo de l'annonce"
+                  loading="lazy"
+                  className="w-full h-full object-cover hover:scale-105 transition-transform"
+                />
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Post card */}
       <div className="card mb-4">
         <div className="flex items-start justify-between mb-3 gap-2">
@@ -180,11 +202,11 @@ export default function PostDetail() {
             )}
             <button
               onClick={() => sharePost(post)}
-              className="p-2 rounded-xl text-gray-400 dark:text-gray-500 hover:text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-950/30 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-orange-900/50 transition-colors text-xs font-semibold"
               aria-label="Partager cette annonce"
-              title="Partager"
             >
-              <Share2 size={16} />
+              <Share2 size={14} />
+              <span>Partager</span>
             </button>
           </div>
         </div>

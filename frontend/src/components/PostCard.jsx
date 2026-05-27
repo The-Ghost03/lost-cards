@@ -52,11 +52,11 @@ export default function PostCard({ post }) {
         </p>
         <button
           onClick={(e) => { e.preventDefault(); e.stopPropagation(); sharePost(post) }}
-          className="p-1.5 rounded-lg text-gray-400 hover:text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-950/30 transition-colors"
+          className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-orange-900/50 transition-colors text-xs font-semibold"
           aria-label="Partager cette annonce"
-          title="Partager"
         >
-          <Share2 size={13} />
+          <Share2 size={12} />
+          <span>Partager</span>
         </button>
       </div>
     </Link>

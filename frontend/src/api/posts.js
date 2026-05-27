@@ -2,7 +2,23 @@ import api from './axios'
 
 export const getPosts       = (params) => api.get('/posts', { params })
 export const getPost        = (id)     => api.get(`/posts/${id}`)
-export const createPost     = (data)   => api.post('/posts', data)
+export const createPost     = (data)   => {
+  // Si on a des photos, on envoie en multipart, sinon JSON classique
+  if (data.photos && data.photos.length > 0) {
+    const fd = new FormData()
+    Object.entries(data).forEach(([k, v]) => {
+      if (k === 'photos') {
+        v.forEach(f => fd.append('photos[]', f))
+      } else if (Array.isArray(v)) {
+        v.forEach(item => fd.append(`${k}[]`, item))
+      } else if (v != null) {
+        fd.append(k, v)
+      }
+    })
+    return api.post('/posts', fd, { headers: { 'Content-Type': 'multipart/form-data' } })
+  }
+  return api.post('/posts', data)
+}
 export const markRecovered  = (id)     => api.patch(`/posts/${id}/recover`)
 export const deletePost     = (id)     => api.delete(`/posts/${id}`)
 
@@ -22,7 +38,3 @@ export const getContactRequests = (postId) =>
 
 export const approveContact = (postId, requestId) =>
   api.patch(`/posts/${postId}/contact/${requestId}/approve`)
-
-// — Suivi global —
-export const getMyContactRequests  = () => api.get('/me/contact-requests')
-export const getMyIncomingRequests = () => api.get('/me/incoming-requests')

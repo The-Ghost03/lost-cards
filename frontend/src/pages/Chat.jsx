@@ -38,9 +38,11 @@ export default function Chat() {
   const [text,     setText]     = useState('')
   const [loading,  setLoading]  = useState(true)
 
-  const bottomRef   = useRef(null)
-  const textareaRef = useRef(null)
-  const lastCountRef = useRef(0)
+  const bottomRef        = useRef(null)
+  const textareaRef      = useRef(null)
+  const lastCountRef     = useRef(0)
+  const scrollContainerRef = useRef(null)
+  const isAtBottomRef    = useRef(true)   // l'utilisateur lit-il en bas ?
 
   /* ── Load messages (also marks as read on backend) ────────────────*/
   const loadMessages = useCallback(async (silent = false) => {
@@ -75,10 +77,22 @@ export default function Chat() {
       .finally(() => setLoading(false))
   }, [postId])
 
-  /* ── Scroll to bottom whenever messages update ────────────────────*/
+  /* ── Auto-scroll bas SEULEMENT si l'utilisateur est déjà près du bas
+     (sinon il est en train de lire en haut, on ne le bouge pas)
+  */
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+    if (isAtBottomRef.current) {
+      bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+    }
   }, [messages])
+
+  /* Track si l'utilisateur est en bas (à 80px près) */
+  const handleScroll = () => {
+    const el = scrollContainerRef.current
+    if (!el) return
+    const gap = el.scrollHeight - el.scrollTop - el.clientHeight
+    isAtBottomRef.current = gap < 80
+  }
 
   /* ── Poll for new messages every 5 s ─────────────────────────────*/
   useEffect(() => {
@@ -149,13 +163,15 @@ export default function Chat() {
   }
 
   return (
-    /* Full-height column between top-nav and bottom-tabs */
+    /* Fixed overlay between top-nav (3.5rem) and bottom-tabs (4rem)
+       → header et input bar restent toujours visibles, seul le centre scrolle.
+    */
     <div
-      className="flex flex-col -mx-4"
-      style={{ height: 'calc(100svh - 3.5rem - 4rem)' }}
+      className="fixed left-0 right-0 flex flex-col bg-white dark:bg-gray-950 z-20"
+      style={{ top: '3.5rem', bottom: '4rem' }}
     >
-      {/* ── Chat header ─────────────────────────────────────────── */}
-      <div className="flex-none flex items-center gap-3 px-4 py-3 bg-white border-b border-gray-100 shadow-sm">
+      {/* ── Chat header (sticky en haut du conteneur) ──────────── */}
+      <div className="flex-none flex items-center gap-3 px-4 py-3 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 shadow-sm">
         <button
           onClick={() => navigate('/messages')}
           className="p-1 text-gray-500 hover:text-gray-700 transition-colors"
@@ -187,7 +203,11 @@ export default function Chat() {
       </div>
 
       {/* ── Messages ────────────────────────────────────────────── */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 bg-gray-50 space-y-1">
+      <div
+        ref={scrollContainerRef}
+        onScroll={handleScroll}
+        className="flex-1 overflow-y-auto overscroll-contain px-4 py-4 bg-gray-50 dark:bg-gray-950 space-y-1"
+      >
         {messages.length === 0 && (
           <p className="text-center text-gray-400 text-sm pt-10">
             Démarrez la conversation
@@ -224,8 +244,8 @@ export default function Chat() {
         <div ref={bottomRef} />
       </div>
 
-      {/* ── Input bar ───────────────────────────────────────────── */}
-      <div className="flex-none px-4 py-3 bg-white border-t border-gray-100">
+      {/* ── Input bar (sticky en bas du conteneur) ──────────────── */}
+      <div className="flex-none px-4 py-3 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800">
         <div className="flex items-end gap-2">
           <textarea
             ref={textareaRef}

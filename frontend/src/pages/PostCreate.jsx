@@ -5,6 +5,7 @@ import { MapPin, FileText, Phone, CheckSquare, Square } from 'lucide-react'
 import { Spinner } from '../components/Spinner'
 import { useAsyncAction } from '../lib/useAsyncAction'
 import { t } from '../lib/toast'
+import SharePostModal from '../components/SharePostModal'
 
 const DOCUMENTS = [
   { key: 'cni',       label: "CNI (Carte Nationale d'Identité)" },
@@ -25,6 +26,7 @@ const COMMUNES = [
 
 export default function PostCreate() {
   const navigate = useNavigate()
+  const [createdPost, setCreatedPost] = useState(null)   // open the share modal on success
   const [form, setForm] = useState({
     name_on_cards:   '',
     location:        '',
@@ -47,13 +49,19 @@ export default function PostCreate() {
     try {
       const res = await createPost(form)
       t.success('Annonce publiée ! Merci pour votre geste.')
-      navigate(`/posts/${res.data.id}`)
+      setCreatedPost(res.data)   // open the share modal
     } catch (err) {
       const errors = err.response?.data?.errors
       if (errors) Object.values(errors).flat().forEach(m => t.error(m))
       else t.error('Erreur lors de la publication')
     }
   })
+
+  const closeShareModal = () => {
+    const id = createdPost.id
+    setCreatedPost(null)
+    navigate(`/posts/${id}`)
+  }
 
   const set = (field) => (e) => setForm({ ...form, [field]: e.target.value })
 
@@ -140,6 +148,8 @@ export default function PostCreate() {
           {loading ? <><Spinner size={16} /> Publication en cours...</> : "Publier l'annonce"}
         </button>
       </form>
+
+      {createdPost && <SharePostModal post={createdPost} onClose={closeShareModal} />}
     </div>
   )
 }

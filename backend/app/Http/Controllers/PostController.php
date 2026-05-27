@@ -6,7 +6,7 @@ use App\Models\AlertSubscription;
 use App\Models\Post;
 use App\Models\User;
 use App\Mail\WalletFoundNotification;
-use App\Services\PushService;
+use App\Services\AlertNotifier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 
@@ -64,7 +64,10 @@ class PostController extends Controller
         // L'utilisateur publie une annonce → il n'est plus latent
         $request->user()->update(['latent_at' => null]);
 
-        $this->notifySubscribers($post);
+        // Notifications envoyées APRÈS la réponse HTTP — l'API répond immédiatement
+        dispatch(function () use ($post) {
+            app(AlertNotifier::class)->notifyMatching($post);
+        })->afterResponse();
 
         return response()->json($post->load('user:id,name,phone'), 201);
     }
@@ -101,78 +104,4 @@ class PostController extends Controller
         return response()->json(['message' => 'Annonce supprimée.']);
     }
 
-    private function notifySubscribers(Post $post): void
-    {
-        // Split post name into significant words (accent-folded, min 2 chars)
-        $postWords = $this->extractWords($post->name_on_cards);
-
-        if (empty($postWords)) return;
-
-        $push        = app(PushService::class);
-        $notifiedIds = collect();
-
-        $sendAlert = function ($user) use ($post, $push) {
-            try {
-                Mail::to($user->email)->send(new WalletFoundNotification($post, $user));
-            } catch (\Exception) {}
-            try {
-                $push->sendToUser(
-                    $user,
-                    "🔑 Un portefeuille à votre nom a été trouvé",
-                    "Un retrouveur a signalé un portefeuille à {$post->location}. Vérifiez si c'est le vôtre.",
-                    "/posts/{$post->id}"
-                );
-            } catch (\Exception) {}
-        };
-
-        // 1. Alert subscribers — word-level match (accent-insensitive)
-        AlertSubscription::with('user')
-            ->get()
-            ->filter(function ($sub) use ($postWords) {
-                $subWords = $this->extractWords($sub->name);
-                return !empty(array_intersect($postWords, $subWords));
-            })
-            ->each(function ($sub) use ($sendAlert, $notifiedIds) {
-                $sendAlert($sub->user);
-                $notifiedIds->push($sub->user_id);
-            });
-
-        // 2. Chercheur users without explicit alert whose name matches
-        User::where('status', 'chercheur')
-            ->where('id', '!=', $post->user_id)
-            ->whereNotIn('id', $notifiedIds->all())
-            ->get()
-            ->filter(function ($user) use ($postWords) {
-                $nameWords = $this->extractWords($user->name);
-                return !empty(array_intersect($postWords, $nameWords));
-            })
-            ->each(fn ($user) => $sendAlert($user));
-    }
-
-    /**
-     * Lowercase + accent-fold a string, then split into significant words.
-     * "KOUAMÉ Jean-Marc" → ["kouame", "jean", "marc"]
-     */
-    private function extractWords(string $input): array
-    {
-        $normalized = $this->normalize($input);
-        return array_values(array_filter(
-            preg_split('/[\s\-\.]+/', $normalized),
-            fn ($w) => mb_strlen($w) >= 2
-        ));
-    }
-
-    /**
-     * Lowercase and strip diacritics so "Kouamé" matches "kouame".
-     * Covers French/Ivorian common accents.
-     */
-    private function normalize(string $s): string
-    {
-        $s = mb_strtolower($s, 'UTF-8');
-        $from = ['à','á','â','ã','ä','å','ā','ç','è','é','ê','ë','ē','ì','í','î','ï','ī',
-                'ñ','ò','ó','ô','õ','ö','ø','ō','ù','ú','û','ü','ū','ý','ÿ','œ','æ'];
-        $to   = ['a','a','a','a','a','a','a','c','e','e','e','e','e','i','i','i','i','i',
-                'n','o','o','o','o','o','o','o','u','u','u','u','u','y','y','oe','ae'];
-        return str_replace($from, $to, $s);
-    }
 }

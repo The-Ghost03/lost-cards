@@ -6,7 +6,7 @@ import { useAuth } from '../context/AuthContext'
 import { usePush } from '../lib/usePush'
 
 const SNOOZE_KEY = 'push-prompt-snoozed-until'
-const SNOOZE_MS  = 7 * 86400 * 1000   // 7 jours
+const SNOOZE_MS  = 3 * 86400 * 1000   // 3 jours
 
 const HIDDEN_ROUTES = ['/login', '/register', '/forgot-password', '/reset-password']
 

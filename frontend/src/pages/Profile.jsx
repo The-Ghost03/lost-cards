@@ -8,6 +8,7 @@ import {
   Search, Handshake, User, Mail, Shield,
   KeyRound, Trash2, ChevronRight, CheckCircle,
 } from 'lucide-react'
+import PushBanner from '../components/PushBanner'
 
 export default function Profile() {
   const { user, updateStatus, deleteAccount, logout } = useAuth()
@@ -132,6 +133,9 @@ export default function Profile() {
           )}
         </div>
       )}
+
+      {/* ── Notifications push ────────────────────────────────────── */}
+      <PushBanner />
 
       {/* ── Sécurité ──────────────────────────────────────────────── */}
       <div className="card">

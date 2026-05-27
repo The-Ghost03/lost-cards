@@ -1,169 +1,23 @@
 <!doctype html>
-<html lang="fr-CI">
+<html lang="fr">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-
-    <!-- ── SEO de base ──────────────────────────────────────────── -->
-    <title>LostCards — Retrouvez vos pièces perdues à Abidjan, Côte d'Ivoire</title>
-    <meta name="description" content="Plateforme sécurisée à Abidjan pour récupérer un portefeuille perdu (CNI, permis, carte bancaire, passeport). Vérification d'identité par selfie, chat privé, 100% gratuit." />
-    <meta name="keywords" content="portefeuille perdu Abidjan, CNI perdue Côte d'Ivoire, permis perdu Abidjan, carte bancaire perdue, retrouver pièces, signaler portefeuille trouvé, LostCards, lost cards, objets trouvés Abidjan, perdu et retrouvé" />
-    <meta name="author" content="SoftSkills Côte d'Ivoire" />
-    <meta name="publisher" content="LostCards" />
-    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
-    <meta name="googlebot" content="index, follow" />
-
-    <!-- ── Géo (référencement local) ────────────────────────────── -->
-    <meta name="geo.region" content="CI-AB" />
-    <meta name="geo.placename" content="Abidjan" />
-    <meta name="geo.position" content="5.345317;-4.024429" />
-    <meta name="ICBM" content="5.345317, -4.024429" />
-
-    <!-- ── Canonical ────────────────────────────────────────────── -->
-    <link rel="canonical" href="https://lost-card.softskills.ci/" />
-
-    <!-- ── Open Graph (Facebook, LinkedIn, WhatsApp) ────────────── -->
-    <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="LostCards" />
-    <meta property="og:locale" content="fr_CI" />
-    <meta property="og:url" content="https://lost-card.softskills.ci/" />
-    <meta property="og:title" content="LostCards — Retrouvez vos pièces perdues à Abidjan" />
-    <meta property="og:description" content="Plateforme sécurisée pour récupérer un portefeuille perdu à Abidjan. CNI, permis, carte bancaire — vérification par selfie, chat privé, 100% gratuit." />
-    <meta property="og:image" content="https://lost-card.softskills.ci/og-image.png" />
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="Logo LostCards — Plateforme de récupération de portefeuilles perdus à Abidjan" />
-
-    <!-- ── Twitter Cards ────────────────────────────────────────── -->
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="LostCards — Retrouvez vos pièces perdues à Abidjan" />
-    <meta name="twitter:description" content="Plateforme sécurisée pour récupérer un portefeuille perdu à Abidjan. Vérification selfie, chat privé, 100% gratuit." />
-    <meta name="twitter:image" content="https://lost-card.softskills.ci/og-image.png" />
-    <meta name="twitter:image:alt" content="LostCards logo et tagline" />
-
-    <!-- ── PWA / Mobile ─────────────────────────────────────────── -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <meta name="theme-color" content="#f97316" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="LostCards" />
-    <meta name="format-detection" content="telephone=no" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/icons/pwa-192.png" />
     <link rel="manifest" href="/manifest.json" />
-
-    <!-- ── Performance hints ────────────────────────────────────── -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-
-    <!-- ── JSON-LD : Organization + WebSite + WebApplication ────── -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@graph": [
-        {
-          "@type": "Organization",
-          "@id": "https://lost-card.softskills.ci/#organization",
-          "name": "LostCards",
-          "url": "https://lost-card.softskills.ci/",
-          "logo": "https://lost-card.softskills.ci/icons/pwa-512.png",
-          "sameAs": [],
-          "address": {
-            "@type": "PostalAddress",
-            "addressLocality": "Abidjan",
-            "addressCountry": "CI"
-          },
-          "areaServed": {
-            "@type": "City",
-            "name": "Abidjan"
-          },
-          "founder": "SoftSkills",
-          "description": "Plateforme civique de récupération de portefeuilles perdus à Abidjan."
-        },
-        {
-          "@type": "WebSite",
-          "@id": "https://lost-card.softskills.ci/#website",
-          "url": "https://lost-card.softskills.ci/",
-          "name": "LostCards",
-          "inLanguage": "fr-CI",
-          "publisher": { "@id": "https://lost-card.softskills.ci/#organization" },
-          "potentialAction": {
-            "@type": "SearchAction",
-            "target": "https://lost-card.softskills.ci/?q={search_term_string}",
-            "query-input": "required name=search_term_string"
-          }
-        },
-        {
-          "@type": "WebApplication",
-          "name": "LostCards",
-          "url": "https://lost-card.softskills.ci/",
-          "applicationCategory": "Lifestyle",
-          "operatingSystem": "Web, iOS, Android",
-          "browserRequirements": "Requires JavaScript",
-          "offers": { "@type": "Offer", "price": "0", "priceCurrency": "XOF" },
-          "inLanguage": "fr-CI",
-          "description": "Application web qui connecte ceux qui ont perdu un portefeuille avec ceux qui l'ont retrouvé, à Abidjan. Vérification par selfie obligatoire."
-        },
-        {
-          "@type": "FAQPage",
-          "mainEntity": [
-            {
-              "@type": "Question",
-              "name": "Comment retrouver mon portefeuille perdu à Abidjan ?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "Tapez votre nom dans la barre de recherche LostCards. Si quelqu'un a signalé un portefeuille à votre nom, vous le verrez immédiatement. Vous pouvez aussi créer une alerte pour être notifié dès qu'un portefeuille correspondant est signalé."
-              }
-            },
-            {
-              "@type": "Question",
-              "name": "Comment fonctionne la vérification d'identité ?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "Pour réclamer un portefeuille, vous envoyez un selfie de vous-même. Le retrouveur compare votre visage avec la photo sur les pièces trouvées. Si c'est validé, un chat privé s'ouvre pour organiser la remise. Aucune adresse n'est partagée sans cette vérification."
-              }
-            },
-            {
-              "@type": "Question",
-              "name": "J'ai trouvé un portefeuille, comment le signaler ?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "Inscrivez-vous en mode Retrouveur, puis publiez une annonce avec le nom partiel visible sur les cartes et le lieu où vous l'avez trouvé. Le propriétaire pourra vous contacter via la plateforme."
-              }
-            },
-            {
-              "@type": "Question",
-              "name": "LostCards est-il gratuit ?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "Oui, LostCards est 100% gratuit pour tous les utilisateurs, à Abidjan et partout en Côte d'Ivoire."
-              }
-            }
-          ]
-        }
-      ]
-    }
-    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <title>LostCards — Retrouvez vos pièces perdues à Abidjan</title>
+    <meta name="description" content="Plateforme de recouvrement de portefeuilles et pièces perdus à Abidjan, Côte d'Ivoire." />
   </head>
   <body>
     <div id="root"></div>
-
-    <!-- Contenu de secours pour crawlers sans JS / preview rapide -->
-    <noscript>
-      <article style="max-width:720px;margin:40px auto;font-family:system-ui,sans-serif;padding:20px;">
-        <h1>LostCards — Retrouvez vos pièces perdues à Abidjan</h1>
-        <p>LostCards est une plateforme civique gratuite qui connecte les personnes ayant perdu leur portefeuille (CNI, permis de conduire, carte bancaire, passeport) avec celles qui l'ont retrouvé, à Abidjan et en Côte d'Ivoire.</p>
-        <h2>Comment ça marche ?</h2>
-        <ol>
-          <li>Vous avez perdu votre portefeuille : tapez votre nom sur la plateforme.</li>
-          <li>Si un retrouveur l'a signalé, envoyez un selfie pour prouver votre identité.</li>
-          <li>Un chat privé s'ouvre — vous organisez la remise en toute sécurité.</li>
-        </ol>
-        <p>Vous avez activé JavaScript pour utiliser l'application interactive.</p>
-      </article>
-    </noscript>
-
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

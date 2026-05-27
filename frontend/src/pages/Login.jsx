@@ -15,7 +15,7 @@ export default function Login() {
     try {
       await login(form)
       t.success('Connecté !')
-      navigate('/')
+      navigate('/dashboard')
     } catch (err) {
       const errors = err.response?.data?.errors
       if (errors) {

@@ -15,16 +15,25 @@ api.interceptors.request.use(config => {
   return config
 })
 
+// Routes accessibles sans connexion — pas de redirect forcé sur 401
+const PUBLIC_ROUTES = ['/', '/login', '/register', '/forgot-password', '/reset-password']
+function isPublicRoute(pathname) {
+  if (PUBLIC_ROUTES.includes(pathname)) return true
+  if (pathname.startsWith('/posts/')) return true
+  return false
+}
+
 api.interceptors.response.use(
   res => res,
   err => {
     if (err.response?.status === 401) {
       localStorage.removeItem('user')
       localStorage.removeItem('token')
-      // Don't redirect if already on a public page — avoids infinite reload loop
-      const pub = ['/login', '/register', '/forgot-password', '/reset-password']
-      const onPublic = pub.some(p => window.location.pathname.startsWith(p))
-      if (!onPublic) {
+
+      // Si l'utilisateur est sur une page publique (ex: home après expiration
+      // de session au lancement de l'app), on le laisse là — pas de redirect.
+      // Sinon (il était sur dashboard/messages/...), on l'envoie au login.
+      if (!isPublicRoute(window.location.pathname)) {
         window.location.href = '/login'
       }
     }

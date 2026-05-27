@@ -23,7 +23,7 @@ export default function Register() {
     try {
       await register(form)
       t.success('Compte créé avec succès !')
-      navigate('/')
+      navigate('/dashboard')
     } catch (err) {
       const errors = err.response?.data?.errors
       if (errors) Object.values(errors).flat().forEach(msg => t.error(msg))

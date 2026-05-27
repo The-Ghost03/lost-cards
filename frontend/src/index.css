@@ -5,7 +5,7 @@
 @layer base {
   * { box-sizing: border-box; }
   body {
-    @apply bg-gray-50 text-gray-800 font-sans;
+    @apply bg-gray-50 dark:bg-gray-950 text-gray-800 dark:text-gray-100 font-sans;
     margin: 0;
     -webkit-tap-highlight-color: transparent;
     /* Block double-tap zoom and pinch-to-zoom on mobile */
@@ -24,6 +24,7 @@
 }
 
 @layer components {
+  /* ── Buttons ─────────────────────────────────────────────────────── */
   .btn-primary {
     @apply bg-orange-500 hover:bg-orange-600 text-white font-semibold px-4 py-2 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95;
     box-shadow: 0 1px 3px rgba(249, 115, 22, 0.2);
@@ -33,7 +34,10 @@
     transform: translateY(-1px);
   }
   .btn-secondary {
-    @apply bg-white hover:bg-gray-50 text-gray-700 font-semibold px-4 py-2 rounded-xl border border-gray-200 transition-all duration-200 active:scale-95;
+    @apply bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600
+           text-gray-700 dark:text-gray-200 font-semibold px-4 py-2 rounded-xl
+           border border-gray-200 dark:border-gray-600
+           transition-all duration-200 active:scale-95;
   }
   .btn-secondary:hover {
     border-color: #d1d5db;
@@ -42,28 +46,91 @@
   .btn-danger {
     @apply bg-red-500 hover:bg-red-600 text-white font-semibold px-4 py-2 rounded-xl transition-all duration-200 active:scale-95;
   }
+
+  /* ── Input ───────────────────────────────────────────────────────── */
   .input {
-    @apply w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 bg-white transition-all duration-200;
+    @apply w-full border border-gray-200 dark:border-gray-600
+           rounded-xl px-4 py-2.5 text-sm
+           focus:outline-none focus:ring-2 focus:ring-orange-400
+           bg-white dark:bg-gray-700
+           text-gray-800 dark:text-gray-100
+           placeholder:text-gray-400 dark:placeholder:text-gray-500
+           transition-all duration-200;
   }
   .input:focus {
     border-color: #fb923c;
     box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.12);
   }
+
+  /* ── Card ────────────────────────────────────────────────────────── */
   .card {
-    @apply bg-white rounded-2xl shadow-sm border border-gray-100 p-4 transition-all duration-200;
+    @apply bg-white dark:bg-gray-800
+           rounded-2xl shadow-sm
+           border border-gray-100 dark:border-gray-700
+           p-4 transition-all duration-200;
   }
   .card-hover {
     @apply card cursor-pointer;
   }
   .card-hover:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
     border-color: #fed7aa;
   }
+  .dark .card-hover:hover {
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    border-color: #9a3412;
+  }
+
+  /* ── Badge ───────────────────────────────────────────────────────── */
   .badge {
     @apply inline-flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full;
   }
 }
+
+/* ── Dark mode overrides for inline Tailwind classes ────────────────
+   These sit outside @layer so they take priority over utilities.     */
+
+/* Neutral text */
+.dark .text-gray-900 { color: #f9fafb; }
+.dark .text-gray-800 { color: #f3f4f6; }
+.dark .text-gray-700 { color: #e5e7eb; }
+.dark .text-gray-600 { color: #d1d5db; }
+.dark .text-gray-500 { color: #9ca3af; }
+.dark .text-gray-400 { color: #6b7280; }
+.dark .text-gray-300 { color: #4b5563; }
+
+/* Neutral backgrounds */
+.dark .bg-white          { background-color: #1f2937; }
+.dark .bg-gray-50        { background-color: #111827; }
+.dark .bg-gray-100       { background-color: #1f2937; }
+.dark .bg-gray-200       { background-color: #374151; }
+
+/* Borders */
+.dark .border-gray-100   { border-color: #374151; }
+.dark .border-gray-200   { border-color: #4b5563; }
+
+/* Tinted info boxes */
+.dark .bg-orange-50      { background-color: rgb(120 53 15 / 0.3); }
+.dark .bg-yellow-50      { background-color: rgb(113 63 18 / 0.3); }
+.dark .bg-green-50       { background-color: rgb(6 78 59 / 0.25); }
+.dark .bg-red-50         { background-color: rgb(127 29 29 / 0.3); }
+.dark .bg-blue-50        { background-color: rgb(30 58 138 / 0.3); }
+
+/* Tinted borders */
+.dark .border-orange-100 { border-color: rgb(154 52 18 / 0.5); }
+.dark .border-orange-200 { border-color: rgb(154 52 18 / 0.6); }
+.dark .border-yellow-200 { border-color: rgb(133 77 14 / 0.6); }
+.dark .border-green-200  { border-color: rgb(6 95 70 / 0.6); }
+.dark .border-red-200    { border-color: rgb(153 27 27 / 0.6); }
+.dark .border-red-300    { border-color: rgb(185 28 28 / 0.7); }
+
+/* Skeleton shimmer (dark-aware) */
+.dark .bg-gray-200.animate-pulse { background-color: #374151; }
+.dark .bg-gray-100.animate-pulse { background-color: #1f2937; }
+
+/* Unread badge border */
+.dark .border-white { border-color: #1f2937; }
 
 /* === Animations === */
 @keyframes fadeIn {
@@ -119,13 +186,47 @@
   background-size: 200% 100%;
   animation: shimmer 1.5s ease-in-out infinite;
 }
+.dark .shimmer {
+  background: linear-gradient(90deg, #1f2937 0%, #374151 50%, #1f2937 100%);
+  background-size: 200% 100%;
+}
 
-/* Stagger helper — use style={{ animationDelay: `${i * 60}ms` }} on items */
 .stagger > * {
   animation: slideUp 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
-
-/* Page transition */
 .page-enter {
   animation: fadeIn 0.3s ease-out both;
+}
+
+/* ── Colored badge backgrounds (dark mode) ── */
+.dark .bg-blue-100    { background-color: rgb(30 58 138 / 0.35); }
+.dark .bg-purple-100  { background-color: rgb(76 29 149 / 0.35); }
+.dark .bg-indigo-100  { background-color: rgb(49 46 129 / 0.35); }
+.dark .bg-pink-100    { background-color: rgb(131 24 67 / 0.35); }
+.dark .bg-green-100   { background-color: rgb(6 78 59 / 0.35); }
+.dark .bg-yellow-100  { background-color: rgb(113 63 18 / 0.35); }
+.dark .bg-red-100     { background-color: rgb(127 29 29 / 0.35); }
+.dark .bg-orange-100  { background-color: rgb(124 45 18 / 0.35); }
+
+/* Colored text stays readable in dark mode */
+.dark .text-blue-700    { color: #93c5fd; }
+.dark .text-purple-700  { color: #c4b5fd; }
+.dark .text-indigo-700  { color: #a5b4fc; }
+.dark .text-pink-700    { color: #f9a8d4; }
+.dark .text-green-700   { color: #6ee7b7; }
+.dark .text-yellow-700  { color: #fcd34d; }
+.dark .text-red-700     { color: #fca5a5; }
+.dark .text-red-600     { color: #fca5a5; }
+.dark .text-orange-700  { color: #fdba74; }
+.dark .text-orange-600  { color: #fb923c; }
+.dark .text-green-800   { color: #6ee7b7; }
+.dark .text-yellow-800  { color: #fcd34d; }
+.dark .text-red-800     { color: #fca5a5; }
+.dark .border-green-200 { border-color: rgb(6 95 70 / 0.5); }
+.dark .border-yellow-200{ border-color: rgb(133 77 14 / 0.5); }
+
+/* Toaster dark */
+.dark [data-hot-toast] {
+  background: #1f2937 !important;
+  color: #f3f4f6 !important;
 }

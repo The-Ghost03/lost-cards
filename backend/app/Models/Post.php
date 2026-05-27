@@ -54,6 +54,22 @@ class Post extends Model
         return $this->hasMany(PostPhoto::class)->orderBy('position');
     }
 
+    /**
+     * Traduit user_id (BIGINT FK) en UUID dans le JSON.
+     */
+    public function toArray()
+    {
+        $array = parent::toArray();
+
+        if (array_key_exists('user_id', $array)) {
+            $array['user_id'] = $this->relationLoaded('user') && $this->user
+                ? $this->user->uuid
+                : User::where('id', $this->user_id)->value('uuid');
+        }
+
+        return $array;
+    }
+
     // Reveal pickup address only to approved requesters or the post owner
     public function canRevealAddress(User $user): bool
     {

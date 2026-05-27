@@ -13,4 +13,17 @@ class ContactRequest extends Model
 
     public function post()  { return $this->belongsTo(Post::class); }
     public function user()  { return $this->belongsTo(User::class); }
+
+    public function toArray()
+    {
+        $array = parent::toArray();
+
+        if (array_key_exists('user_id', $array)) {
+            $array['user_id'] = $this->relationLoaded('user') && $this->user
+                ? $this->user->uuid
+                : User::where('id', $this->user_id)->value('uuid');
+        }
+
+        return $array;
+    }
 }

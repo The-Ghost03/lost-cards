@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>LostCards — Cartes de communication update</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #f3f4f6;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 24px;
+    }
+    .card {
+      width: 1080px;
+      height: 1080px;
+      border-radius: 32px;
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 80px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.08);
+    }
+    .card-label {
+      position: absolute;
+      top: -28px;
+      left: 0;
+      font-size: 14px;
+      color: #6b7280;
+      font-weight: 600;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 18px;
+      border-radius: 999px;
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 32px;
+    }
+    .logo {
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -1px;
+    }
+    .emoji-hero {
+      font-size: 200px;
+      line-height: 1;
+      margin-bottom: 40px;
+      filter: drop-shadow(0 8px 24px rgba(0,0,0,0.15));
+    }
+    h1 { font-size: 96px; font-weight: 900; line-height: 1.05; letter-spacing: -3px; }
+    h2 { font-size: 72px; font-weight: 800; line-height: 1.1; letter-spacing: -2px; margin-bottom: 24px; }
+    p.sub { font-size: 36px; line-height: 1.4; font-weight: 500; max-width: 800px; }
+    p.tiny { font-size: 24px; font-weight: 600; opacity: 0.7; margin-top: 40px; }
+
+    /* === COLOR THEMES === */
+    .theme-orange { background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: white; }
+    .theme-dark   { background: linear-gradient(135deg, #1f2937 0%, #111827 100%); color: white; }
+    .theme-white  { background: white; color: #111827; }
+    .theme-white .pill { background: #fff7ed; color: #c2410c; }
+    .theme-orange .pill { background: rgba(255,255,255,0.2); color: white; backdrop-filter: blur(10px); }
+    .theme-dark .pill { background: rgba(249,115,22,0.2); color: #fb923c; }
+
+    /* Card 1 — Hero */
+    .hero { text-align: center; }
+    .hero .badge {
+      display: inline-block;
+      padding: 12px 28px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 999px;
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 40px;
+      backdrop-filter: blur(10px);
+    }
+    .hero h1 { font-size: 130px; }
+    .hero .url {
+      position: absolute;
+      bottom: 60px;
+      left: 0;
+      right: 0;
+      text-align: center;
+      font-size: 28px;
+      font-weight: 600;
+      opacity: 0.9;
+    }
+
+    /* Cards feature */
+    .feature { text-align: center; }
+    .feature .feat-num {
+      position: absolute;
+      top: 60px;
+      left: 60px;
+      font-size: 32px;
+      font-weight: 800;
+      opacity: 0.3;
+    }
+    .feature .brand-foot {
+      position: absolute;
+      bottom: 60px;
+      left: 0;
+      right: 0;
+      text-align: center;
+      font-size: 22px;
+      font-weight: 600;
+      opacity: 0.5;
+    }
+
+    /* Mockup phone simple */
+    .phone-mockup {
+      width: 320px;
+      height: 540px;
+      background: white;
+      border-radius: 40px;
+      padding: 12px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      margin-bottom: 40px;
+    }
+    .phone-screen {
+      width: 100%;
+      height: 100%;
+      background: #f9fafb;
+      border-radius: 28px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .notif {
+      background: white;
+      border-radius: 14px;
+      padding: 14px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      animation: slideIn 0.5s ease-out;
+    }
+    .notif-icon {
+      width: 36px;
+      height: 36px;
+      background: #f97316;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 20px;
+    }
+    .notif-title { font-size: 13px; font-weight: 700; color: #111827; }
+    .notif-body { font-size: 12px; color: #6b7280; margin-top: 2px; }
+
+    /* Final CTA */
+    .cta-card {
+      background: linear-gradient(135deg, #f97316 0%, #c2410c 100%);
+      color: white;
+      text-align: center;
+    }
+    .cta-card .qr-placeholder {
+      width: 200px;
+      height: 200px;
+      background: white;
+      border-radius: 24px;
+      margin: 40px auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      color: #6b7280;
+    }
+    .cta-card .url {
+      font-size: 42px;
+      font-weight: 800;
+      margin-top: 32px;
+      letter-spacing: -1px;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Print / capture mode */
+    @media print {
+      body { background: white; padding: 0; gap: 0; }
+      .card { page-break-after: always; box-shadow: none; }
+    }
+
+    h3 { font-size: 56px; font-weight: 800; line-height: 1.1; margin-bottom: 24px; letter-spacing: -1.5px; }
+    .features-list { list-style: none; display: flex; flex-direction: column; gap: 20px; margin-top: 32px; max-width: 700px; }
+    .features-list li { font-size: 32px; font-weight: 600; display: flex; align-items: center; gap: 16px; }
+    .features-list li .dot { width: 12px; height: 12px; background: #f97316; border-radius: 50%; flex-shrink: 0; }
+  </style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════════════ -->
+<!-- CARTE 1 : HERO / ANNONCE -->
+<!-- ════════════════════════════════════════════════════ -->
+<div class="card theme-orange hero">
+  <span class="card-label">Card 1 — Hero (1080×1080)</span>
+  <div class="badge">🚀 MISE À JOUR MAJEURE</div>
+  <div class="emoji-hero">🔑</div>
+  <h1>LostCards<br>évolue.</h1>
+  <p class="sub" style="margin-top: 32px;">9 nouvelles fonctionnalités<br>pour retrouver tes pièces plus vite.</p>
+  <div class="url">lost-card.softskills.ci</div>
+</div>
+
+<!-- ════════════════════════════════════════════════════ -->
+<!-- CARTE 2 : PHOTOS -->
+<!-- ════════════════════════════════════════════════════ -->
+<div class="card theme-white feature">
+  <span class="card-label">Card 2 — Photos</span>
+  <span class="feat-num">01 / 09</span>
+  <div class="pill">📸 NOUVEAU</div>
+  <div class="emoji-hero">📷</div>
+  <h2>Photos des<br>annonces</h2>
+  <p class="sub">Ajoute jusqu'à <strong>5 photos</strong> du portefeuille<br>ou des pièces trouvées.<br>Le propriétaire reconnaît plus vite.</p>
+  <div class="brand-foot">🔑 LostCards · lost-card.softskills.ci</div>
+</div>
+
+<!-- ════════════════════════════════════════════════════ -->
+<!-- CARTE 3 : NOTIFICATIONS PUSH -->
+<!-- ════════════════════════════════════════════════════ -->
+<div class="card theme-orange feature">
+  <span class="card-label">Card 3 — Push</span>
+  <span class="feat-num" style="color:white">02 / 09</span>
+  <div class="pill">🔔 INSTANTANÉ</div>
+
+  <!-- Mockup notification -->
+  <div class="phone-mockup">
+    <div class="phone-screen">
+      <div class="notif">
+        <div class="notif-icon">🔑</div>
+        <div>
+          <div class="notif-title">LostCards</div>
+          <div class="notif-body">Un portefeuille à ton nom a été trouvé à Cocody !</div>
+        </div>
+      </div>
+      <div class="notif" style="animation-delay: 0.2s">
+        <div class="notif-icon" style="background: #3b82f6">💬</div>
+        <div>
+          <div class="notif-title">Aka Prince</div>
+          <div class="notif-body">Bonjour, j'ai retrouvé votre portefeuille...</div>
+        </div>
+      </div>
+      <div class="notif" style="animation-delay: 0.4s">
+        <div class="notif-icon" style="background: #10b981">✅</div>
+        <div>
+          <div class="notif-title">Identité vérifiée</div>
+          <div class="notif-body">Tu peux maintenant chatter avec le retrouveur</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2 style="color: white">Notifications push</h2>
+  <p class="sub">Sois prévenu en temps réel<br>quand quelqu'un trouve tes pièces.</p>
+  <div class="brand-foot" style="color: white">🔑 LostCards</div>
+</div>
+
+<!-- ════════════════════════════════════════════════════ -->
+<!-- CARTE 4 : MESSAGERIE -->
+<!-- ════════════════════════════════════════════════════ -->
+<div class="card theme-white feature">
+  <span class="card-label">Card 4 — Chat</span>
+  <span class="feat-num">03 / 09</span>
+  <div class="pill">💬 FLUIDE</div>
+  <div class="emoji-hero">💬</div>
+  <h2>Messagerie<br>instantanée</h2>
+  <p class="sub">Comme WhatsApp.<br>Envoi en temps réel,<br>scroll libre, barre fixe.</p>
+  <div class="brand-foot">🔑 LostCards · lost-card.softskills.ci</div>
+</div>
+
+<!-- ════════════════════════════════════════════════════ -->
+<!-- CARTE 5 : DARK MODE -->
+<!-- ════════════════════════════════════════════════════ -->
+<div class="card theme-dark feature">
+  <span class="card-label">Card 5 — Dark mode</span>
+  <span class="feat-num" style="color: #f97316">04 / 09</span>
+  <div class="pill">🌗 AUTO</div>
+  <div class="emoji-hero">🌙</div>
+  <h2 style="color: white">Mode sombre<br>automatique</h2>
+  <p class="sub" style="color: #d1d5db">Bascule en mode nuit dès 18h.<br>Repasse en clair à 7h du matin.<br>Tes yeux te diront merci.</p>
+  <div class="brand-foot" style="color: #9ca3af">🔑 LostCards</div>
+</div>
+
+<!-- ════════════════════════════════════════════════════ -->
+<!-- CARTE 6 : PARTAGE -->
+<!-- ════════════════════════════════════════════════════ -->
+<div class="card theme-orange feature">
+  <span class="card-label">Card 6 — Partage</span>
+  <span class="feat-num" style="color: white">05 / 09</span>
+  <div class="pill">🔗 VIRAL</div>
+  <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-bottom: 40px;">
+    <div style="width: 96px; height: 96px; background: #25D366; border-radius: 24px; display: flex; align-items: center; justify-content: center; font-size: 48px;">💬</div>
+    <div style="width: 96px; height: 96px; background: #1877F2; border-radius: 24px; display: flex; align-items: center; justify-content: center; font-size: 48px;">f</div>
+    <div style="width: 96px; height: 96px; background: black; border-radius: 24px; display: flex; align-items: center; justify-content: center; font-size: 48px; color: white;">𝕏</div>
+    <div style="width: 96px; height: 96px; background: #0088cc; border-radius: 24px; display: flex; align-items: center; justify-content: center; font-size: 48px;">✈</div>
+  </div>
+  <h2 style="color: white">Partage facile</h2>
+  <p class="sub">Diffuse les annonces sur<br>WhatsApp, Facebook, X, Telegram,<br>SMS et plus encore.</p>
+  <div class="brand-foot" style="color: white">🔑 LostCards</div>
+</div>
+
+<!-- ════════════════════════════════════════════════════ -->
+<!-- CARTE 7 : CAMERA -->
+<!-- ════════════════════════════════════════════════════ -->
+<div class="card theme-white feature">
+  <span class="card-label">Card 7 — Caméra</span>
+  <span class="feat-num">06 / 09</span>
+  <div class="pill">🤳 VÉRIFICATION</div>
+  <div class="emoji-hero">🔄</div>
+  <h2>Caméra<br>retournable</h2>
+  <p class="sub">Selfie avec la caméra avant<br>OU arrière. <strong>Bouton de bascule</strong><br>quand un capteur déconne.</p>
+  <div class="brand-foot">🔑 LostCards · lost-card.softskills.ci</div>
+</div>
+
+<!-- ════════════════════════════════════════════════════ -->
+<!-- CARTE 8 : ANALYTICS / ADMIN -->
+<!-- ════════════════════════════════════════════════════ -->
+<div class="card theme-dark feature">
+  <span class="card-label">Card 8 — Analytics</span>
+  <span class="feat-num" style="color: #f97316">07 / 09</span>
+  <div class="pill">📊 ADMIN</div>
+  <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; max-width: 600px; margin-bottom: 40px; width: 100%;">
+    <div style="background: rgba(249,115,22,0.15); border: 1px solid rgba(249,115,22,0.3); border-radius: 20px; padding: 24px; text-align: left;">
+      <div style="font-size: 56px; font-weight: 900; color: #fb923c;">847</div>
+      <div style="font-size: 18px; color: #d1d5db; font-weight: 600;">Visiteurs</div>
+    </div>
+    <div style="background: rgba(59,130,246,0.15); border: 1px solid rgba(59,130,246,0.3); border-radius: 20px; padding: 24px; text-align: left;">
+      <div style="font-size: 56px; font-weight: 900; color: #60a5fa;">23</div>
+      <div style="font-size: 18px; color: #d1d5db; font-weight: 600;">Récupérés</div>
+    </div>
+    <div style="background: rgba(168,85,247,0.15); border: 1px solid rgba(168,85,247,0.3); border-radius: 20px; padding: 24px; text-align: left;">
+      <div style="font-size: 56px; font-weight: 900; color: #c084fc;">3m</div>
+      <div style="font-size: 18px; color: #d1d5db; font-weight: 600;">Durée moy.</div>
+    </div>
+    <div style="background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); border-radius: 20px; padding: 24px; text-align: left;">
+      <div style="font-size: 56px; font-weight: 900; color: #34d399;">76%</div>
+      <div style="font-size: 18px; color: #d1d5db; font-weight: 600;">Mobile</div>
+    </div>
+  </div>
+  <h3 style="color: white">Statistiques en temps réel</h3>
+  <p class="sub" style="color: #9ca3af">Dashboard admin complet :<br>visites, sources, appareils.</p>
+  <div class="brand-foot" style="color: #6b7280">🔑 LostCards</div>
+</div>
+
+<!-- ════════════════════════════════════════════════════ -->
+<!-- CARTE 9 : RECAP + CTA -->
+<!-- ════════════════════════════════════════════════════ -->
+<div class="card cta-card">
+  <span class="card-label">Card 9 — CTA finale</span>
+  <div class="pill">🎉 DISPONIBLE MAINTENANT</div>
+  <h1 style="font-size: 110px;">Mets à jour<br>maintenant.</h1>
+  <ul class="features-list" style="color: white;">
+    <li><span class="dot"></span> Photos des annonces</li>
+    <li><span class="dot"></span> Notifications push instantanées</li>
+    <li><span class="dot"></span> Messagerie temps réel</li>
+    <li><span class="dot"></span> Mode sombre auto</li>
+    <li><span class="dot"></span> Partage 1 clic</li>
+  </ul>
+  <div class="url">lost-card.softskills.ci</div>
+</div>
+
+<!-- ════════════════════════════════════════════════════ -->
+<!-- CARTE 10 : STORY VERTICALE (option) -->
+<!-- ════════════════════════════════════════════════════ -->
+<div class="card theme-orange feature" style="width: 1080px; height: 1920px; border-radius: 40px;">
+  <span class="card-label">Card 10 — Format Story (1080×1920)</span>
+  <div class="pill" style="margin-top: 60px;">🚀 NOUVEAU</div>
+  <div class="emoji-hero" style="font-size: 280px;">🔑</div>
+  <h1 style="font-size: 140px; color: white;">LostCards<br>évolue.</h1>
+  <p class="sub" style="margin-top: 40px; font-size: 44px;">
+    📸 Photos<br>
+    🔔 Notifications<br>
+    💬 Chat instantané<br>
+    🌗 Mode sombre<br>
+    🔗 Partage 1-clic
+  </p>
+  <p class="tiny" style="color: white; font-size: 32px;">👆 Mets à jour</p>
+  <div class="url" style="font-size: 36px; bottom: 80px;">lost-card.softskills.ci</div>
+</div>
+
+</body>
+</html>

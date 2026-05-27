@@ -62,7 +62,8 @@ class Post extends Model
         $array = parent::toArray();
 
         if (array_key_exists('user_id', $array)) {
-            $array['user_id'] = $this->relationLoaded('user') && $this->user
+            $loaded = $this->relationLoaded('user') && $this->user && $this->user->uuid;
+            $array['user_id'] = $loaded
                 ? $this->user->uuid
                 : User::where('id', $this->user_id)->value('uuid');
         }

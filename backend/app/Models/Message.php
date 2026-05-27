@@ -47,14 +47,12 @@ class Message extends Model
         };
 
         if (array_key_exists('sender_id', $array)) {
-            $array['sender_id'] = $this->relationLoaded('sender') && $this->sender
-                ? $this->sender->uuid
-                : $resolve($this->sender_id);
+            $hasUuid = $this->relationLoaded('sender') && $this->sender && $this->sender->uuid;
+            $array['sender_id'] = $hasUuid ? $this->sender->uuid : $resolve($this->sender_id);
         }
         if (array_key_exists('receiver_id', $array)) {
-            $array['receiver_id'] = $this->relationLoaded('receiver') && $this->receiver
-                ? $this->receiver->uuid
-                : $resolve($this->receiver_id);
+            $hasUuid = $this->relationLoaded('receiver') && $this->receiver && $this->receiver->uuid;
+            $array['receiver_id'] = $hasUuid ? $this->receiver->uuid : $resolve($this->receiver_id);
         }
 
         return $array;

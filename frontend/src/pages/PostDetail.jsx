@@ -3,7 +3,8 @@ import { useParams, useNavigate, Link } from 'react-router-dom'
 import { getPost, submitContact, approveContact, rejectContact, getContactRequests, markRecovered, getSelfie, deletePost } from '../api/posts'
 import { getMessages, sendMessage } from '../api/messages'
 import { useAuth } from '../context/AuthContext'
-import { MapPin, FileText, Calendar, HelpCircle, Send, CheckCircle, XCircle, MessageCircle, ChevronLeft, Camera, Trash2, Shield } from 'lucide-react'
+import { MapPin, FileText, Calendar, HelpCircle, Send, CheckCircle, XCircle, MessageCircle, ChevronLeft, Camera, Trash2, Shield, Share2 } from 'lucide-react'
+import { sharePost } from '../lib/share'
 import SelfieCapture from '../components/SelfieCapture'
 import { formatDistanceToNow } from 'date-fns'
 import { fr } from 'date-fns/locale'
@@ -163,8 +164,8 @@ export default function PostDetail() {
 
       {/* Post card */}
       <div className="card mb-4">
-        <div className="flex items-start justify-between mb-3">
-          <div>
+        <div className="flex items-start justify-between mb-3 gap-2">
+          <div className="min-w-0">
             <h1 className="text-xl font-bold text-gray-900">{post.name_partial}</h1>
             <p className="text-xs text-gray-400 flex items-center gap-1 mt-1">
               <MapPin size={12} /> {post.location}
@@ -173,9 +174,19 @@ export default function PostDetail() {
               </span>
             </p>
           </div>
-          {post.status === 'recovered' && (
-            <span className="badge bg-green-100 text-green-700"><CheckCircle size={12} /> Récupéré</span>
-          )}
+          <div className="flex items-center gap-1.5 shrink-0">
+            {post.status === 'recovered' && (
+              <span className="badge bg-green-100 text-green-700"><CheckCircle size={12} /> Récupéré</span>
+            )}
+            <button
+              onClick={() => sharePost(post)}
+              className="p-2 rounded-xl text-gray-400 dark:text-gray-500 hover:text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-950/30 transition-colors"
+              aria-label="Partager cette annonce"
+              title="Partager"
+            >
+              <Share2 size={16} />
+            </button>
+          </div>
         </div>
 
         <div className="flex flex-wrap gap-1.5 mb-4">

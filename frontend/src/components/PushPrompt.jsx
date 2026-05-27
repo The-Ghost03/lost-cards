@@ -51,6 +51,15 @@ export default function PushPrompt() {
     return () => clearTimeout(timer)
   }, [user, supported, permission, subscribed, location.pathname])
 
+  // Filet de sécurité : si l'abonnement est actif (après-activation OU
+  // chargement initial), on ferme le modal et on marque le prompt comme fini
+  useEffect(() => {
+    if (subscribed) {
+      setShow(false)
+      markDone()
+    }
+  }, [subscribed])
+
   if (!show) return null
 
   const handleActivate = async () => {

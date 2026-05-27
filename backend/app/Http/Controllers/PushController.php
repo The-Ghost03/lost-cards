@@ -15,7 +15,7 @@ class PushController extends Controller
     public function publicKey()
     {
         return response()->json([
-            'public_key' => env('VAPID_PUBLIC_KEY'),
+            'public_key' => config('webpush.public_key'),
         ]);
     }
 

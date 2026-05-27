@@ -17,9 +17,9 @@ class PushService
 
         $this->client = new WebPush([
             'VAPID' => [
-                'subject'    => env('VAPID_SUBJECT', 'mailto:admin@lostcards.ci'),
-                'publicKey'  => env('VAPID_PUBLIC_KEY'),
-                'privateKey' => env('VAPID_PRIVATE_KEY'),
+                'subject'    => config('webpush.subject'),
+                'publicKey'  => config('webpush.public_key'),
+                'privateKey' => config('webpush.private_key'),
             ],
         ]);
 

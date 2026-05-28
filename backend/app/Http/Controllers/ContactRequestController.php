@@ -36,11 +36,10 @@ class ContactRequestController extends Controller
     {
         $userId = $request->user()->id;
         $rows = ContactRequest::where('user_id', $userId)
-            ->with(['post' => fn($q) => $q->select('id','name_partial','location','status','pickup_address','user_id','created_at')])
+            ->with(['post' => fn($q) => $q->select('id','uuid','name_partial','location','status','pickup_address','user_id','created_at')])
             ->orderByDesc('created_at')
             ->get()
             ->map(function ($r) use ($userId) {
-                // Compte des messages non lus sur cette conversation (si approuvée)
                 $unread = 0;
                 if ($r->status === 'approved' && $r->post) {
                     $unread = $r->post->messages()
@@ -49,7 +48,7 @@ class ContactRequestController extends Controller
                         ->count();
                 }
                 return [
-                    'id'         => $r->id,
+                    'id'         => $r->uuid,
                     'status'     => $r->status,
                     'created_at' => $r->created_at,
                     'post'       => $r->post,

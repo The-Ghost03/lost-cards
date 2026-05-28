@@ -26,9 +26,9 @@ class AlertSubscriptionController extends Controller
         return response()->json($alert, 201);
     }
 
-    public function destroy(Request $request, int $id)
+    public function destroy(Request $request, string $uuid)
     {
-        $alert = AlertSubscription::where('id', $id)
+        $alert = AlertSubscription::where('uuid', $uuid)
             ->where('user_id', $request->user()->id)
             ->firstOrFail();
 

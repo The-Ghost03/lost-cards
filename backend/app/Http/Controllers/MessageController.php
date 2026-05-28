@@ -30,7 +30,7 @@ class MessageController extends Controller
             ->map(function ($post) use ($userId) {
                 $lastMsg = $post->messages->first();
                 return [
-                    'post_id'      => $post->id,
+                    'post_id'      => $post->uuid,
                     'post'         => $post->only(['name_partial', 'location', 'status']),
                     'last_message' => $lastMsg,
                     'unread_count' => $post->messages()

@@ -51,7 +51,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/alerts',         [AlertSubscriptionController::class, 'index']);
     Route::post('/alerts',        [AlertSubscriptionController::class, 'store']);
-    Route::delete('/alerts/{id}', [AlertSubscriptionController::class, 'destroy']);
+    Route::delete('/alerts/{uuid}', [AlertSubscriptionController::class, 'destroy']);
 
     // Web push subscriptions
     Route::post('/push/subscribe',   [PushController::class, 'subscribe']);

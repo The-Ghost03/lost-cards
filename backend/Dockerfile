@@ -2,7 +2,9 @@ FROM php:8.3-cli
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
         git zip unzip curl libpng-dev libonig-dev libxml2-dev \
-    && docker-php-ext-install pdo_mysql mbstring \
+        libjpeg-dev libfreetype6-dev \
+    && docker-php-ext-configure gd --with-jpeg --with-freetype \
+    && docker-php-ext-install pdo_mysql mbstring gd exif \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Upload limits — 5 photos × 8 Mo + marge

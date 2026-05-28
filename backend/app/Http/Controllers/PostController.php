@@ -8,6 +8,7 @@ use App\Models\PostPhoto;
 use App\Models\User;
 use App\Mail\WalletFoundNotification;
 use App\Services\AlertNotifier;
+use App\Services\ImageOptimizer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
@@ -54,7 +55,10 @@ class PostController extends Controller
         $path = Storage::disk('local')->path($photo->path);
         abort_unless(file_exists($path), 404);
 
-        return response()->file($path, ['Cache-Control' => 'public, max-age=86400']);
+        // Cache 30 jours immutable — les URLs contiennent des UUIDs, le contenu ne change pas
+        return response()->file($path, [
+            'Cache-Control' => 'public, max-age=2592000, immutable',
+        ]);
     }
 
     public function store(Request $request)
@@ -81,9 +85,10 @@ class PostController extends Controller
             'status'  => 'active',
         ]);
 
-        // Stocker les photos
+        // Optimise et stocke les photos (resize ≤1600px + JPEG q80 + strip EXIF)
+        $optimizer = app(ImageOptimizer::class);
         foreach ($photoFiles as $i => $file) {
-            $path = $file->store('post_photos', 'local');
+            $path = $optimizer->optimizeAndStore($file, 'post_photos');
             PostPhoto::create([
                 'post_id'  => $post->id,
                 'path'     => $path,

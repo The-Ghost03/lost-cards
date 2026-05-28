@@ -8,6 +8,7 @@ use App\Mail\SelfieSubmittedNotification;
 use App\Models\ContactRequest;
 use App\Models\Post;
 use App\Models\User;
+use App\Services\ImageOptimizer;
 use App\Services\PushService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
@@ -81,7 +82,13 @@ class ContactRequestController extends Controller
             $existing->delete();
         }
 
-        $path = $request->file('selfie')->store('selfies', 'local');
+        // Selfie : on optimise aussi (vérification visuelle, 1200px suffisent largement)
+        $path = app(ImageOptimizer::class)->optimizeAndStore(
+            $request->file('selfie'),
+            'selfies',
+            1200,
+            82
+        );
 
         $contactRequest = ContactRequest::create([
             'post_id'     => $post->id,
@@ -124,7 +131,8 @@ class ContactRequestController extends Controller
         $path = Storage::disk('local')->path($contactRequest->selfie_path);
         abort_unless(file_exists($path), 404, 'Selfie introuvable.');
 
-        return response()->file($path, ['Cache-Control' => 'private, max-age=3600']);
+        // Cache privé court (1h) — le selfie peut être supprimé/réessayé
+        return response()->file($path, ['Cache-Control' => 'private, max-age=3600, must-revalidate']);
     }
 
     public function approve(Request $request, Post $post, ContactRequest $contactRequest)

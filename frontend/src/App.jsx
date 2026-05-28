@@ -7,6 +7,7 @@ import ErrorBoundary     from './components/ErrorBoundary'
 import { ConfirmProvider } from './components/ConfirmDialog'
 import { UnreadProvider }  from './context/UnreadContext'
 import { usePageTracking } from './lib/usePageTracking'
+import { useOnlineStatus } from './lib/useOnlineStatus'
 
 import Home           from './pages/Home'
 import Login          from './pages/Login'
@@ -24,6 +25,7 @@ import AdminDash      from './pages/admin/Dashboard'
 
 function AppInner() {
   usePageTracking()
+  useOnlineStatus()
   return (
     <ConfirmProvider>
       <UnreadProvider>

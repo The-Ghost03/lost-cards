@@ -1,16 +1,60 @@
 {
-  "name": "LostCards",
+  "name": "LostCards — Retrouvez vos pièces à Abidjan",
   "short_name": "LostCards",
-  "description": "Retrouvez vos pièces perdues à Abidjan, Côte d'Ivoire",
+  "description": "Plateforme citoyenne pour retrouver les portefeuilles et pièces perdus à Abidjan, Côte d'Ivoire.",
+  "id": "lostcards-pwa",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "orientation": "portrait",
+  "display_override": ["standalone", "minimal-ui", "browser"],
+  "orientation": "portrait-primary",
   "theme_color": "#f97316",
-  "background_color": "#ffffff",
+  "background_color": "#0f172a",
   "lang": "fr",
+  "dir": "ltr",
+  "categories": ["lifestyle", "social", "utilities"],
   "icons": [
-    { "src": "/icons/pwa-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "/icons/pwa-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
-  ]
+    {
+      "src": "/icons/pwa-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/pwa-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/pwa-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Rechercher mon nom",
+      "short_name": "Rechercher",
+      "description": "Cherchez votre nom dans les annonces publiées",
+      "url": "/?utm_source=pwa_shortcut",
+      "icons": [{ "src": "/icons/pwa-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Signaler un portefeuille trouvé",
+      "short_name": "Signaler",
+      "description": "Publier une annonce pour un portefeuille trouvé",
+      "url": "/posts/create?utm_source=pwa_shortcut",
+      "icons": [{ "src": "/icons/pwa-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Mes messages",
+      "short_name": "Messages",
+      "description": "Voir mes conversations en cours",
+      "url": "/messages?utm_source=pwa_shortcut",
+      "icons": [{ "src": "/icons/pwa-192.png", "sizes": "192x192" }]
+    }
+  ],
+  "prefer_related_applications": false
 }

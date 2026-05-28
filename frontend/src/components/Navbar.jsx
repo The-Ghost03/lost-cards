@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 import { t } from '../lib/toast'
 import LogoIcon from './LogoIcon'
+import { useConfirm } from './ConfirmDialog'
 
 /* ── Badge dot ──────────────────────────────────────────────────── */
 function UnreadBadge({ count, small = false }) {
@@ -56,11 +57,20 @@ export default function Navbar() {
   const { total }        = useUnread()
   const location         = useLocation()
   const navigate         = useNavigate()
+  const confirm          = useConfirm()
 
   const isRetrouveur = user?.status === 'retrouveur' || user?.role === 'admin'
   const isAdmin      = user?.role === 'admin'
 
   const handleLogout = async () => {
+    const ok = await confirm({
+      title:        'Se déconnecter ?',
+      message:      `Vous quittez votre compte ${user?.name ? `(${user.name})` : ''}. Vous devrez vous reconnecter pour accéder à vos annonces et messages.`,
+      confirmLabel: 'Se déconnecter',
+      cancelLabel:  'Annuler',
+      danger:       true,
+    })
+    if (!ok) return
     await logout()
     t.success('Déconnecté')
     navigate('/')

@@ -12,8 +12,13 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
+    /**
+     * 'role' VOLONTAIREMENT EXCLU pour empêcher toute escalade de privilège
+     * par mass assignment. Modification du role uniquement via Admin\DashboardController
+     * avec forceFill() pour bypass intentionnel du guard.
+     */
     protected $fillable = [
-        'name', 'email', 'phone', 'password', 'role', 'status', 'uuid',
+        'name', 'email', 'phone', 'password', 'status', 'uuid',
         'device_type', 'device_os', 'device_browser', 'last_login_at', 'last_ip',
         'latent_at', 'last_reminder_at',
     ];

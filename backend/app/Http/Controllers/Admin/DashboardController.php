@@ -84,7 +84,11 @@ class DashboardController extends Controller
             'role'   => 'sometimes|in:admin,user',
             'status' => 'sometimes|in:chercheur,retrouveur',
         ]);
-        $user->update($data);
+        // 'role' n'est pas dans $fillable (protection mass assignment globale)
+        // → on bypass volontairement le guard via forceFill (intentionnel ici)
+        if (array_key_exists('role', $data))   $user->forceFill(['role'   => $data['role']]);
+        if (array_key_exists('status', $data)) $user->forceFill(['status' => $data['status']]);
+        $user->save();
         return response()->json($user->fresh());
     }
 }

@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rules\Password as PasswordRule;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
@@ -21,7 +22,7 @@ class AuthController extends Controller
             'name'     => 'required|string|max:100',
             'email'    => 'required|email|unique:users',
             'phone'    => 'required|string|max:20',
-            'password' => 'required|string|min:8|confirmed',
+            'password' => ['required', 'confirmed', PasswordRule::min(8)->mixedCase()->numbers()],
             'status'   => 'required|in:chercheur,retrouveur',
         ]);
 
@@ -31,7 +32,6 @@ class AuthController extends Controller
             'email'          => $data['email'],
             'phone'          => $data['phone'],
             'password'       => Hash::make($data['password']),
-            'role'           => 'user',
             'status'         => $data['status'],
             'device_type'    => $this->detectDeviceType($ua),
             'device_os'      => $this->detectOS($ua),
@@ -39,6 +39,8 @@ class AuthController extends Controller
             'last_login_at'  => now(),
             'last_ip'        => $request->ip(),
         ]);
+        // 'role' n'est pas dans $fillable → assignement explicite après création
+        $user->forceFill(['role' => 'user'])->save();
 
         return response()->json([
             'user'  => $user,
@@ -131,7 +133,7 @@ class AuthController extends Controller
         $data = $request->validate([
             'email'    => 'required|email',
             'token'    => 'required|string',
-            'password' => 'required|string|min:8|confirmed',
+            'password' => ['required', 'confirmed', PasswordRule::min(8)->mixedCase()->numbers()],
         ]);
 
         $row = DB::table('password_reset_tokens')->where('email', $data['email'])->first();

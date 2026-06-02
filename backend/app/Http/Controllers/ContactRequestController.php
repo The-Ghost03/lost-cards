@@ -137,6 +137,7 @@ class ContactRequestController extends Controller
 
     public function approve(Request $request, Post $post, ContactRequest $contactRequest)
     {
+        abort_unless($contactRequest->post_id === $post->id, 404);
         abort_unless($request->user()->id === $post->user_id, 403, 'Action non autorisée.');
         $contactRequest->update(['status' => 'approved']);
 
@@ -163,6 +164,7 @@ class ContactRequestController extends Controller
 
     public function reject(Request $request, Post $post, ContactRequest $contactRequest)
     {
+        abort_unless($contactRequest->post_id === $post->id, 404);
         abort_unless($request->user()->id === $post->user_id, 403, 'Action non autorisée.');
         $contactRequest->update(['status' => 'rejected']);
 

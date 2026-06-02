@@ -20,6 +20,10 @@ return Application::configure(basePath: dirname(__DIR__))
             \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
         ]);
 
+        // API-only backend : ne jamais tenter de rediriger vers une route web "login"
+        // (qui n'existe pas) — laisse remonter l'AuthenticationException -> 401 JSON.
+        $middleware->redirectGuestsTo(fn (Request $request) => $request->is('api/*') ? null : '/login');
+
         // Public tracking endpoint — no CSRF required
         $middleware->validateCsrfTokens(except: [
             'api/analytics/track',

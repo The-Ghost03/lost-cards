@@ -31,7 +31,9 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
     ports:
-      - "8083:80"
+      # Lié à loopback uniquement : nginx (host) fait le reverse-proxy TLS.
+      # Évite d'exposer le frontend HTTP en clair sur l'IP publique.
+      - "127.0.0.1:8083:80"
     depends_on:
       - backend
 

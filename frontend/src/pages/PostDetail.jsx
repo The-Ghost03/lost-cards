@@ -1,3 +1,4 @@
+import { usePageMeta } from '../lib/usePageMeta'
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { getPost, submitContact, approveContact, rejectContact, getContactRequests, markRecovered, getSelfie, deletePost } from '../api/posts'
@@ -33,6 +34,12 @@ export default function PostDetail() {
   const [enlargedSelfie, setEnlargedSelfie] = useState(null)
   const [msgText, setMsgText] = useState('')
   const [loading, setLoading] = useState(true)
+  const docLabel = post ? (DOC_LABELS[post.type_doc] || post.type_doc || 'Document') : ''
+  usePageMeta(post ? {
+    title: `${docLabel} perdu(e) — ${post.location || 'Abidjan'}`,
+    description: `Quelqu'un a perdu son ${(docLabel || 'document').toLowerCase()} à ${post.location || 'Abidjan'}. Vous l'avez trouvé ? Contactez le propriétaire sur LostCards.`,
+    url: `https://lost-card.softskills.ci/posts/${post.id}`,
+  } : {})
   const [sending, setSending] = useState(false)
   const [myRequest, setMyReq] = useState(null)
 

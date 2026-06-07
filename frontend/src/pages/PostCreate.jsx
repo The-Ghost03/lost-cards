@@ -1,3 +1,4 @@
+import { usePageMeta } from '../lib/usePageMeta'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { createPost } from '../api/posts'
@@ -25,6 +26,7 @@ const COMMUNES = [
 ]
 
 export default function PostCreate() {
+  usePageMeta({ title: 'Signaler un document trouvé' })
   const navigate = useNavigate()
   const [createdPost, setCreatedPost] = useState(null)
   const [photos, setPhotos] = useState([])   // [{ file, previewUrl }]

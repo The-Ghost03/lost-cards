@@ -1,3 +1,4 @@
+import { usePageMeta } from '../lib/usePageMeta'
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Search, Wallet, Shield, Bell, ArrowRight } from 'lucide-react'
@@ -7,6 +8,30 @@ import { Spinner, SkeletonCard } from '../components/Spinner'
 import { useAuth } from '../context/AuthContext'
 
 export default function Home() {
+  usePageMeta({
+    title: 'Retrouvez vos pièces perdues à Abidjan',
+    description: "Plateforme citoyenne gratuite pour retrouver CNI, permis, cartes bancaires et portefeuilles perdus à Abidjan, Côte d'Ivoire.",
+    url: 'https://lost-card.softskills.ci/',
+    jsonLd: {
+      '@context': 'https://schema.org',
+      '@graph': [
+        {
+          '@type': 'WebSite',
+          name: 'LostCards Abidjan',
+          url: 'https://lost-card.softskills.ci',
+          potentialAction: { '@type': 'SearchAction', target: 'https://lost-card.softskills.ci/?q={q}', 'query-input': 'required name=q' },
+        },
+        {
+          '@type': 'LocalBusiness',
+          name: 'LostCards Abidjan',
+          description: 'Plateforme de signalement et retrouvaille de documents perdus à Abidjan',
+          url: 'https://lost-card.softskills.ci',
+          areaServed: { '@type': 'City', name: 'Abidjan' },
+          address: { '@type': 'PostalAddress', addressLocality: 'Abidjan', addressCountry: 'CI' },
+        },
+      ],
+    },
+  })
   const [query, setQuery]           = useState('')
   const [posts, setPosts]           = useState([])
   const [loading, setLoading]       = useState(false)

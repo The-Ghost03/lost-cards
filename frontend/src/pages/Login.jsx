@@ -1,3 +1,4 @@
+import { usePageMeta } from '../lib/usePageMeta'
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
@@ -6,6 +7,7 @@ import { t } from '../lib/toast'
 import { useAsyncAction } from '../lib/useAsyncAction'
 
 export default function Login() {
+  usePageMeta({ title: 'Connexion' })
   const [form, setForm] = useState({ email: '', password: '' })
   const { login } = useAuth()
   const navigate = useNavigate()

@@ -1,3 +1,4 @@
+import { usePageMeta } from '../lib/usePageMeta'
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
@@ -6,6 +7,7 @@ import { t } from '../lib/toast'
 import { useAsyncAction } from '../lib/useAsyncAction'
 
 export default function Register() {
+  usePageMeta({ title: 'Créer un compte' })
   const [form, setForm] = useState({
     name: '', email: '', phone: '', password: '', password_confirmation: '', status: '',
   })

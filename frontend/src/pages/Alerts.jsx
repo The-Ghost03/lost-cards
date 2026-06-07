@@ -1,9 +1,11 @@
+import { usePageMeta } from '../lib/usePageMeta'
 import { useState, useEffect } from 'react'
 import { getAlerts, createAlert, deleteAlert } from '../api/alerts'
 import { Bell, Trash2, PlusCircle } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 export default function Alerts() {
+  usePageMeta({ title: 'Mes alertes' })
   const [alerts, setAlerts] = useState([])
   const [name, setName]     = useState('')
   const [loading, setLoading] = useState(true)

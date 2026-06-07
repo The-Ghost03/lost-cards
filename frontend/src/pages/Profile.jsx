@@ -1,3 +1,4 @@
+import { usePageMeta } from '../lib/usePageMeta'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
@@ -11,6 +12,7 @@ import {
 import PushBanner from '../components/PushBanner'
 
 export default function Profile() {
+  usePageMeta({ title: 'Mon profil' })
   const { user, updateStatus, deleteAccount, logout } = useAuth()
   const confirm  = useConfirm()
   const navigate = useNavigate()

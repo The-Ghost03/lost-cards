@@ -27,7 +27,7 @@
 
     <p>Si vous pensez qu'il s'agit d'une erreur, vous pouvez retenter en envoyant un selfie plus clair ou dans une meilleure lumière.</p>
 
-    <a class="btn" href="{{ config('app.frontend_url') }}/posts/{{ $post->id }}">
+    <a class="btn" href="{{ config('app.frontend_url') }}/posts/{{ $post->uuid }}">
       Réessayer →
     </a>
 

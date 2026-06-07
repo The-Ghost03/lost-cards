@@ -24,7 +24,7 @@
       "{{ $preview }}"
     </div>
 
-    <a class="btn" href="{{ config('app.frontend_url') }}/posts/{{ $post->id }}">
+    <a class="btn" href="{{ config('app.frontend_url') }}/posts/{{ $post->uuid }}">
       Répondre →
     </a>
 

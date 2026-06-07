@@ -28,7 +28,7 @@
 
     <p>Rendez-vous sur l'annonce pour voir l'adresse de récupération et envoyer un message au retrouveur.</p>
 
-    <a class="btn" href="{{ config('app.frontend_url') }}/posts/{{ $post->id }}">
+    <a class="btn" href="{{ config('app.frontend_url') }}/posts/{{ $post->uuid }}">
       Voir l'adresse et contacter →
     </a>
 

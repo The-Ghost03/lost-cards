@@ -28,7 +28,7 @@
 
     <p>Connectez-vous pour comparer le selfie avec la photo sur les pièces d'identité trouvées, puis approuver ou refuser la demande.</p>
 
-    <a class="btn" href="{{ config('app.frontend_url') }}/posts/{{ $post->id }}">
+    <a class="btn" href="{{ config('app.frontend_url') }}/posts/{{ $post->uuid }}">
       Vérifier le selfie →
     </a>
 

@@ -3,12 +3,14 @@ services:
     image: mysql:8.0
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-LostCards2024!}
+      # Pas de fallback : le déploiement échoue explicitement si la variable manque.
+      # Définir DB_PASSWORD dans un fichier .env à la racine (chmod 600) ou dans l'env shell.
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD est requis (fichier .env racine ou variable d'environnement)}
       MYSQL_DATABASE: ${DB_DATABASE:-lostcards}
     volumes:
       - db_data:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASSWORD:-LostCards2024!}"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASSWORD:?DB_PASSWORD est requis}"]
       interval: 5s
       timeout: 5s
       retries: 15
@@ -23,6 +25,32 @@ services:
       - selfies:/var/www/storage/app/selfies
     depends_on:
       db:
+        condition: service_healthy
+    healthcheck:
+      # /up = endpoint de santé natif Laravel 11 (bootstrap/app.php, health: '/up')
+      test: ["CMD", "curl", "-fsS", "http://localhost:8000/up"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  # Worker de queue dédié, supervisé par Docker (remplace l'ancien `& en arrière-plan`
+  # dans le CMD du backend, qui mourait silencieusement). Logs sur stdout/stderr
+  # → visibles via `docker compose logs -f queue`.
+  queue:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file: backend/.env
+    volumes:
+      - selfies:/var/www/storage/app/selfies
+    command: ["sh", "-c", "php artisan config:cache && exec php artisan queue:work --sleep=3 --tries=3 --timeout=120"]
+    depends_on:
+      db:
+        condition: service_healthy
+      backend:
+        # Attend que le backend soit healthy → garantit que les migrations sont passées.
         condition: service_healthy
 
   frontend:

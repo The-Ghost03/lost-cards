@@ -26,4 +26,10 @@ RUN mkdir -p bootstrap/cache \
 
 EXPOSE 8000
 
-CMD ["sh", "-c", "php artisan config:cache && php artisan migrate --force && php artisan db:seed --class=DatabaseSeeder --force && php artisan queue:work --sleep=3 --tries=3 --timeout=120 > /tmp/queue.log 2>&1 & php artisan serve --host=0.0.0.0 --port=8000"]
+# NOTE :
+# - Le seed est une opération manuelle one-shot (jamais au boot — il réinitialisait
+#   le mot de passe admin en prod) :
+#     docker compose -f docker-compose.prod.yml exec backend php artisan db:seed --class=DatabaseSeeder --force
+# - Le queue worker tourne dans un service dédié `queue` (docker-compose.prod.yml),
+#   supervisé par Docker (restart: unless-stopped), logs sur stdout.
+CMD ["sh", "-c", "php artisan config:cache && php artisan migrate --force && exec php artisan serve --host=0.0.0.0 --port=8000"]

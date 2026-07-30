@@ -5,9 +5,11 @@ namespace App\Http\Controllers;
 use App\Mail\PasswordResetNotification;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
@@ -16,6 +18,9 @@ use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
+    /** Durée de validité d'un lien de réinitialisation de mot de passe, en minutes. */
+    private const PASSWORD_RESET_TTL_MINUTES = 60;
+
     public function register(Request $request)
     {
         $data = $request->validate([
@@ -79,7 +84,11 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
-        try { $request->user()->currentAccessToken()->delete(); } catch (\Throwable) {}
+        try {
+            $request->user()->currentAccessToken()->delete();
+        } catch (\Throwable $e) {
+            Log::warning('Échec suppression du token courant au logout', ['user_id' => $request->user()?->id, 'exception' => $e]);
+        }
         return response()->json(['message' => 'Déconnecté.']);
     }
 
@@ -123,7 +132,9 @@ class AuthController extends Controller
 
         try {
             Mail::to($user->email)->send(new PasswordResetNotification($user, $resetUrl));
-        } catch (\Throwable) {}
+        } catch (\Throwable $e) {
+            Log::warning('Échec envoi mail de réinitialisation de mot de passe', ['user_id' => $user->id, 'exception' => $e]);
+        }
 
         return response()->json(['message' => 'Si un compte existe, un email a été envoyé.']);
     }
@@ -142,8 +153,14 @@ class AuthController extends Controller
             throw ValidationException::withMessages(['token' => ['Lien invalide ou expiré.']]);
         }
 
-        // 60 minute expiration
-        if (now()->diffInMinutes($row->created_at) > 60) {
+        // Expiration à 60 min. Comparaison par instants absolus : NE PAS utiliser
+        // diffInMinutes(), qui est signé en Carbon 3 (now()->diffInMinutes(passé)
+        // renvoie une valeur négative, donc « > 60 » ne serait jamais vrai et les
+        // liens de reset n'expireraient jamais). created_at est un string ici
+        // (requête DB brute), d'où le Carbon::parse. created_at absent => expiré.
+        $createdAt = $row->created_at ? Carbon::parse($row->created_at) : null;
+
+        if ($createdAt === null || $createdAt->lt(now()->subMinutes(self::PASSWORD_RESET_TTL_MINUTES))) {
             DB::table('password_reset_tokens')->where('email', $data['email'])->delete();
             throw ValidationException::withMessages(['token' => ['Le lien a expiré. Veuillez en demander un nouveau.']]);
         }

@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Services\ImageOptimizer;
 use App\Services\PushService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 
@@ -108,15 +109,21 @@ class ContactRequestController extends Controller
             $cr        = ContactRequest::find($crId);
             $post      = Post::find($postId);
             if (!$finder || !$post) return;
-            try { Mail::to($finder->email)->send(new SelfieSubmittedNotification($post, $finder, $requester, $cr)); } catch (\Throwable) {}
+            try {
+                Mail::to($finder->email)->send(new SelfieSubmittedNotification($post, $finder, $requester, $cr));
+            } catch (\Throwable $e) {
+                Log::warning('Échec envoi mail "selfie soumis" au retrouveur', ['post_id' => $postId, 'user_id' => $finderId, 'exception' => $e]);
+            }
             try {
                 app(PushService::class)->sendToUser(
                     $finder,
                     "📸 Nouvelle demande sur votre annonce",
                     "{$requester->name} a envoyé un selfie pour vérifier l'identité.",
-                    "/posts/{$postId}"
+                    "/posts/{$post->uuid}"
                 );
-            } catch (\Throwable) {}
+            } catch (\Throwable $e) {
+                Log::warning('Échec envoi push "selfie soumis" au retrouveur', ['post_id' => $postId, 'user_id' => $finderId, 'exception' => $e]);
+            }
         });
 
         return response()->json($contactRequest, 201);
@@ -148,15 +155,21 @@ class ContactRequestController extends Controller
             $requester = User::find($requesterId);
             $post      = Post::find($postId);
             if (!$requester || !$post) return;
-            try { Mail::to($requester->email)->send(new ContactApprovedNotification($post, $requester)); } catch (\Throwable) {}
+            try {
+                Mail::to($requester->email)->send(new ContactApprovedNotification($post, $requester));
+            } catch (\Throwable $e) {
+                Log::warning('Échec envoi mail "demande approuvée" au chercheur', ['post_id' => $postId, 'user_id' => $requesterId, 'exception' => $e]);
+            }
             try {
                 app(PushService::class)->sendToUser(
                     $requester,
                     "✅ Votre identité a été vérifiée",
                     "Vous pouvez maintenant discuter avec le retrouveur.",
-                    "/messages/{$postId}"
+                    "/messages/{$post->uuid}"
                 );
-            } catch (\Throwable) {}
+            } catch (\Throwable $e) {
+                Log::warning('Échec envoi push "demande approuvée" au chercheur', ['post_id' => $postId, 'user_id' => $requesterId, 'exception' => $e]);
+            }
         });
 
         return response()->json($contactRequest);
@@ -175,15 +188,21 @@ class ContactRequestController extends Controller
             $requester = User::find($requesterId);
             $post      = Post::find($postId);
             if (!$requester || !$post) return;
-            try { Mail::to($requester->email)->send(new ContactRejectedNotification($post, $requester)); } catch (\Throwable) {}
+            try {
+                Mail::to($requester->email)->send(new ContactRejectedNotification($post, $requester));
+            } catch (\Throwable $e) {
+                Log::warning('Échec envoi mail "demande rejetée" au chercheur', ['post_id' => $postId, 'user_id' => $requesterId, 'exception' => $e]);
+            }
             try {
                 app(PushService::class)->sendToUser(
                     $requester,
                     "ℹ️ Votre selfie n'a pas été validé",
                     "Le retrouveur n'a pas reconnu votre visage. Vous pouvez réessayer.",
-                    "/posts/{$postId}"
+                    "/posts/{$post->uuid}"
                 );
-            } catch (\Throwable) {}
+            } catch (\Throwable $e) {
+                Log::warning('Échec envoi push "demande rejetée" au chercheur', ['post_id' => $postId, 'user_id' => $requesterId, 'exception' => $e]);
+            }
         });
 
         return response()->json($contactRequest);

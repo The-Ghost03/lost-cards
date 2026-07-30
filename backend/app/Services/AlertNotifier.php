@@ -6,6 +6,7 @@ use App\Mail\WalletFoundNotification;
 use App\Models\AlertSubscription;
 use App\Models\Post;
 use App\Models\User;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 class AlertNotifier
@@ -26,15 +27,19 @@ class AlertNotifier
         $sendAlert = function (User $user) use ($post) {
             try {
                 Mail::to($user->email)->send(new WalletFoundNotification($post, $user));
-            } catch (\Throwable) {}
+            } catch (\Throwable $e) {
+                Log::warning('Échec envoi mail d\'alerte "portefeuille trouvé"', ['post_id' => $post->id, 'user_id' => $user->id, 'exception' => $e]);
+            }
             try {
                 $this->push->sendToUser(
                     $user,
                     "🔑 Un portefeuille à votre nom a été trouvé",
                     "Un retrouveur a signalé un portefeuille à {$post->location}. Vérifiez si c'est le vôtre.",
-                    "/posts/{$post->id}"
+                    "/posts/{$post->uuid}"
                 );
-            } catch (\Throwable) {}
+            } catch (\Throwable $e) {
+                Log::warning('Échec envoi push d\'alerte "portefeuille trouvé"', ['post_id' => $post->id, 'user_id' => $user->id, 'exception' => $e]);
+            }
         };
 
         // 1. Abonnés explicites

@@ -8,6 +8,7 @@ use App\Models\Post;
 use App\Models\User;
 use App\Services\PushService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 class MessageController extends Controller
@@ -101,15 +102,21 @@ class MessageController extends Controller
             $sender   = User::find($senderId);
             $post     = Post::find($postId);
             if (!$receiver || !$sender || !$post) return;
-            try { Mail::to($receiver->email)->send(new NewMessageNotification($post, $sender, $receiver, $preview)); } catch (\Throwable) {}
+            try {
+                Mail::to($receiver->email)->send(new NewMessageNotification($post, $sender, $receiver, $preview));
+            } catch (\Throwable $e) {
+                Log::warning('Échec envoi mail "nouveau message"', ['post_id' => $postId, 'receiver_id' => $receiverId, 'exception' => $e]);
+            }
             try {
                 app(PushService::class)->sendToUser(
                     $receiver,
                     "💬 {$sender->name}",
                     $preview,
-                    "/messages/{$postId}"
+                    "/messages/{$post->uuid}"
                 );
-            } catch (\Throwable) {}
+            } catch (\Throwable $e) {
+                Log::warning('Échec envoi push "nouveau message"', ['post_id' => $postId, 'receiver_id' => $receiverId, 'exception' => $e]);
+            }
         });
 
         return response()->json($message->load('sender:id,name'), 201);

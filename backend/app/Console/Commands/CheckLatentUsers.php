@@ -6,6 +6,7 @@ use App\Models\Post;
 use App\Models\User;
 use App\Services\PushService;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 class CheckLatentUsers extends Command
@@ -67,7 +68,9 @@ class CheckLatentUsers extends Command
                     }
                 );
                 $emailsSent++;
-            } catch (\Throwable) {}
+            } catch (\Throwable $e) {
+                Log::warning('Échec envoi mail de rappel utilisateur latent', ['user_id' => $user->id, 'exception' => $e]);
+            }
 
             // Push
             try {
@@ -78,7 +81,9 @@ class CheckLatentUsers extends Command
                     '/posts/create'
                 );
                 if ($count > 0) $pushesSent += $count;
-            } catch (\Throwable) {}
+            } catch (\Throwable $e) {
+                Log::warning('Échec envoi push de rappel utilisateur latent', ['user_id' => $user->id, 'exception' => $e]);
+            }
 
             $user->update(['last_reminder_at' => $now]);
         }

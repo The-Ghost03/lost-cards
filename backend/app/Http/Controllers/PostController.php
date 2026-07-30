@@ -25,6 +25,9 @@ class PostController extends Controller
         }
 
         if ($request->boolean('my')) {
+            // Route publique : sans utilisateur authentifié, "mes annonces" n'a pas de sens → 401
+            // (cohérent avec le rendu JSON de AuthenticationException dans bootstrap/app.php)
+            abort_unless($request->user(), 401, 'Non authentifié.');
             $query->where('user_id', $request->user()->id);
         } else {
             $query->where('status', 'active');

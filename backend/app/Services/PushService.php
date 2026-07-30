@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\PushSubscription;
 use App\Models\User;
+use Illuminate\Support\Facades\Log;
 use Minishlink\WebPush\Subscription;
 use Minishlink\WebPush\WebPush;
 
@@ -59,8 +60,9 @@ class PushService
                     'contentEncoding' => 'aes128gcm',
                 ]);
                 $client->queueNotification($webSub, $payload);
-            } catch (\Throwable) {
-                // ignore les subscriptions malformées
+            } catch (\Throwable $e) {
+                // ignore les subscriptions malformées (mais on trace pour diagnostic)
+                Log::warning('Subscription push malformée ignorée', ['subscription_id' => $sub->id, 'user_id' => $user->id, 'exception' => $e]);
             }
         }
 

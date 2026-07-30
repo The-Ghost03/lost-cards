@@ -22,7 +22,13 @@ services:
     restart: unless-stopped
     env_file: backend/.env
     volumes:
-      - selfies:/var/www/storage/app/selfies
+      # ⚠ Monté sur app/private, PAS app/selfies : le disque `local` de Laravel a
+      # pour racine storage_path('app/private') (config/filesystems.php). L'ancien
+      # montage sur app/selfies visait un répertoire que l'application n'écrit
+      # jamais — selfies ET photos d'annonces vivaient donc dans la couche
+      # éphémère du conteneur, détruite à chaque rebuild, et la sauvegarde
+      # archivait un répertoire vide en signalant un succès.
+      - selfies:/var/www/storage/app/private
     depends_on:
       db:
         condition: service_healthy
@@ -44,7 +50,13 @@ services:
     restart: unless-stopped
     env_file: backend/.env
     volumes:
-      - selfies:/var/www/storage/app/selfies
+      # ⚠ Monté sur app/private, PAS app/selfies : le disque `local` de Laravel a
+      # pour racine storage_path('app/private') (config/filesystems.php). L'ancien
+      # montage sur app/selfies visait un répertoire que l'application n'écrit
+      # jamais — selfies ET photos d'annonces vivaient donc dans la couche
+      # éphémère du conteneur, détruite à chaque rebuild, et la sauvegarde
+      # archivait un répertoire vide en signalant un succès.
+      - selfies:/var/www/storage/app/private
     command: ["sh", "-c", "php artisan config:cache && exec php artisan queue:work --sleep=3 --tries=3 --timeout=120"]
     depends_on:
       db:

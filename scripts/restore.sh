@@ -85,18 +85,29 @@ if [ -n "$DB_DUMP" ]; then
     log "Base restaurée."
 fi
 
-# ── 2. Restauration selfies ──────────────────────────────────────────────────
+# ── 2. Restauration des fichiers utilisateurs ────────────────────────────────
+# Cible : storage/app/private (racine du disque `local` Laravel), et non
+# storage/app/selfies — voir la note dans backup.sh. Les archives produites
+# AVANT le 30/07/2026 contiennent un dossier `selfies/` et sont vides : elles
+# ne sont pas restaurables ici, c'est normal.
 if [ -n "$SELFIES_ARCHIVE" ]; then
     [ -f "$SELFIES_ARCHIVE" ] || fail "archive introuvable : $SELFIES_ARCHIVE"
     gzip -t "$SELFIES_ARCHIVE" || fail "archive corrompue (gzip invalide) : $SELFIES_ARCHIVE"
 
-    log "Restauration du volume selfies..."
+    RACINE_ARCHIVE="$(tar tzf "$SELFIES_ARCHIVE" | head -n1 | cut -d/ -f1)"
+    if [ "$RACINE_ARCHIVE" != "private" ]; then
+        fail "archive au format obsolète (racine « ${RACINE_ARCHIVE} », attendu « private »).
+       Les sauvegardes antérieures au 30/07/2026 ciblaient un répertoire que
+       l'application n'écrivait pas : elles sont vides et sans valeur."
+    fi
+
+    log "Restauration des fichiers utilisateurs (selfies + photos d'annonces)..."
     compose exec -T backend sh -c \
-        'rm -rf /var/www/storage/app/selfies.old \
-         && { [ -d /var/www/storage/app/selfies ] && mv /var/www/storage/app/selfies /var/www/storage/app/selfies.old || true; }'
+        'rm -rf /var/www/storage/app/private.old \
+         && { [ -d /var/www/storage/app/private ] && mv /var/www/storage/app/private /var/www/storage/app/private.old || true; }'
     compose exec -T backend sh -c 'tar xzf - -C /var/www/storage/app' < "$SELFIES_ARCHIVE"
-    compose exec -T backend sh -c 'rm -rf /var/www/storage/app/selfies.old'
-    log "Selfies restaurés."
+    compose exec -T backend sh -c 'rm -rf /var/www/storage/app/private.old'
+    log "Fichiers utilisateurs restaurés."
 fi
 
 log "Restauration terminée. Vérifier l'application (login, affichage des selfies)."

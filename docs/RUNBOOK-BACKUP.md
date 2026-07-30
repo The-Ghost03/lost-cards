@@ -42,6 +42,44 @@ rm /root/lostcards-backup.sh
 ⚠️ **Sauvegarde hors-site : toujours manquante.** Les archives sont sur le même
 disque que la base — une panne du VPS reste une perte totale. Voir §4.
 
+### 0.1 Incident du 30/07/2026 — fichiers hors volume (corrigé)
+
+L'audit sécurité a révélé que **le volume Docker était monté au mauvais endroit** :
+le disque `local` de Laravel a pour racine `storage_path('app/private')`
+(`backend/config/filesystems.php`), alors que le volume était monté sur
+`storage/app/selfies`, répertoire que l'application n'écrit jamais.
+
+Conséquences constatées en production :
+- Les 4 photos d'annonce existantes vivaient dans la **couche éphémère du
+  conteneur** : un `docker compose up --build` les aurait détruites définitivement.
+- Les selfies de vérification d'identité auraient subi le même sort.
+- `backup.sh` archivait le répertoire vide **en retournant un succès** : la
+  sauvegarde des fichiers était en échec silencieux depuis sa mise en place.
+
+Actions réalisées le 30/07/2026 :
+- Fichiers récupérés hors du conteneur : `/root/lostcards-rescue-20260730/`
+  et archive `/var/backups/lostcards/storage_private_20260730.tar.gz`.
+- Montage corrigé vers `app/private` dans `docker-compose.prod.yml`.
+- `backup.sh` archive désormais `private` et **compte les fichiers**, en
+  journalisant explicitement une archive vide au lieu de la taire.
+- `restore.sh` refuse les archives au format obsolète (racine `selfies/`).
+
+**⚠️ À faire au prochain déploiement**, dans cet ordre — sinon les photos
+disparaissent de l'application (le volume, vide, masquera le répertoire) :
+
+```bash
+# 1. Déployer (le volume est désormais monté sur app/private)
+docker compose -f docker-compose.prod.yml up -d --build
+
+# 2. Réinjecter les fichiers récupérés DANS le volume
+docker compose -f docker-compose.prod.yml exec -T backend \
+  sh -c 'tar xzf - -C /var/www/storage/app' < /var/backups/lostcards/storage_private_20260730.tar.gz
+
+# 3. Vérifier
+docker compose -f docker-compose.prod.yml exec backend \
+  find /var/www/storage/app/private -type f
+```
+
 ---
 
 ## 1. Ce qui est sauvegardé

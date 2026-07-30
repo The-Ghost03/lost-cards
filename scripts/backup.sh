@@ -70,18 +70,32 @@ mv "${DB_DUMP}.tmp" "$DB_DUMP"
 chmod 600 "$DB_DUMP"
 log "Dump MySQL OK ($(du -h "$DB_DUMP" | cut -f1))"
 
-# ── 2. Archive du volume selfies ─────────────────────────────────────────────
-# Via le conteneur backend (le volume y est monté sur /var/www/storage/app/selfies) :
-# indépendant du nom de projet compose qui préfixe le nom du volume Docker.
-log "Archive selfies -> ${SELFIES_ARCHIVE}"
-if compose exec -T backend sh -c 'tar czf - -C /var/www/storage/app selfies' \
+# ── 2. Archive des fichiers utilisateurs (selfies + photos d'annonces) ───────
+# Chemin = racine du disque `local` de Laravel : storage_path('app/private')
+# (voir backend/config/filesystems.php). C'est là que sont écrits les selfies
+# ET les photos d'annonces — NE PAS revenir à app/selfies, qui n'est jamais
+# écrit par l'application et produisait une archive vide « en succès ».
+log "Archive fichiers utilisateurs -> ${SELFIES_ARCHIVE}"
+if compose exec -T backend sh -c 'tar czf - -C /var/www/storage/app private' \
     > "${SELFIES_ARCHIVE}.tmp"; then
+    if ! gzip -t "${SELFIES_ARCHIVE}.tmp" 2>/dev/null; then
+        rm -f "${SELFIES_ARCHIVE}.tmp"
+        fail "archive fichiers corrompue (gzip invalide)"
+    fi
+    # Garde-fou : une archive sans aucun fichier régulier signale un mauvais
+    # chemin (le bug corrigé le 30/07/2026) et non une absence de données.
+    # Le seuil est à 0 fichier : un déploiement neuf légitime peut être vide,
+    # mais on le journalise explicitement au lieu de le taire.
+    NB_FICHIERS="$(tar tzf "${SELFIES_ARCHIVE}.tmp" | grep -cv '/$' || true)"
     mv "${SELFIES_ARCHIVE}.tmp" "$SELFIES_ARCHIVE"
     chmod 600 "$SELFIES_ARCHIVE"
-    log "Archive selfies OK ($(du -h "$SELFIES_ARCHIVE" | cut -f1))"
+    if [ "$NB_FICHIERS" -eq 0 ]; then
+        log "ATTENTION : archive fichiers VIDE (0 fichier). Vérifier le montage du volume."
+    fi
+    log "Archive fichiers OK — ${NB_FICHIERS} fichier(s), $(du -h "$SELFIES_ARCHIVE" | cut -f1)"
 else
     rm -f "${SELFIES_ARCHIVE}.tmp"
-    fail "archive selfies échouée (conteneur backend arrêté ?)"
+    fail "archive fichiers échouée (conteneur backend arrêté ?)"
 fi
 
 # ── 3. Rotation ──────────────────────────────────────────────────────────────

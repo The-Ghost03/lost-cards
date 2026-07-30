@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="./vendor/phpunit/phpunit/phpunit.xsd"
+         bootstrap="vendor/autoload.php"
+         colors="true"
+         cacheDirectory=".phpunit.cache"
+>
+    <testsuites>
+        <testsuite name="Feature">
+            <directory>tests/Feature</directory>
+        </testsuite>
+    </testsuites>
+    <source>
+        <include>
+            <directory>app</directory>
+        </include>
+    </source>
+    <php>
+        <!--
+            Base de test 100% isolée : SQLite en mémoire, aucune dépendance
+            à un serveur MySQL. RefreshDatabase (voir tests/Feature/*) migre
+            le schéma avant chaque test et roule chaque test dans une
+            transaction annulée à la fin.
+
+            IMPORTANT — voir le rapport QA (P1-S7) : la migration
+            `database/migrations/2024_01_01_000005_selfie_verification.php`
+            utilise du SQL brut MySQL (`ALTER TABLE ... MODIFY ...`) qui est
+            incompatible avec le driver SQLite et fera échouer `migrate`
+            tant qu'elle n'aura pas été rendue portable (Schema::table(...)
+            ->nullable()->change(), ou bloc conditionné par
+            DB::getDriverName()). Voir le rapport de la story P1-S7.
+        -->
+        <env name="APP_ENV" value="testing"/>
+        <env name="APP_KEY" value="base64:s7eQbtB/nyzHNLFnlNdAmyKu6yumGgBjtNqEC1isMQA="/>
+        <env name="APP_DEBUG" value="true"/>
+        <env name="BCRYPT_ROUNDS" value="4"/>
+        <env name="CACHE_STORE" value="array"/>
+        <env name="DB_CONNECTION" value="sqlite"/>
+        <env name="DB_DATABASE" value=":memory:"/>
+        <env name="MAIL_MAILER" value="array"/>
+        <env name="QUEUE_CONNECTION" value="sync"/>
+        <env name="SESSION_DRIVER" value="array"/>
+        <env name="FILESYSTEM_DISK" value="local"/>
+        <env name="VAPID_PUBLIC_KEY" value=""/>
+        <env name="VAPID_PRIVATE_KEY" value=""/>
+        <env name="SEED_ADMIN_PASSWORD" value=""/>
+        <env name="SEED_DEMO_PASSWORD" value=""/>
+    </php>
+</phpunit>

@@ -12,6 +12,13 @@ frontend/dist/
 frontend/.env.local
 frontend/.env.production
 
+# Secrets d'exécution à la racine (DB_PASSWORD lu par docker-compose.prod.yml)
+/.env
+
+# Overrides docker locaux et cache Composer du conteneur de dev
+/docker-compose.override.yml
+backend/.composer-home/
+
 # System
 .DS_Store
 Thumbs.db

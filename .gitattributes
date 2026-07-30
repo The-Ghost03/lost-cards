@@ -1,0 +1,7 @@
+# Les scripts shell sont exécutés sur le VPS Linux : un CRLF introduit par un
+# poste Windows casserait le shebang ("bad interpreter: /usr/bin/env bash^M").
+*.sh text eol=lf
+
+# Idem pour les fichiers consommés par Docker/Compose côté Linux.
+Dockerfile text eol=lf
+*.yml text eol=lf

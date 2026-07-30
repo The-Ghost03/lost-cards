@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { getConversations } from '../api/messages'
 import { useUnread } from '../context/UnreadContext'
 import { MessageCircle, Wallet, ChevronRight } from 'lucide-react'
+import { Spinner } from '../components/Spinner'
 import { formatDistanceToNow } from 'date-fns'
 import { fr } from 'date-fns/locale'
 
@@ -21,8 +22,8 @@ export default function Messages() {
 
   if (loading) {
     return (
-      <div className="flex justify-center pt-20">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500" />
+      <div className="flex justify-center pt-20 text-orange-500">
+        <Spinner size={32} />
       </div>
     )
   }
@@ -38,7 +39,7 @@ export default function Messages() {
         <div className="card text-center py-12">
           <MessageCircle size={36} className="mx-auto text-gray-300 mb-3" />
           <p className="text-gray-600 font-medium">Aucune conversation</p>
-          <p className="text-gray-400 text-xs mt-1">
+          <p className="text-gray-400 text-meta mt-1">
             Vos messages apparaîtront ici une fois qu'une demande de contact est approuvée.
           </p>
         </div>
@@ -68,7 +69,7 @@ export default function Messages() {
                   }`}>
                     {convo.post?.name_partial}
                   </p>
-                  <p className={`text-xs truncate ${
+                  <p className={`text-meta truncate ${
                     hasUnread ? 'text-gray-600 font-medium' : 'text-gray-400'
                   }`}>
                     {convo.last_message?.content || 'Pas encore de message'}
@@ -78,7 +79,7 @@ export default function Messages() {
                 {/* Meta */}
                 <div className="shrink-0 flex flex-col items-end gap-1">
                   {convo.last_message && (
-                    <span className="text-xs text-gray-400">
+                    <span className="text-meta text-gray-400">
                       {formatDistanceToNow(new Date(convo.last_message.created_at), {
                         addSuffix: false, locale: fr,
                       })}

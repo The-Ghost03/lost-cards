@@ -73,7 +73,7 @@ export default function Home() {
     <div>
       {/* Hero */}
       <div className="py-10 text-center">
-        <div className="inline-flex items-center gap-2 bg-orange-50 text-orange-600 text-xs font-semibold px-3 py-1.5 rounded-full mb-4">
+        <div className="inline-flex items-center gap-2 bg-orange-50 text-orange-600 text-meta font-semibold px-3 py-1.5 rounded-full mb-4">
           🇨🇮 Abidjan, Côte d'Ivoire
         </div>
         <h1 className="text-3xl font-bold text-gray-900 mb-3 leading-tight">
@@ -108,7 +108,7 @@ export default function Home() {
         <div className="bg-orange-500 rounded-2xl p-4 mb-8 flex items-center justify-between gap-3">
           <div>
             <p className="font-semibold text-white text-sm">Vous avez trouvé un portefeuille ?</p>
-            <p className="text-orange-100 text-xs mt-0.5">Inscrivez-vous et aidez quelqu'un à retrouver ses pièces.</p>
+            <p className="text-orange-100 text-meta mt-0.5">Inscrivez-vous et aidez quelqu'un à retrouver ses pièces.</p>
           </div>
           <button onClick={() => navigate('/register')} className="shrink-0 bg-white text-orange-500 font-semibold text-sm px-3 py-2 rounded-xl flex items-center gap-1">
             Signaler <ArrowRight size={14} />
@@ -121,12 +121,12 @@ export default function Home() {
         {[
           { icon: <Wallet size={20} className="text-orange-500" />, title: "Quelqu'un signale", desc: "Le retrouveur publie l'annonce avec les infos partielles du portefeuille." },
           { icon: <Search size={20} className="text-orange-500" />, title: 'Le proprio cherche', desc: 'Il tape son nom et trouve l\'annonce correspondante.' },
-          { icon: <Shield size={20} className="text-orange-500" />, title: 'Contact sécurisé', desc: 'Une question secrète vérifie l\'identité avant d\'ouvrir le chat.' },
+          { icon: <Shield size={20} className="text-orange-500" />, title: 'Contact sécurisé', desc: 'Un selfie vérifie l\'identité avant d\'ouvrir le chat.' },
         ].map((step, i) => (
           <div key={i} className="card text-center p-3">
             <div className="flex justify-center mb-2">{step.icon}</div>
-            <p className="font-semibold text-xs text-gray-800 mb-1">{step.title}</p>
-            <p className="text-xs text-gray-500 leading-relaxed">{step.desc}</p>
+            <p className="font-semibold text-meta text-gray-800 mb-1">{step.title}</p>
+            <p className="text-meta text-gray-500 leading-relaxed">{step.desc}</p>
           </div>
         ))}
       </div>
@@ -155,7 +155,7 @@ export default function Home() {
           <div className="card text-center py-10">
             <Bell size={32} className="mx-auto text-gray-300 mb-3" />
             <p className="text-gray-600 font-medium text-sm">Aucun portefeuille trouvé pour ce nom</p>
-            <p className="text-gray-400 text-xs mt-1 mb-4">Créez une alerte pour être notifié si quelqu'un le signale.</p>
+            <p className="text-gray-400 text-meta mt-1 mb-4">Créez une alerte pour être notifié si quelqu'un le signale.</p>
             <button onClick={() => navigate('/alerts')} className="btn-primary text-sm">
               Créer une alerte
             </button>

@@ -64,7 +64,7 @@ export default function Profile() {
             <Mail size={12} /> {user?.email}
           </p>
           {isAdmin && (
-            <span className="text-xs bg-red-100 text-red-600 font-semibold px-2 py-0.5 rounded-full mt-1 inline-block">
+            <span className="text-meta bg-red-100 text-red-600 font-semibold px-2 py-0.5 rounded-full mt-1 inline-block">
               Administrateur
             </span>
           )}
@@ -74,7 +74,7 @@ export default function Profile() {
       {/* ── Mon statut ────────────────────────────────────────────── */}
       {!isAdmin && (
         <div className="card">
-          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">
+          <p className="text-meta font-semibold text-gray-500 uppercase tracking-wide mb-3">
             Mon profil
           </p>
 
@@ -99,7 +99,7 @@ export default function Profile() {
               <span className={`font-semibold text-sm ${isChercheur ? 'text-orange-700' : 'text-gray-700'}`}>
                 Chercheur
               </span>
-              <span className="text-xs text-gray-500 leading-snug">
+              <span className="text-meta text-gray-500 leading-snug">
                 J'ai perdu mon portefeuille et je le cherche.
               </span>
             </button>
@@ -124,14 +124,14 @@ export default function Profile() {
               <span className={`font-semibold text-sm ${isRetrouveur ? 'text-green-700' : 'text-gray-700'}`}>
                 Retrouveur
               </span>
-              <span className="text-xs text-gray-500 leading-snug">
+              <span className="text-meta text-gray-500 leading-snug">
                 J'ai trouvé un portefeuille et je veux le rendre.
               </span>
             </button>
           </div>
 
           {statusLoading && (
-            <p className="text-xs text-gray-400 text-center mt-3">Mise à jour...</p>
+            <p className="text-meta text-gray-400 text-center mt-3">Mise à jour...</p>
           )}
         </div>
       )}
@@ -141,7 +141,7 @@ export default function Profile() {
 
       {/* ── Sécurité ──────────────────────────────────────────────── */}
       <div className="card">
-        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">
+        <p className="text-meta font-semibold text-gray-500 uppercase tracking-wide mb-3">
           Sécurité
         </p>
 
@@ -173,7 +173,7 @@ export default function Profile() {
       {/* ── Zone de danger ────────────────────────────────────────── */}
       {!isAdmin && (
         <div className="card border border-red-100">
-          <p className="text-xs font-semibold text-red-400 uppercase tracking-wide mb-3">
+          <p className="text-meta font-semibold text-red-400 uppercase tracking-wide mb-3">
             Zone de danger
           </p>
 
@@ -187,7 +187,7 @@ export default function Profile() {
             </button>
           ) : (
             <div className="space-y-3">
-              <p className="text-xs text-gray-500">
+              <p className="text-meta text-gray-500">
                 Confirmez avec votre mot de passe pour supprimer définitivement votre compte.
               </p>
               <input

@@ -60,17 +60,17 @@ export default function InstallPrompt() {
         <div className="flex-1 min-w-0">
           <p className="font-bold text-sm text-gray-900">Installer LostCards</p>
           {iosHint ? (
-            <p className="text-xs text-gray-500 flex items-center gap-1 mt-0.5">
+            <p className="text-meta text-gray-500 flex items-center gap-1 mt-0.5">
               Appuyez sur <Share size={12} className="inline" /> puis "Sur l'écran d'accueil"
             </p>
           ) : (
-            <p className="text-xs text-gray-500 mt-0.5">Accès rapide en un clic</p>
+            <p className="text-meta text-gray-500 mt-0.5">Accès rapide en un clic</p>
           )}
         </div>
         {!iosHint && (
           <button
             onClick={install}
-            className="btn-primary text-xs py-2 px-3 shrink-0 flex items-center gap-1 animate-pulse-glow"
+            className="btn-primary text-meta py-2 px-3 shrink-0 flex items-center gap-1 animate-pulse-glow"
           >
             <Download size={14} /> Installer
           </button>

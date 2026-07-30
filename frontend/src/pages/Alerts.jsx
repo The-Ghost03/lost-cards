@@ -58,7 +58,9 @@ export default function Alerts() {
 
       {/* Add alert form */}
       <form onSubmit={handleAdd} className="card mb-6 flex gap-2">
+        <label htmlFor="alert-name" className="sr-only">Nom à surveiller</label>
         <input
+          id="alert-name"
           type="text"
           className="input flex-1"
           placeholder="Ex: KOUAMÉ Jean (votre nom tel qu'écrit sur vos cartes)"
@@ -79,7 +81,7 @@ export default function Alerts() {
         <div className="card text-center py-10">
           <Bell size={32} className="mx-auto text-gray-300 mb-3" />
           <p className="text-gray-600 font-medium text-sm">Aucune alerte configurée</p>
-          <p className="text-gray-400 text-xs mt-1">Ajoutez votre nom pour être notifié automatiquement.</p>
+          <p className="text-gray-400 text-meta mt-1">Ajoutez votre nom pour être notifié automatiquement.</p>
         </div>
       ) : (
         <div className="flex flex-col gap-2">
@@ -91,10 +93,10 @@ export default function Alerts() {
                 </div>
                 <div>
                   <p className="font-semibold text-gray-800 text-sm">{alert.name}</p>
-                  <p className="text-xs text-gray-400">Alerte active · notifications email</p>
+                  <p className="text-meta text-gray-400">Alerte active · notifications email</p>
                 </div>
               </div>
-              <button onClick={() => handleDelete(alert.id)} className="text-gray-300 hover:text-red-500 transition-colors p-1">
+              <button onClick={() => handleDelete(alert.id)} className="text-gray-300 hover:text-red-500 transition-colors p-1" aria-label={`Supprimer l'alerte ${alert.name}`}>
                 <Trash2 size={15} />
               </button>
             </div>

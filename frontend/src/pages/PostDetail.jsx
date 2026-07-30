@@ -7,6 +7,7 @@ import { useAuth } from '../context/AuthContext'
 import { MapPin, FileText, Calendar, HelpCircle, Send, CheckCircle, XCircle, MessageCircle, ChevronLeft, Camera, Trash2, Shield, Share2 } from 'lucide-react'
 import { sharePost } from '../lib/share'
 import SelfieCapture from '../components/SelfieCapture'
+import { Spinner } from '../components/Spinner'
 import { formatDistanceToNow } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { t } from '../lib/toast'
@@ -154,7 +155,7 @@ export default function PostDetail() {
     }
   })
 
-  if (loading) return <div className="flex justify-center pt-20"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500" /></div>
+  if (loading) return <div className="flex justify-center pt-20 text-orange-500"><Spinner size={32} /></div>
   if (!post)   return <div className="pt-10 text-center text-gray-500">Annonce introuvable</div>
 
   const isOwner       = user?.id === post.user_id
@@ -196,7 +197,7 @@ export default function PostDetail() {
         <div className="flex items-start justify-between mb-3 gap-2">
           <div className="min-w-0">
             <h1 className="text-xl font-bold text-gray-900">{post.name_partial}</h1>
-            <p className="text-xs text-gray-400 flex items-center gap-1 mt-1">
+            <p className="text-meta text-gray-400 flex items-center gap-1 mt-1">
               <MapPin size={12} /> {post.location}
               <span className="ml-3"><Calendar size={12} className="inline mr-1" />
                 {formatDistanceToNow(new Date(post.created_at), { addSuffix: true, locale: fr })}
@@ -209,7 +210,7 @@ export default function PostDetail() {
             )}
             <button
               onClick={() => sharePost(post)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-orange-900/50 transition-colors text-xs font-semibold"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-orange-900/50 transition-colors text-meta font-semibold"
               aria-label="Partager cette annonce"
             >
               <Share2 size={14} />
@@ -253,7 +254,7 @@ export default function PostDetail() {
             <button
               onClick={handleDelete}
               disabled={deleting}
-              className="btn-secondary text-xs text-red-500 border-red-200 hover:bg-red-100 flex items-center gap-1.5 disabled:opacity-50"
+              className="btn-secondary text-meta text-red-500 border-red-200 hover:bg-red-100 flex items-center gap-1.5 disabled:opacity-50"
             >
               <Trash2 size={13} />
               {deleting ? 'Suppression...' : "Supprimer l'annonce"}
@@ -263,15 +264,15 @@ export default function PostDetail() {
           {/* Contact requests — read only, no approve/reject */}
           {requests.length > 0 && (
             <div className="mb-4">
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Demandes de contact</p>
+              <p className="text-meta font-semibold text-gray-400 uppercase tracking-wide mb-2">Demandes de contact</p>
               <div className="flex flex-col gap-2">
                 {requests.map(req => (
                   <div key={req.id} className="flex items-center justify-between bg-white dark:bg-gray-800 rounded-xl p-3 border border-gray-100 dark:border-gray-700">
                     <div>
                       <p className="text-sm font-medium text-gray-800">{req.user?.name}</p>
-                      <p className="text-xs text-gray-400">{req.user?.phone}</p>
+                      <p className="text-meta text-gray-400">{req.user?.phone}</p>
                     </div>
-                    <span className={`badge text-xs ${
+                    <span className={`badge text-meta ${
                       req.status === 'approved' ? 'bg-green-100 text-green-700' :
                       req.status === 'rejected' ? 'bg-red-100 text-red-600' :
                       'bg-yellow-100 text-yellow-700'
@@ -288,14 +289,14 @@ export default function PostDetail() {
 
           {/* Messages — read only, no send form */}
           <div>
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Messagerie</p>
+            <p className="text-meta font-semibold text-gray-400 uppercase tracking-wide mb-2">Messagerie</p>
             <div className="flex flex-col gap-2 max-h-72 overflow-y-auto">
               {messages.length === 0 && (
-                <p className="text-xs text-gray-400 text-center py-4">Aucun message sur cette annonce</p>
+                <p className="text-meta text-gray-400 text-center py-4">Aucun message sur cette annonce</p>
               )}
               {messages.map(msg => (
                 <div key={msg.id} className="flex flex-col gap-0.5">
-                  <p className="text-xs text-gray-400 px-1">{msg.sender?.name || 'Utilisateur'}</p>
+                  <p className="text-meta text-gray-400 px-1">{msg.sender?.name || 'Utilisateur'}</p>
                   <div className="bg-white dark:bg-gray-800 text-gray-800 rounded-2xl rounded-tl-sm px-3 py-2 text-sm max-w-[85%] shadow-sm">
                     {msg.content}
                   </div>
@@ -315,7 +316,7 @@ export default function PostDetail() {
 
           {!myRequest && (
             <form onSubmit={submitContactRequest} className="flex flex-col gap-3">
-              <div className="bg-orange-50 p-3 rounded-xl text-xs text-gray-600">
+              <div className="bg-orange-50 p-3 rounded-xl text-meta text-gray-600">
                 <p className="font-semibold text-orange-700 mb-1 flex items-center gap-1.5"><Camera size={14} /> Vérification par selfie</p>
                 <p>Prenez un selfie de votre visage. Le retrouveur le comparera avec la photo sur vos pièces d'identité trouvées.</p>
               </div>
@@ -339,7 +340,7 @@ export default function PostDetail() {
             <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-sm text-red-700 flex items-center justify-between gap-3">
               <span>Selfie non validé par le retrouveur.</span>
               <button
-                className="text-red-700 underline text-xs font-medium shrink-0"
+                className="text-red-700 underline text-meta font-medium shrink-0"
                 onClick={() => { setMyReq(null); setSelfie(null); setPreview(null) }}
               >
                 Réessayer
@@ -358,9 +359,9 @@ export default function PostDetail() {
               <div className="flex items-center justify-between gap-2">
                 <div>
                   <p className="text-sm font-medium text-gray-800">{req.user?.name}</p>
-                  <p className="text-xs text-gray-400">{req.user?.phone}</p>
+                  <p className="text-meta text-gray-400">{req.user?.phone}</p>
                 </div>
-                <span className={`badge text-xs ${
+                <span className={`badge text-meta ${
                   req.status === 'approved' ? 'bg-green-100 text-green-700' :
                   req.status === 'rejected' ? 'bg-red-100 text-red-600' :
                   'bg-yellow-100 text-yellow-700'
@@ -381,7 +382,7 @@ export default function PostDetail() {
                       />
                     : <button
                         onClick={() => loadSelfie(req.id)}
-                        className="text-xs bg-orange-50 border border-orange-300 text-orange-700 font-medium px-3 py-1.5 rounded-lg hover:bg-orange-100 transition-colors"
+                        className="text-meta bg-orange-50 border border-orange-300 text-orange-700 font-medium px-3 py-1.5 rounded-lg hover:bg-orange-100 transition-colors"
                       >
                         Voir le selfie
                       </button>
@@ -392,11 +393,11 @@ export default function PostDetail() {
               {/* Actions */}
               {req.status !== 'approved' && (
                 <div className="flex gap-2">
-                  <button onClick={() => handleApprove(req.id)} disabled={approving || rejecting} className="btn-primary text-xs py-1 px-3 flex-1">
+                  <button onClick={() => handleApprove(req.id)} disabled={approving || rejecting} className="btn-primary text-meta py-1 px-3 flex-1">
                     {approving ? '...' : <><CheckCircle size={12} className="inline mr-1" /> C'est bien lui / elle</>}
                   </button>
                   {req.status === 'pending' && (
-                    <button onClick={() => handleReject(req.id)} disabled={approving || rejecting} className="text-xs py-1 px-3 flex-1 rounded-xl border border-red-300 text-red-600 hover:bg-red-50 disabled:opacity-50 transition-colors active:scale-95">
+                    <button onClick={() => handleReject(req.id)} disabled={approving || rejecting} className="text-meta py-1 px-3 flex-1 rounded-xl border border-red-300 text-red-600 hover:bg-red-50 disabled:opacity-50 transition-colors active:scale-95">
                       {rejecting ? '...' : <><XCircle size={12} className="inline mr-1" /> Pas le bon</>}
                     </button>
                   )}
@@ -415,13 +416,13 @@ export default function PostDetail() {
           </h2>
 
           {isOwner && !requests.some(r => r.status === 'approved') && (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-3 text-xs text-yellow-700 mb-3">
+            <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-3 text-meta text-yellow-700 mb-3">
               Approuvez une demande ci-dessus pour pouvoir envoyer des messages.
             </div>
           )}
           <div className="flex flex-col gap-2 max-h-64 overflow-y-auto mb-3 pr-1">
             {messages.length === 0 && (
-              <p className="text-xs text-gray-400 text-center py-4">Démarrez la conversation</p>
+              <p className="text-meta text-gray-400 text-center py-4">Démarrez la conversation</p>
             )}
             {messages.map(msg => {
               const mine = msg.sender_id === user?.id
@@ -445,7 +446,7 @@ export default function PostDetail() {
               value={msgText}
               onChange={e => setMsgText(e.target.value)}
             />
-            <button type="submit" className="btn-primary px-3" disabled={sendingMsg}>
+            <button type="submit" className="btn-primary px-3" disabled={sendingMsg} aria-label="Envoyer le message">
               <Send size={16} />
             </button>
           </form>
@@ -473,7 +474,8 @@ export default function PostDetail() {
             />
             <button
               onClick={() => setEnlargedSelfie(null)}
-              className="absolute -top-3 -right-3 w-8 h-8 rounded-full bg-white text-gray-800 font-bold text-lg flex items-center justify-center shadow-lg hover:bg-gray-100"
+              className="absolute -top-3 -right-3 w-8 h-8 rounded-full bg-white text-gray-800 font-bold text-lg flex items-center justify-center shadow-float hover:bg-gray-100"
+              aria-label="Fermer l'image agrandie"
             >
               ×
             </button>

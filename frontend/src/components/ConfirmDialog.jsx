@@ -51,7 +51,7 @@ export function ConfirmProvider({ children }) {
               </div>
               <div>
                 <p className="font-bold text-gray-900 text-sm">{state.title}</p>
-                <p className="text-gray-500 text-xs mt-0.5 leading-relaxed">{state.message}</p>
+                <p className="text-gray-500 text-meta mt-0.5 leading-relaxed">{state.message}</p>
               </div>
             </div>
 

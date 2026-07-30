@@ -28,14 +28,14 @@ export default class ErrorBoundary extends Component {
 
     return (
       <div className="min-h-screen bg-red-50 dark:bg-red-950/30 p-4 flex flex-col items-center justify-center">
-        <div className="max-w-lg w-full bg-white dark:bg-gray-900 rounded-2xl shadow-lg p-5">
+        <div className="max-w-lg w-full bg-white dark:bg-gray-900 rounded-2xl shadow-float p-5">
           <h1 className="text-lg font-bold text-red-700 dark:text-red-400 mb-2">
             ⚠️ Une erreur est survenue
           </h1>
           <p className="text-sm text-gray-700 dark:text-gray-300 mb-3 break-words">
             {message}
           </p>
-          <details className="text-xs text-gray-500 dark:text-gray-400 mb-4">
+          <details className="text-meta text-gray-500 dark:text-gray-400 mb-4">
             <summary className="cursor-pointer font-medium">Détails techniques</summary>
             <pre className="mt-2 bg-gray-100 dark:bg-gray-800 p-2 rounded overflow-auto max-h-40 whitespace-pre-wrap">
               {stack}

@@ -51,7 +51,7 @@ export default function Register() {
 
         {/* Statut — step 1 visually */}
         <div className="card">
-          <p className="text-xs font-semibold text-gray-700 mb-3 uppercase tracking-wide">Vous êtes…</p>
+          <p className="text-meta font-semibold text-gray-700 mb-3 uppercase tracking-wide">Vous êtes…</p>
           <div className="grid grid-cols-2 gap-3">
             {[
               { key: 'chercheur',  Icon: Search,    label: 'Chercheur',  desc: "J'ai perdu mes pièces" },
@@ -69,7 +69,7 @@ export default function Register() {
               >
                 <Icon size={26} className={`mx-auto mb-1.5 ${form.status === key ? 'text-orange-500' : 'text-gray-400'}`} />
                 <p className="font-semibold text-sm">{label}</p>
-                <p className="text-xs opacity-70 mt-0.5">{desc}</p>
+                <p className="text-meta opacity-70 mt-0.5">{desc}</p>
               </button>
             ))}
           </div>
@@ -77,24 +77,24 @@ export default function Register() {
 
         <div className="card flex flex-col gap-4">
           <div>
-            <label className="text-xs font-medium text-gray-700 mb-1 block">Nom complet</label>
-            <input type="text" className="input" placeholder="Jean Kouamé" value={form.name} onChange={set('name')} required />
+            <label htmlFor="register-name" className="text-meta font-medium text-gray-700 mb-1 block">Nom complet</label>
+            <input id="register-name" type="text" className="input" placeholder="Jean Kouamé" value={form.name} onChange={set('name')} required />
           </div>
           <div>
-            <label className="text-xs font-medium text-gray-700 mb-1 block">Email</label>
-            <input type="email" className="input" placeholder="votre@email.com" value={form.email} onChange={set('email')} required />
+            <label htmlFor="register-email" className="text-meta font-medium text-gray-700 mb-1 block">Email</label>
+            <input id="register-email" type="email" className="input" placeholder="votre@email.com" value={form.email} onChange={set('email')} required />
           </div>
           <div>
-            <label className="text-xs font-medium text-gray-700 mb-1 block">Téléphone (WhatsApp de préférence)</label>
-            <input type="tel" className="input" placeholder="+225 07 00 00 00 00" value={form.phone} onChange={set('phone')} required />
+            <label htmlFor="register-phone" className="text-meta font-medium text-gray-700 mb-1 block">Téléphone (WhatsApp de préférence)</label>
+            <input id="register-phone" type="tel" className="input" placeholder="+225 07 00 00 00 00" value={form.phone} onChange={set('phone')} required />
           </div>
           <div>
-            <label className="text-xs font-medium text-gray-700 mb-1 block">Mot de passe</label>
-            <input type="password" className="input" placeholder="Min. 8 caractères" value={form.password} onChange={set('password')} required minLength={8} />
+            <label htmlFor="register-password" className="text-meta font-medium text-gray-700 mb-1 block">Mot de passe</label>
+            <input id="register-password" type="password" className="input" placeholder="Min. 8 caractères" value={form.password} onChange={set('password')} required minLength={8} />
           </div>
           <div>
-            <label className="text-xs font-medium text-gray-700 mb-1 block">Confirmer le mot de passe</label>
-            <input type="password" className="input" placeholder="••••••••" value={form.password_confirmation} onChange={set('password_confirmation')} required />
+            <label htmlFor="register-password-confirmation" className="text-meta font-medium text-gray-700 mb-1 block">Confirmer le mot de passe</label>
+            <input id="register-password-confirmation" type="password" className="input" placeholder="••••••••" value={form.password_confirmation} onChange={set('password_confirmation')} required />
           </div>
         </div>
 

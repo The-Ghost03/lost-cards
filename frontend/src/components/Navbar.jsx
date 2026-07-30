@@ -17,7 +17,7 @@ function UnreadBadge({ count, small = false }) {
     <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-gray-900" />
   )
   return (
-    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center leading-none border border-white dark:border-gray-900">
+    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[11px] font-bold w-4 h-4 rounded-full flex items-center justify-center leading-none border border-white dark:border-gray-900">
       {count > 9 ? '9+' : count}
     </span>
   )
@@ -119,7 +119,7 @@ export default function Navbar() {
                     </div>
                     {label}
                     {badge > 0 && (
-                      <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full leading-none">
+                      <span className="bg-red-500 text-white text-[11px] font-bold px-1.5 py-0.5 rounded-full leading-none">
                         {badge > 9 ? '9+' : badge}
                       </span>
                     )}
@@ -164,7 +164,7 @@ export default function Navbar() {
                     <Icon size={21} strokeWidth={active ? 2.5 : 1.8} />
                     <UnreadBadge count={badge} />
                   </div>
-                  <span className={`text-[10px] ${active ? 'font-semibold' : 'font-medium'}`}>
+                  <span className={`text-[12px] ${active ? 'font-semibold' : 'font-medium'}`}>
                     {label}
                   </span>
                 </Link>
@@ -177,7 +177,7 @@ export default function Navbar() {
               className="flex-1 flex flex-col items-center justify-center py-2 gap-0.5 text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 transition-colors"
             >
               <LogOut size={21} strokeWidth={1.8} />
-              <span className="text-[10px] font-medium">Sortir</span>
+              <span className="text-[12px] font-medium">Sortir</span>
             </button>
           </div>
         </nav>

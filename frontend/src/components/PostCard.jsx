@@ -23,7 +23,7 @@ export default function PostCard({ post }) {
       <div className="flex items-start justify-between gap-2 mb-3">
         <div className="min-w-0">
           <p className="font-semibold text-gray-800 text-base group-hover:text-orange-600 transition-colors">{post.name_partial}</p>
-          <p className="text-xs text-gray-400 flex items-center gap-1 mt-0.5">
+          <p className="text-meta text-gray-400 flex items-center gap-1 mt-0.5">
             <MapPin size={11} /> {post.location}
           </p>
         </div>
@@ -47,12 +47,12 @@ export default function PostCard({ post }) {
       </div>
 
       <div className="flex items-center justify-between gap-2">
-        <p className="text-xs text-gray-400 flex items-center gap-1">
+        <p className="text-meta text-gray-400 flex items-center gap-1">
           <Calendar size={11} /> Trouvé {age}
         </p>
         <button
           onClick={(e) => { e.preventDefault(); e.stopPropagation(); sharePost(post) }}
-          className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-orange-900/50 transition-colors text-xs font-semibold"
+          className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-orange-900/50 transition-colors text-meta font-semibold"
           aria-label="Partager cette annonce"
         >
           <Share2 size={12} />

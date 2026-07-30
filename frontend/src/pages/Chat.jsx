@@ -156,8 +156,8 @@ export default function Chat() {
   /* ── Render ───────────────────────────────────────────────────────*/
   if (loading) {
     return (
-      <div className="flex justify-center pt-20">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500" />
+      <div className="flex justify-center pt-20 text-orange-500">
+        <Spinner size={32} />
       </div>
     )
   }
@@ -175,6 +175,7 @@ export default function Chat() {
         <button
           onClick={() => navigate('/messages')}
           className="p-1 text-gray-500 hover:text-gray-700 transition-colors"
+          aria-label="Retour aux conversations"
         >
           <ChevronLeft size={22} />
         </button>
@@ -187,10 +188,10 @@ export default function Chat() {
           <p className="font-semibold text-gray-800 text-sm leading-tight truncate">
             {post?.name_partial}
           </p>
-          <p className="text-xs text-gray-400 truncate">{post?.location}</p>
+          <p className="text-meta text-gray-400 truncate">{post?.location}</p>
         </div>
 
-        <span className={`shrink-0 text-xs font-medium px-2 py-0.5 rounded-full flex items-center gap-1 ${
+        <span className={`shrink-0 text-meta font-medium px-2 py-0.5 rounded-full flex items-center gap-1 ${
           post?.status === 'recovered'
             ? 'bg-gray-100 text-gray-500'
             : 'bg-green-100 text-green-700'
@@ -221,7 +222,7 @@ export default function Chat() {
           return (
             <div key={msg.id}>
               {showSep && (
-                <p className="text-center text-xs text-gray-400 py-3">
+                <p className="text-center text-meta text-gray-400 py-3">
                   {fmtTime(msg.created_at)}
                 </p>
               )}
@@ -261,6 +262,7 @@ export default function Chat() {
             onClick={handleSend}
             disabled={!text.trim() || sending}
             className="shrink-0 w-11 h-11 rounded-xl bg-orange-500 hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed text-white flex items-center justify-center transition-colors"
+            aria-label="Envoyer le message"
           >
             {sending ? <Spinner size={16} /> : <Send size={18} />}
           </button>

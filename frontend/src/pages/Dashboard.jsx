@@ -29,7 +29,7 @@ function QuickAction({ to, onClick, icon: Icon, label, desc, color }) {
       </div>
       <div>
         <p className="font-semibold text-sm text-gray-800">{label}</p>
-        <p className="text-xs text-gray-400 leading-snug">{desc}</p>
+        <p className="text-meta text-gray-400 leading-snug">{desc}</p>
       </div>
     </>
   )
@@ -106,14 +106,14 @@ export default function Dashboard() {
           <div className="flex items-center gap-2 mb-1">
             <h1 className="text-xl font-bold text-gray-900">Bonjour, {firstName} 👋</h1>
           </div>
-          <div className="inline-flex items-center gap-1.5 text-xs bg-orange-100 text-orange-600 font-semibold px-3 py-1 rounded-full">
+          <div className="inline-flex items-center gap-1.5 text-meta bg-orange-100 text-orange-600 font-semibold px-3 py-1 rounded-full">
             <Search size={12} /> Mode Chercheur
           </div>
         </div>
 
         {/* Quick actions */}
         <div>
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Actions</p>
+          <p className="text-meta font-semibold text-gray-400 uppercase tracking-wide mb-3">Actions</p>
           <div className="flex flex-col gap-3">
             <QuickAction
               to="/alerts"
@@ -150,7 +150,7 @@ export default function Dashboard() {
         <div>
           <h2 className="font-semibold text-gray-800 text-sm mb-3 flex items-center justify-between">
             <span>Mes demandes</span>
-            <span className="text-xs font-normal text-gray-400">{myContacts.length} annonce{myContacts.length > 1 ? 's' : ''}</span>
+            <span className="text-meta font-normal text-gray-400">{myContacts.length} annonce{myContacts.length > 1 ? 's' : ''}</span>
           </h2>
 
           {loading ? (
@@ -159,10 +159,10 @@ export default function Dashboard() {
             <div className="card text-center py-8">
               <Search size={28} className="mx-auto text-gray-300 mb-2" />
               <p className="text-sm text-gray-600 font-medium">Aucune demande en cours</p>
-              <p className="text-xs text-gray-400 mt-1 mb-3">
+              <p className="text-meta text-gray-400 mt-1 mb-3">
                 Trouvez votre nom dans une annonce et envoyez votre selfie pour entrer en contact.
               </p>
-              <Link to="/" className="btn-primary text-xs inline-flex items-center gap-1">
+              <Link to="/" className="btn-primary text-meta inline-flex items-center gap-1">
                 <Search size={12} /> Chercher mon nom
               </Link>
             </div>
@@ -176,7 +176,7 @@ export default function Dashboard() {
         {/* Info card */}
         <div className="bg-orange-50 border border-orange-100 rounded-2xl p-4">
           <p className="text-sm font-semibold text-orange-700 mb-1">Comment retrouver votre portefeuille ?</p>
-          <ol className="text-xs text-orange-600 space-y-1 list-decimal list-inside leading-relaxed">
+          <ol className="text-meta text-orange-600 space-y-1 list-decimal list-inside leading-relaxed">
             <li>Recherchez votre nom dans la barre de recherche</li>
             <li>Créez une alerte pour être prévenu automatiquement</li>
             <li>Contactez le retrouveur via la messagerie sécurisée</li>
@@ -196,7 +196,7 @@ export default function Dashboard() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-bold text-gray-900">Bonjour, {firstName} 👋</h1>
-          <div className="inline-flex items-center gap-1.5 text-xs bg-green-100 text-green-700 font-semibold px-3 py-1 rounded-full mt-1">
+          <div className="inline-flex items-center gap-1.5 text-meta bg-green-100 text-green-700 font-semibold px-3 py-1 rounded-full mt-1">
             <Handshake size={12} /> Mode Retrouveur
           </div>
         </div>
@@ -209,17 +209,17 @@ export default function Dashboard() {
       <div className="grid grid-cols-2 gap-3">
         <div className="card text-center py-4">
           <p className="text-2xl font-bold text-orange-500">{active}</p>
-          <p className="text-xs text-gray-400 mt-0.5">Annonces actives</p>
+          <p className="text-meta text-gray-400 mt-0.5">Annonces actives</p>
         </div>
         <div className="card text-center py-4">
           <p className="text-2xl font-bold text-green-500">{recovered}</p>
-          <p className="text-xs text-gray-400 mt-0.5">Portefeuilles rendus</p>
+          <p className="text-meta text-gray-400 mt-0.5">Portefeuilles rendus</p>
         </div>
       </div>
 
       {/* Quick actions */}
       <div>
-        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Actions rapides</p>
+        <p className="text-meta font-semibold text-gray-400 uppercase tracking-wide mb-3">Actions rapides</p>
         <div className="grid grid-cols-2 gap-3">
           <QuickAction
             to="/posts/create"
@@ -266,7 +266,7 @@ export default function Dashboard() {
           <div className="card text-center py-10">
             <Wallet size={32} className="mx-auto text-gray-300 mb-3" />
             <p className="text-gray-600 font-medium text-sm">Aucune annonce publiée</p>
-            <p className="text-gray-400 text-xs mt-1 mb-4">
+            <p className="text-gray-400 text-meta mt-1 mb-4">
               Vous avez trouvé un portefeuille ? Signalez-le ici.
             </p>
             <Link to="/posts/create" className="btn-primary text-sm">
@@ -281,7 +281,7 @@ export default function Dashboard() {
               <div className="flex items-start justify-between mb-2">
                 <div>
                   <p className="font-semibold text-gray-800 text-sm">{post.name_on_cards}</p>
-                  <p className="text-xs text-gray-400 mt-0.5">
+                  <p className="text-meta text-gray-400 mt-0.5">
                     {post.location} · {formatDistanceToNow(new Date(post.created_at), { addSuffix: true, locale: fr })}
                   </p>
                 </div>
@@ -293,21 +293,22 @@ export default function Dashboard() {
               <div className="flex gap-2 mt-3">
                 <button
                   onClick={() => navigate(`/posts/${post.id}`)}
-                  className="btn-secondary text-xs flex items-center gap-1 flex-1"
+                  className="btn-secondary text-meta flex items-center gap-1 flex-1"
                 >
                   <Eye size={13} /> Voir
                 </button>
                 {post.status === 'active' && (
                   <button
                     onClick={() => handleRecover(post.id)}
-                    className="btn-secondary text-xs flex items-center gap-1 flex-1 text-green-600 border-green-200 hover:bg-green-50"
+                    className="btn-secondary text-meta flex items-center gap-1 flex-1 text-green-600 border-green-200 hover:bg-green-50"
                   >
                     <CheckCircle size={13} /> Récupéré
                   </button>
                 )}
                 <button
                   onClick={() => handleDelete(post.id)}
-                  className="btn-secondary text-xs flex items-center gap-1 text-red-500 border-red-100 hover:bg-red-50 px-3"
+                  className="btn-secondary text-meta flex items-center gap-1 text-red-500 border-red-100 hover:bg-red-50 px-3"
+                  aria-label="Supprimer l'annonce"
                 >
                   <Trash2 size={13} />
                 </button>
@@ -343,7 +344,7 @@ function ContactCard({ contact, navigate }) {
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 flex-wrap mb-0.5">
             <p className="font-semibold text-gray-800 text-sm truncate">{post.name_partial}</p>
-            <span className={`badge text-xs ${statusMeta.color}`}>
+            <span className={`badge text-meta ${statusMeta.color}`}>
               {statusMeta.icon} {statusMeta.label}
             </span>
             {contact.unread > 0 && (
@@ -352,21 +353,21 @@ function ContactCard({ contact, navigate }) {
               </span>
             )}
           </div>
-          <p className="text-xs text-gray-400">
+          <p className="text-meta text-gray-400">
             {post.location} · Envoyé {formatDistanceToNow(new Date(contact.created_at), { addSuffix: true, locale: fr })}
           </p>
           {contact.status === 'approved' && (
-            <p className="text-xs text-green-600 mt-1.5 flex items-center gap-1">
+            <p className="text-meta text-green-600 mt-1.5 flex items-center gap-1">
               <MessageCircle size={11} /> Ouvrir la conversation
             </p>
           )}
           {contact.status === 'pending' && (
-            <p className="text-xs text-yellow-700 mt-1.5">
+            <p className="text-meta text-yellow-700 mt-1.5">
               ⏳ Le retrouveur vérifie votre selfie
             </p>
           )}
           {contact.status === 'rejected' && (
-            <p className="text-xs text-red-600 mt-1.5">
+            <p className="text-meta text-red-600 mt-1.5">
               Non reconnu — vous pouvez réessayer
             </p>
           )}

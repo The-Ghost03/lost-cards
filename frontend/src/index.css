@@ -1,11 +1,21 @@
+/* Public Sans, variable, auto-hébergée (wght 100-900, subsets latin/latin-ext/vietnamese —
+   le navigateur ne télécharge que les subsets réellement utilisés via unicode-range). */
+@import '@fontsource-variable/public-sans';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  /* Réservée aux éléments flottants (modales, sheet, toast, bottom bar).
+     Aucune ombre ailleurs — direction « Fiche » : filets, pas ombres. */
+  --shadow-float: 0 8px 24px -8px rgb(20 18 16 / 0.18);
+}
+
 @layer base {
   * { box-sizing: border-box; }
   body {
-    @apply bg-gray-50 dark:bg-gray-950 text-gray-800 dark:text-gray-100 font-sans;
+    @apply bg-paper dark:bg-gray-950 text-ink-950 dark:text-gray-100 font-sans;
     margin: 0;
     -webkit-tap-highlight-color: transparent;
     /* Block double-tap zoom and pinch-to-zoom on mobile */
@@ -23,73 +33,80 @@
   }
 }
 
+@layer utilities {
+  /* Padding bas = zone sûre iOS/Android (encoche, barre home).
+     Utilisé par la bottom-nav (Navbar.jsx). */
+  .safe-area-pb {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
 @layer components {
   /* ── Buttons ─────────────────────────────────────────────────────── */
+  /* Registre « Fiche » : filets, pas d'ombre ni de translate au survol —
+     produit à 95 % tactile. Seuls :active (scale) et :focus-visible restent. */
   .btn-primary {
-    @apply bg-orange-500 hover:bg-orange-600 text-white font-semibold px-4 py-2 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95;
-    box-shadow: 0 1px 3px rgba(249, 115, 22, 0.2);
+    @apply bg-flame-700 hover:bg-flame-700/90 text-white font-semibold px-4 py-2 rounded-control transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98];
   }
-  .btn-primary:hover:not(:disabled) {
-    box-shadow: 0 4px 14px rgba(249, 115, 22, 0.35);
-    transform: translateY(-1px);
+  .btn-primary:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(232, 93, 4, 0.3);
   }
   .btn-secondary {
-    @apply bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600
-           text-gray-700 dark:text-gray-200 font-semibold px-4 py-2 rounded-xl
-           border border-gray-200 dark:border-gray-600
-           transition-all duration-200 active:scale-95;
+    @apply bg-white dark:bg-gray-700 hover:bg-ink-100 dark:hover:bg-gray-600
+           text-ink-600 dark:text-gray-200 font-semibold px-4 py-2 rounded-control
+           border border-ink-200 dark:border-gray-600
+           transition-colors duration-200 active:scale-[0.98];
   }
-  .btn-secondary:hover {
-    border-color: #d1d5db;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  .btn-secondary:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(232, 93, 4, 0.2);
   }
   .btn-danger {
-    @apply bg-red-500 hover:bg-red-600 text-white font-semibold px-4 py-2 rounded-xl transition-all duration-200 active:scale-95;
+    @apply bg-red-500 hover:bg-red-600 text-white font-semibold px-4 py-2 rounded-control transition-colors duration-200 active:scale-[0.98];
   }
 
   /* ── Input ───────────────────────────────────────────────────────── */
   .input {
-    @apply w-full border border-gray-200 dark:border-gray-600
-           rounded-xl px-4 py-2.5 text-sm
-           focus:outline-none focus:ring-2 focus:ring-orange-400
+    @apply w-full border border-ink-200 dark:border-gray-600
+           rounded-control px-4 py-2.5 text-sm
+           focus:outline-none focus:ring-2 focus:ring-flame-500/40
            bg-white dark:bg-gray-700
-           text-gray-800 dark:text-gray-100
-           placeholder:text-gray-400 dark:placeholder:text-gray-500
-           transition-all duration-200;
+           text-ink-950 dark:text-gray-100
+           placeholder:text-ink-400 dark:placeholder:text-gray-500
+           transition-colors duration-200;
   }
   .input:focus {
-    border-color: #fb923c;
-    box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.12);
+    border-color: #E85D04;
   }
 
   /* ── Card ────────────────────────────────────────────────────────── */
+  /* Registre « Fiche » : filet 1px, aucune ombre (voir §4.4 de l'audit). */
   .card {
     @apply bg-white dark:bg-gray-800
-           rounded-2xl shadow-sm
-           border border-gray-100 dark:border-gray-700
-           p-4 transition-all duration-200;
+           rounded-fiche border border-ink-200 dark:border-gray-700
+           p-4 transition-colors duration-200;
   }
   .card-hover {
-    @apply card cursor-pointer;
+    @apply card cursor-pointer active:scale-[0.98];
   }
-  .card-hover:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-    border-color: #fed7aa;
-  }
-  .dark .card-hover:hover {
-    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
-    border-color: #9a3412;
+  .card-hover:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(232, 93, 4, 0.25);
   }
 
   /* ── Badge ───────────────────────────────────────────────────────── */
   .badge {
-    @apply inline-flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full;
+    @apply inline-flex items-center gap-1 text-meta font-medium px-2 py-1 rounded-stamp;
   }
 }
 
 /* ── Dark mode overrides for inline Tailwind classes ────────────────
    These sit outside @layer so they take priority over utilities.     */
+
+/* Nouveaux neutres « Fiche » (paper/ink) — mêmes garanties que gray-50/800 */
+.dark .bg-paper      { background-color: #12100E; } /* night.950 */
+.dark .text-ink-950  { color: #EDE9E3; } /* teinte claire chaude, pas de blanc pur */
 
 /* Neutral text */
 .dark .text-gray-900 { color: #f9fafb; }

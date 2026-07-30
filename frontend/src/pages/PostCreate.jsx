@@ -96,10 +96,11 @@ export default function PostCreate() {
       <form onSubmit={handleSubmit} className="flex flex-col gap-5">
         {/* Nom sur les cartes */}
         <div className="card">
-          <label className="flex items-center gap-2 text-sm font-semibold text-gray-800 mb-3">
+          <label htmlFor="post-name-on-cards" className="flex items-center gap-2 text-sm font-semibold text-gray-800 mb-3">
             <FileText size={16} className="text-orange-500" /> Nom sur les cartes
           </label>
           <input
+            id="post-name-on-cards"
             type="text"
             className="input"
             placeholder="Ex: KOUAMÉ Jean (tel qu'écrit sur les cartes)"
@@ -111,10 +112,10 @@ export default function PostCreate() {
 
         {/* Lieu */}
         <div className="card">
-          <label className="flex items-center gap-2 text-sm font-semibold text-gray-800 mb-3">
+          <label htmlFor="post-location" className="flex items-center gap-2 text-sm font-semibold text-gray-800 mb-3">
             <MapPin size={16} className="text-orange-500" /> Commune / Lieu de trouvaille
           </label>
-          <select className="input" value={form.location} onChange={set('location')} required>
+          <select id="post-location" className="input" value={form.location} onChange={set('location')} required>
             <option value="">Choisir une commune...</option>
             {COMMUNES.map(c => <option key={c} value={c}>{c}</option>)}
           </select>
@@ -122,9 +123,10 @@ export default function PostCreate() {
 
         {/* Documents */}
         <div className="card">
-          <label className="flex items-center gap-2 text-sm font-semibold text-gray-800 mb-3">
+          {/* En-tête de groupe (pas un <label> : il ne référence pas un champ unique) */}
+          <p className="flex items-center gap-2 text-sm font-semibold text-gray-800 mb-3">
             <FileText size={16} className="text-orange-500" /> Documents trouvés dans le portefeuille
-          </label>
+          </p>
           <div className="grid grid-cols-2 gap-2">
             {DOCUMENTS.map(doc => {
               const checked = form.documents.includes(doc.key)
@@ -133,7 +135,7 @@ export default function PostCreate() {
                   key={doc.key}
                   type="button"
                   onClick={() => toggleDoc(doc.key)}
-                  className={`flex items-center gap-2 text-left text-xs px-3 py-2.5 rounded-xl border transition-colors ${
+                  className={`flex items-center gap-2 text-left text-meta px-3 py-2.5 rounded-xl border transition-colors ${
                     checked
                       ? 'border-orange-400 bg-orange-50 text-orange-700 font-medium'
                       : 'border-gray-200 text-gray-600 hover:border-gray-300'
@@ -149,10 +151,11 @@ export default function PostCreate() {
 
         {/* Photos (optionnel, max 5) */}
         <div className="card">
-          <label className="flex items-center gap-2 text-sm font-semibold text-gray-800 mb-1">
+          {/* En-tête de groupe (le vrai <label> du champ fichier est plus bas) */}
+          <p className="flex items-center gap-2 text-sm font-semibold text-gray-800 mb-1">
             <Camera size={16} className="text-orange-500" /> Photos du portefeuille (optionnel)
-          </label>
-          <p className="text-xs text-gray-400 mb-3">
+          </p>
+          <p className="text-meta text-gray-400 mb-3">
             Ajoutez des photos floutées des pièces ou du portefeuille pour aider à l'identification ({photos.length}/{MAX_PHOTOS}).
           </p>
 
@@ -194,10 +197,11 @@ export default function PostCreate() {
 
         {/* Adresse de récupération */}
         <div className="card">
-          <label className="flex items-center gap-2 text-sm font-semibold text-gray-800 mb-3">
+          <label htmlFor="post-pickup-address" className="flex items-center gap-2 text-sm font-semibold text-gray-800 mb-3">
             <Phone size={16} className="text-orange-500" /> Adresse pour la récupération
           </label>
           <input
+            id="post-pickup-address"
             type="text"
             className="input"
             placeholder="Ex: Cocody Riviera 3, près de la pharmacie Soleil"
@@ -205,7 +209,7 @@ export default function PostCreate() {
             onChange={set('pickup_address')}
             required
           />
-          <p className="text-xs text-gray-400 mt-1.5">Visible uniquement après vérification de l'identité du propriétaire.</p>
+          <p className="text-meta text-gray-400 mt-1.5">Visible uniquement après vérification de l'identité du propriétaire.</p>
         </div>
 
         <button

@@ -42,20 +42,20 @@ export default function Login() {
 
       <form onSubmit={handleSubmit} className="card flex flex-col gap-4 animate-slide-up">
         <div>
-          <label className="text-xs font-medium text-gray-700 mb-1 block">Email</label>
+          <label htmlFor="login-email" className="text-meta font-medium text-gray-700 mb-1 block">Email</label>
           <div className="relative">
             <Mail size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-            <input type="email" required className="input pl-9" placeholder="votre@email.com" value={form.email} onChange={set('email')} />
+            <input id="login-email" type="email" required className="input pl-9" placeholder="votre@email.com" value={form.email} onChange={set('email')} />
           </div>
         </div>
         <div>
           <div className="flex items-center justify-between mb-1">
-            <label className="text-xs font-medium text-gray-700">Mot de passe</label>
-            <Link to="/forgot-password" className="text-xs text-orange-500 hover:underline">Oublié ?</Link>
+            <label htmlFor="login-password" className="text-meta font-medium text-gray-700">Mot de passe</label>
+            <Link to="/forgot-password" className="text-meta text-orange-500 hover:underline">Oublié ?</Link>
           </div>
           <div className="relative">
             <Lock size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-            <input type="password" required className="input pl-9" placeholder="••••••••" value={form.password} onChange={set('password')} />
+            <input id="login-password" type="password" required className="input pl-9" placeholder="••••••••" value={form.password} onChange={set('password')} />
           </div>
         </div>
         <button type="submit" className="btn-primary w-full mt-1" disabled={loading}>

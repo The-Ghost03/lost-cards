@@ -142,7 +142,7 @@ export default function SharePostModal({ post, onClose }) {
         </div>
 
         {/* URL */}
-        <div className="bg-gray-50 dark:bg-gray-900 rounded-xl px-3 py-2 mb-4 text-xs text-gray-500 dark:text-gray-400 font-mono truncate">
+        <div className="bg-gray-50 dark:bg-gray-900 rounded-xl px-3 py-2 mb-4 text-meta text-gray-500 dark:text-gray-400 font-mono truncate">
           {url}
         </div>
 

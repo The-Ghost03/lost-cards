@@ -93,10 +93,14 @@ docker compose up --build
 
 **Comptes seedés** :
 
-| Rôle  | Email                | Mot de passe |
-|-------|----------------------|--------------|
-| Admin | admin@lostcards.ci   | Admin@1234   |
-| Demo  | demo@lostcards.ci    | Demo@1234    |
+Aucun mot de passe n'est embarqué dans le code. Le seeder provisionne les comptes uniquement si les variables d'environnement correspondantes sont définies (dans `backend/.env` ou l'environnement du conteneur) :
+
+| Rôle  | Email              | Variable d'environnement |
+|-------|--------------------|--------------------------|
+| Admin | admin@lostcards.ci | `SEED_ADMIN_PASSWORD`    |
+| Demo  | demo@lostcards.ci  | `SEED_DEMO_PASSWORD` (ignoré en production) |
+
+Si la variable est absente, le compte n'est ni créé ni modifié. Le seeder n'écrase jamais le mot de passe d'un compte existant.
 
 ### Production
 
@@ -240,7 +244,12 @@ lost-cards/
 - **Hash bcrypt** (Laravel default) pour les mots de passe
 - **Tokens Sanctum** révoqués au logout et à la suppression de compte
 - **Selfies** stockés en disque local non-public (`storage/app/selfies`), accessibles uniquement au propriétaire de l'annonce via endpoint authentifié
-- **Données partielles** — le nom complet sur les cartes n'est jamais exposé en clair, seul un fragment est visible (`name_partial`)
+- **Nom sur les pièces : affiché publiquement** — choix produit assumé, pour qu'un propriétaire
+  reconnaisse sans ambiguïté son nom dans la liste des annonces. Le champ `name_partial`
+  contient donc la même valeur que `name_on_cards` (aucune troncature), et les deux sont
+  lisibles par tout visiteur, y compris non authentifié.
+  *Conséquence à garder en tête : ces noms sont dans les pages indexables par les moteurs
+  de recherche (sitemap + JSON-LD).*
 - **Adresse de récupération** masquée jusqu'à approbation explicite du selfie
 - **Throttle** sur `/api/analytics/track` (120 req/min) et bots filtrés
 - **CORS** restrictif sur le domaine production

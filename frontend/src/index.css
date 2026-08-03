@@ -15,7 +15,12 @@
 @layer base {
   * { box-sizing: border-box; }
   body {
-    @apply bg-paper dark:bg-gray-950 text-ink-950 dark:text-gray-100 font-sans;
+    /* `@apply` intègre les déclarations DANS le sélecteur `body` : l'élément ne
+       porte pas la classe `bg-paper`, donc les surcharges `.dark .bg-paper` plus
+       bas ne l'atteignent jamais. Le mode sombre doit donc être exprimé ici même,
+       sinon le fond retombe sur `gray-950` (#030712) — l'ardoise bleutée que la
+       direction « Fiche » écarte explicitement au profit du noir chaud. */
+    @apply bg-paper dark:bg-night-950 text-ink-950 dark:text-night-100 font-sans;
     margin: 0;
     -webkit-tap-highlight-color: transparent;
     /* Block double-tap zoom and pinch-to-zoom on mobile */
@@ -45,8 +50,12 @@
   /* ── Buttons ─────────────────────────────────────────────────────── */
   /* Registre « Fiche » : filets, pas d'ombre ni de translate au survol —
      produit à 95 % tactile. Seuls :active (scale) et :focus-visible restent. */
+  /* px-5 py-3 → hauteur rendue ~48px. Calibrage repris de Wise (12px vertical +
+     24px de line-height = 48px, « WCAG AAA at all widths »). L'ancien py-2
+     donnait ~40px, sous le seuil de 48px déjà recommandé par l'audit design
+     — un doigt sur un écran d'entrée de gamme, en marchant, ne vise pas à 40px. */
   .btn-primary {
-    @apply bg-flame-700 hover:bg-flame-700/90 text-white font-semibold px-4 py-2 rounded-control transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98];
+    @apply bg-flame-700 hover:bg-flame-700/90 text-white font-semibold px-5 py-3 rounded-control transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98];
   }
   .btn-primary:focus-visible {
     outline: none;
@@ -54,7 +63,7 @@
   }
   .btn-secondary {
     @apply bg-white dark:bg-gray-700 hover:bg-ink-100 dark:hover:bg-gray-600
-           text-ink-600 dark:text-gray-200 font-semibold px-4 py-2 rounded-control
+           text-ink-600 dark:text-gray-200 font-semibold px-5 py-3 rounded-control
            border border-ink-200 dark:border-gray-600
            transition-colors duration-200 active:scale-[0.98];
   }
@@ -63,13 +72,19 @@
     box-shadow: 0 0 0 3px rgba(232, 93, 4, 0.2);
   }
   .btn-danger {
-    @apply bg-red-500 hover:bg-red-600 text-white font-semibold px-4 py-2 rounded-control transition-colors duration-200 active:scale-[0.98];
+    @apply bg-alert-700 hover:bg-alert-700/90 text-white font-semibold px-5 py-3 rounded-control transition-colors duration-200 active:scale-[0.98];
   }
 
   /* ── Input ───────────────────────────────────────────────────────── */
+  /* Bordure `ink-400` et non `ink-200` : calibrage repris de Wise, qui cerne ses
+     champs d'un filet d'encre franc là où les cartes ne tiennent que par le
+     contraste de surface. `ink-200` sur blanc donne ~1,15:1 — la limite du champ
+     est invisible au soleil, et WCAG 1.4.11 exige 3:1 pour un contour de
+     composant. `ink-400` monte à 5,8:1. Les cartes gardent `ink-200` : elles se
+     détachent déjà par le blanc sur `paper`. */
   .input {
-    @apply w-full border border-ink-200 dark:border-gray-600
-           rounded-control px-4 py-2.5 text-sm
+    @apply w-full border border-ink-400 dark:border-gray-600
+           rounded-control px-4 py-3 text-sm
            focus:outline-none focus:ring-2 focus:ring-flame-500/40
            bg-white dark:bg-gray-700
            text-ink-950 dark:text-gray-100
@@ -104,9 +119,20 @@
 /* ── Dark mode overrides for inline Tailwind classes ────────────────
    These sit outside @layer so they take priority over utilities.     */
 
-/* Nouveaux neutres « Fiche » (paper/ink) — mêmes garanties que gray-50/800 */
+/* Nouveaux neutres « Fiche » (paper/ink) — mêmes garanties que gray-50/800.
+   ⚠ Toute migration d'une page de `gray-*` vers `ink-*` DOIT avoir sa ligne ici,
+   sinon le texte garde sa valeur claire sur fond sombre et devient illisible.
+   C'est la contrepartie de ce bloc de surcharges : il fige la palette sombre
+   (chantier P2 — passer par des variables CSS et supprimer ces ~140 lignes). */
 .dark .bg-paper      { background-color: #12100E; } /* night.950 */
 .dark .text-ink-950  { color: #EDE9E3; } /* teinte claire chaude, pas de blanc pur */
+.dark .text-ink-600  { color: #C9C2B9; } /* pendant de gray-600 */
+.dark .text-ink-400  { color: #9B9188; } /* méta : 5,3:1 sur night.900, 6,9:1 sur night.950 */
+.dark .border-ink-200 { border-color: #2A2521; } /* night.700 — filet de carte */
+.dark .border-ink-400 { border-color: #6E655D; } /* contour de champ, inchangé : déjà visible */
+.dark .bg-ink-100    { background-color: #1B1815; } /* night.900 */
+.dark .bg-flame-50   { background-color: rgba(232, 93, 4, 0.14); }
+.dark .text-flame-700 { color: #FF9A5C; } /* flame.300 — flame-700 est illisible sur fond sombre */
 
 /* Neutral text */
 .dark .text-gray-900 { color: #f9fafb; }

@@ -33,7 +33,8 @@ export default {
         alert:   { 50: '#FBE9E7', 700: '#B42318' }, // refusé / erreur
 
         // Dark mode — noir chaud, pas slate
-        night: { 950: '#12100E', 900: '#1B1815', 700: '#2A2521' },
+        // 100 = texte en mode sombre : teinte claire chaude, jamais de blanc pur.
+        night: { 950: '#12100E', 900: '#1B1815', 700: '#2A2521', 100: '#EDE9E3' },
       },
       fontFamily: {
         sans: ['Public Sans Variable', ...defaultTheme.fontFamily.sans],

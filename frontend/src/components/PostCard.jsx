@@ -22,8 +22,8 @@ export default function PostCard({ post }) {
     <Link to={`/posts/${post.id}`} className="card-hover block group">
       <div className="flex items-start justify-between gap-2 mb-3">
         <div className="min-w-0">
-          <p className="font-semibold text-gray-800 text-base group-hover:text-orange-600 transition-colors">{post.name_partial}</p>
-          <p className="text-meta text-gray-400 flex items-center gap-1 mt-0.5">
+          <p className="font-semibold text-ink-950 text-base group-hover:text-flame-700 transition-colors">{post.name_partial}</p>
+          <p className="text-meta text-ink-400 flex items-center gap-1 mt-0.5">
             <MapPin size={11} /> {post.location}
           </p>
         </div>
@@ -31,7 +31,7 @@ export default function PostCard({ post }) {
           ? <span className="badge bg-green-100 text-green-700 shrink-0">
               <CheckCircle size={11} /> Récupéré
             </span>
-          : <ArrowRight size={16} className="text-gray-300 group-hover:text-orange-500 group-hover:translate-x-1 transition-all shrink-0 mt-1" />
+          : <ArrowRight size={16} className="text-ink-200 group-hover:text-flame-500 group-hover:translate-x-1 transition-all shrink-0 mt-1" />
         }
       </div>
 
@@ -47,12 +47,13 @@ export default function PostCard({ post }) {
       </div>
 
       <div className="flex items-center justify-between gap-2">
-        <p className="text-meta text-gray-400 flex items-center gap-1">
+        <p className="text-meta text-ink-400 flex items-center gap-1">
           <Calendar size={11} /> Trouvé {age}
         </p>
         <button
+          type="button"
           onClick={(e) => { e.preventDefault(); e.stopPropagation(); sharePost(post) }}
-          className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-orange-900/50 transition-colors text-meta font-semibold"
+          className="flex items-center gap-1 px-2.5 py-1 rounded-control bg-flame-50 dark:bg-orange-950/40 text-flame-700 dark:text-orange-400 hover:bg-flame-50/70 dark:hover:bg-orange-900/50 transition-colors text-meta font-semibold"
           aria-label="Partager cette annonce"
         >
           <Share2 size={12} />

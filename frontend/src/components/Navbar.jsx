@@ -14,10 +14,10 @@ import { useConfirm } from './ConfirmDialog'
 function UnreadBadge({ count, small = false }) {
   if (!count) return null
   if (small) return (
-    <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-gray-900" />
+    <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-alert-700 rounded-full border-2 border-white dark:border-night-900" />
   )
   return (
-    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[11px] font-bold w-4 h-4 rounded-full flex items-center justify-center leading-none border border-white dark:border-gray-900">
+    <span className="absolute -top-1 -right-1 bg-alert-700 text-white text-[11px] font-bold w-4 h-4 rounded-full flex items-center justify-center leading-none border border-white dark:border-night-900">
       {count > 9 ? '9+' : count}
     </span>
   )
@@ -40,13 +40,13 @@ function ThemeToggle() {
   return (
     <button
       onClick={toggle}
-      className="p-2 rounded-xl text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors relative"
+      className="p-2 rounded-xl text-ink-400 dark:text-night-100/60 hover:text-ink-600 dark:hover:text-night-100 hover:bg-ink-100 dark:hover:bg-night-700 active:opacity-60 transition-colors relative"
       aria-label={label}
       title={label}
     >
       {icon}
       {mode === 'auto' && (
-        <span className="absolute bottom-0.5 right-0.5 w-1.5 h-1.5 bg-orange-400 rounded-full" />
+        <span className="absolute bottom-0.5 right-0.5 w-1.5 h-1.5 bg-flame-500 dark:bg-flame-300 rounded-full" />
       )}
     </button>
   )
@@ -91,10 +91,10 @@ export default function Navbar() {
   return (
     <>
       {/* ── Top bar ──────────────────────────────────────────────── */}
-      <nav className="bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 sticky top-0 z-50 transition-colors duration-200">
+      <nav className="bg-white dark:bg-night-900 border-b border-ink-200 dark:border-night-700 sticky top-0 z-50 transition-colors duration-200">
         <div className="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 font-bold text-orange-500 text-lg">
+          <Link to="/" className="flex items-center gap-2 font-bold text-flame-700 text-lg">
             <LogoIcon size={26} />
             <span>LostCards</span>
           </Link>
@@ -109,8 +109,8 @@ export default function Navbar() {
                     to={to}
                     className={`flex items-center gap-1.5 transition-colors ${
                       isActive(to)
-                        ? 'text-orange-500 font-semibold'
-                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
+                        ? 'text-flame-700 font-semibold'
+                        : 'text-ink-400 dark:text-night-100/60 hover:text-ink-950 dark:hover:text-night-100'
                     }`}
                   >
                     <div className="relative">
@@ -119,7 +119,7 @@ export default function Navbar() {
                     </div>
                     {label}
                     {badge > 0 && (
-                      <span className="bg-red-500 text-white text-[11px] font-bold px-1.5 py-0.5 rounded-full leading-none">
+                      <span className="bg-alert-700 text-white text-[11px] font-bold px-1.5 py-0.5 rounded-full leading-none">
                         {badge > 9 ? '9+' : badge}
                       </span>
                     )}
@@ -127,14 +127,14 @@ export default function Navbar() {
                 ))}
                 <button
                   onClick={handleLogout}
-                  className="flex items-center gap-1.5 text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 transition-colors text-sm"
+                  className="flex items-center gap-1.5 text-ink-400 dark:text-night-100/60 hover:text-alert-700 dark:hover:text-alert-700 active:scale-95 transition-colors text-sm"
                 >
                   <LogOut size={15} /> Déconnexion
                 </button>
               </div>
             ) : (
               <div className="flex items-center gap-3 text-sm mr-1">
-                <Link to="/login"    className="text-gray-600 dark:text-gray-400 hover:text-orange-500 transition-colors">Connexion</Link>
+                <Link to="/login"    className="text-ink-600 dark:text-night-100/70 hover:text-flame-700 transition-colors">Connexion</Link>
                 <Link to="/register" className="btn-primary text-sm py-1.5 px-3">S'inscrire</Link>
               </div>
             )}
@@ -146,7 +146,7 @@ export default function Navbar() {
 
       {/* ── Mobile bottom tab bar ────────────────────────────────── */}
       {user && (
-        <nav className="sm:hidden fixed bottom-0 inset-x-0 z-50 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800 transition-colors duration-200">
+        <nav className="sm:hidden fixed bottom-0 inset-x-0 z-50 bg-white dark:bg-night-900 border-t border-ink-200 dark:border-night-700 transition-colors duration-200">
           <div className="flex safe-area-pb">
             {tabs.map(({ to, icon: Icon, label, badge }) => {
               const active = isActive(to)
@@ -154,12 +154,19 @@ export default function Navbar() {
                 <Link
                   key={to}
                   to={to}
-                  className={`flex-1 flex flex-col items-center justify-center py-2 gap-0.5 transition-colors ${
+                  className={`relative flex-1 flex flex-col items-center justify-center py-2 gap-0.5 transition-colors ${
                     active
-                      ? 'text-orange-500'
-                      : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'
+                      ? 'text-flame-700'
+                      : 'text-ink-400 dark:text-night-100/60 hover:text-ink-600 dark:hover:text-night-100'
                   }`}
                 >
+                  {/* Indicateur de tab actif */}
+                  <span
+                    aria-hidden="true"
+                    className={`absolute top-0 h-0.5 w-5 rounded-full bg-flame-700 transition-opacity duration-200 ${
+                      active ? 'opacity-100' : 'opacity-0'
+                    }`}
+                  />
                   <div className="relative">
                     <Icon size={21} strokeWidth={active ? 2.5 : 1.8} />
                     <UnreadBadge count={badge} />
@@ -174,7 +181,7 @@ export default function Navbar() {
             {/* Logout */}
             <button
               onClick={handleLogout}
-              className="flex-1 flex flex-col items-center justify-center py-2 gap-0.5 text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 transition-colors"
+              className="flex-1 flex flex-col items-center justify-center py-2 gap-0.5 text-ink-400 dark:text-night-100/60 hover:text-alert-700 dark:hover:text-alert-700 active:scale-95 transition-colors"
             >
               <LogOut size={21} strokeWidth={1.8} />
               <span className="text-[12px] font-medium">Sortir</span>

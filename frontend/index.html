@@ -1,6 +1,44 @@
 <!doctype html>
 <html lang="fr">
   <head>
+    <!-- Anti-FOUC : pose la classe .dark AVANT le premier paint, sans dépendre
+         de React. Doit répliquer FIDÈLEMENT la logique de ThemeContext.jsx
+         (clé localStorage `theme-mode`, migration legacy `theme`, fallback
+         horaire isNightTime = 18h-6h59). Toute évolution de ThemeContext.jsx
+         doit être reportée ici. -->
+    <script>
+      (function () {
+        try {
+          var MODES = ['auto', 'light', 'dark']
+          var mode = null
+
+          var saved = localStorage.getItem('theme-mode')
+          if (saved && MODES.indexOf(saved) !== -1) {
+            mode = saved
+          } else {
+            // Migration depuis l'ancienne clé "theme" (light|dark)
+            var legacy = localStorage.getItem('theme')
+            if (legacy === 'dark') mode = 'dark'
+            else if (legacy === 'light') mode = 'light'
+          }
+          if (!mode) mode = 'auto' // défaut : auto = suit l'heure
+
+          var dark
+          if (mode === 'dark') {
+            dark = true
+          } else if (mode === 'light') {
+            dark = false
+          } else {
+            // isNightTime() : nuit de 18h00 à 06h59 (heure locale)
+            var h = new Date().getHours()
+            dark = h >= 18 || h < 7
+          }
+
+          if (dark) document.documentElement.classList.add('dark')
+        } catch (e) {}
+      })()
+    </script>
+
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />

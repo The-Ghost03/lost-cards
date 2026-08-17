@@ -44,7 +44,7 @@ function AppInner() {
   return (
     <ConfirmProvider>
       <UnreadProvider>
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-paper dark:bg-night-950">
           <Navbar />
           <main className="max-w-2xl mx-auto px-4 pb-24">
             <Suspense fallback={<PageFallback />}>

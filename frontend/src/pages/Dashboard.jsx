@@ -6,6 +6,7 @@ import { useAsyncAction } from '../lib/useAsyncAction'
 import { useConfirm }     from '../components/ConfirmDialog'
 import { t }              from '../lib/toast'
 import api                from '../api/axios'
+import { SkeletonCard }   from '../components/Spinner'
 import {
   PlusCircle, Wallet, CheckCircle, Trash2, Eye,
   Bell, MessageCircle, User, Search, Handshake,
@@ -19,23 +20,25 @@ const STATUS_BADGE = {
   recovered: 'bg-gray-100 text-gray-500',
 }
 
-/* ── Quick-action card ──────────────────────────────────────────────── */
-function QuickAction({ to, onClick, icon: Icon, label, desc, color }) {
-  const cls = `card flex items-center gap-3 cursor-pointer hover:shadow-md transition-shadow active:scale-[.98] select-none`
+/* ── Quick-action secondaire ────────────────────────────────────────────
+   Liste discrète (texte + icône ink-400, sans puce de fond colorée) : une
+   seule action primaire par vue reste en `.btn-primary`, le reste descend
+   ici pour casser la parité stricte dénoncée par l'audit design. */
+function QuickActionRow({ to, onClick, icon: Icon, label, desc }) {
+  const cls = 'flex items-center gap-3 py-2.5 text-left select-none active:scale-[.99] transition-colors'
   const inner = (
     <>
-      <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${color}`}>
-        <Icon size={22} className="text-white" />
+      <Icon size={18} className="text-ink-400 shrink-0" />
+      <div className="min-w-0 flex-1">
+        <p className="font-medium text-sm text-gray-700">{label}</p>
+        {desc && <p className="text-meta text-gray-400 leading-snug">{desc}</p>}
       </div>
-      <div>
-        <p className="font-semibold text-sm text-gray-800">{label}</p>
-        <p className="text-meta text-gray-400 leading-snug">{desc}</p>
-      </div>
+      <ChevronRight size={16} className="text-ink-400 shrink-0" />
     </>
   )
   return to
     ? <Link   to={to}      className={cls}>{inner}</Link>
-    : <button onClick={onClick} className={`${cls} w-full text-left`}>{inner}</button>
+    : <button onClick={onClick} className={`${cls} w-full`}>{inner}</button>
 }
 
 export default function Dashboard() {
@@ -104,45 +107,26 @@ export default function Dashboard() {
         {/* Header */}
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <h1 className="text-xl font-bold text-gray-900">Bonjour, {firstName} 👋</h1>
+            <h1 className="text-xl font-bold text-gray-900">Bonjour, {firstName}</h1>
           </div>
           <div className="inline-flex items-center gap-1.5 text-meta bg-orange-100 text-orange-600 font-semibold px-3 py-1 rounded-full">
             <Search size={12} /> Mode Chercheur
           </div>
         </div>
 
-        {/* Quick actions */}
+        {/* Quick actions — une seule action primaire, le reste en liste discrète */}
         <div>
           <p className="text-meta font-semibold text-gray-400 uppercase tracking-wide mb-3">Actions</p>
-          <div className="flex flex-col gap-3">
-            <QuickAction
-              to="/alerts"
-              icon={Bell}
-              label="Créer une alerte"
-              desc="Soyez notifié dès qu'un portefeuille vous correspond"
-              color="bg-orange-500"
-            />
-            <QuickAction
-              to="/"
-              icon={Search}
-              label="Rechercher"
-              desc="Chercher votre nom dans les annonces publiées"
-              color="bg-blue-500"
-            />
-            <QuickAction
-              to="/messages"
-              icon={MessageCircle}
-              label="Mes messages"
-              desc="Discussions avec des retrouveurs"
-              color="bg-purple-500"
-            />
-            <QuickAction
-              to="/profile"
-              icon={Handshake}
-              label="Passer en mode Retrouveur"
-              desc="Vous avez trouvé un portefeuille ? Changez de profil"
-              color="bg-green-500"
-            />
+
+          <Link to="/alerts" className="btn-primary w-full flex items-center justify-center gap-2">
+            <Bell size={16} /> Créer une alerte
+          </Link>
+          <p className="text-meta text-gray-400 mt-2 mb-1">Soyez notifié dès qu'un portefeuille vous correspond.</p>
+
+          <div className="flex flex-col divide-y divide-ink-100 mt-2">
+            <QuickActionRow to="/" icon={Search} label="Rechercher" desc="Chercher votre nom dans les annonces publiées" />
+            <QuickActionRow to="/messages" icon={MessageCircle} label="Mes messages" desc="Discussions avec des retrouveurs" />
+            <QuickActionRow to="/profile" icon={Handshake} label="Passer en mode Retrouveur" desc="Vous avez trouvé un portefeuille ? Changez de profil" />
           </div>
         </div>
 
@@ -154,7 +138,9 @@ export default function Dashboard() {
           </h2>
 
           {loading ? (
-            <div className="text-center py-6 text-gray-400 text-sm">Chargement...</div>
+            <div className="flex flex-col gap-3">
+              {[1, 2, 3].map(n => <SkeletonCard key={n} />)}
+            </div>
           ) : myContacts.length === 0 ? (
             <div className="card text-center py-8">
               <Search size={28} className="mx-auto text-gray-300 mb-2" />
@@ -195,7 +181,7 @@ export default function Dashboard() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-gray-900">Bonjour, {firstName} 👋</h1>
+          <h1 className="text-xl font-bold text-gray-900">Bonjour, {firstName}</h1>
           <div className="inline-flex items-center gap-1.5 text-meta bg-green-100 text-green-700 font-semibold px-3 py-1 rounded-full mt-1">
             <Handshake size={12} /> Mode Retrouveur
           </div>
@@ -205,51 +191,27 @@ export default function Dashboard() {
         </Link>
       </div>
 
-      {/* Stats */}
+      {/* Stats — la stat actionnable (mène aux annonces actives ci-dessous) pèse plus */}
       <div className="grid grid-cols-2 gap-3">
-        <div className="card text-center py-4">
-          <p className="text-2xl font-bold text-orange-500">{active}</p>
-          <p className="text-meta text-gray-400 mt-0.5">Annonces actives</p>
+        <div className="rounded-fiche bg-flame-50 border border-flame-500/30 text-center py-4">
+          <p className="text-display text-flame-700">{active}</p>
+          <p className="text-meta text-ink-600 mt-0.5">Annonces actives</p>
         </div>
         <div className="card text-center py-4">
-          <p className="text-2xl font-bold text-green-500">{recovered}</p>
+          <p className="text-2xl font-bold text-ink-600">{recovered}</p>
           <p className="text-meta text-gray-400 mt-0.5">Portefeuilles rendus</p>
         </div>
       </div>
 
-      {/* Quick actions */}
+      {/* Quick actions — "Signaler" est déjà l'action primaire du header,
+          le reste descend en liste secondaire discrète. */}
       <div>
         <p className="text-meta font-semibold text-gray-400 uppercase tracking-wide mb-3">Actions rapides</p>
-        <div className="grid grid-cols-2 gap-3">
-          <QuickAction
-            to="/posts/create"
-            icon={PlusCircle}
-            label="Signaler"
-            desc="Publier une nouvelle annonce"
-            color="bg-orange-500"
-          />
-          <QuickAction
-            to="/messages"
-            icon={MessageCircle}
-            label="Messages"
-            desc="Vos conversations"
-            color="bg-purple-500"
-          />
-          <QuickAction
-            to="/profile"
-            icon={User}
-            label="Profil"
-            desc="Gérer votre compte"
-            color="bg-gray-500"
-          />
+        <div className="flex flex-col divide-y divide-ink-100">
+          <QuickActionRow to="/messages" icon={MessageCircle} label="Messages" desc="Vos conversations" />
+          <QuickActionRow to="/profile" icon={User} label="Profil" desc="Gérer votre compte" />
           {user?.role === 'admin' && (
-            <QuickAction
-              to="/admin"
-              icon={Shield}
-              label="Admin"
-              desc="Tableau de bord admin"
-              color="bg-red-500"
-            />
+            <QuickActionRow to="/admin" icon={Shield} label="Admin" desc="Tableau de bord admin" />
           )}
         </div>
       </div>
@@ -259,7 +221,9 @@ export default function Dashboard() {
         <h2 className="font-semibold text-gray-800 text-sm mb-3">Mes annonces</h2>
 
         {loading && (
-          <div className="text-center py-8 text-gray-400 text-sm">Chargement...</div>
+          <div className="flex flex-col gap-3">
+            {[1, 2, 3].map(n => <SkeletonCard key={n} />)}
+          </div>
         )}
 
         {!loading && posts.length === 0 && (

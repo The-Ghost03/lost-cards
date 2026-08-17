@@ -72,20 +72,20 @@ export default function Home() {
   return (
     <div>
       {/* Hero */}
-      <div className="py-10 text-center">
-        <div className="inline-flex items-center gap-2 bg-orange-50 text-orange-600 text-meta font-semibold px-3 py-1.5 rounded-full mb-4">
+      <div className="py-10">
+        <p className="inline-flex items-center gap-1.5 text-orange-600 text-meta font-semibold mb-2">
           🇨🇮 Abidjan, Côte d'Ivoire
-        </div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-3 leading-tight">
+        </p>
+        <h1 className="text-3xl font-bold text-gray-900 mb-3 leading-tight text-left">
           Vous avez perdu<br />votre portefeuille ?
         </h1>
-        <p className="text-gray-500 text-sm mb-8 max-w-sm mx-auto">
+        <p className="text-gray-500 text-sm mb-8 max-w-sm text-left">
           Cherchez ici si quelqu'un l'a retrouvé et signalé sur la plateforme.
           CNI, permis, cartes bancaires — on vous aide à les récupérer.
         </p>
 
         {/* Search bar */}
-        <form onSubmit={handleSubmit} className="flex gap-2 max-w-md mx-auto">
+        <form onSubmit={handleSubmit} className="flex gap-2 max-w-md">
           <div className="relative flex-1">
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
@@ -105,25 +105,27 @@ export default function Home() {
 
       {/* CTA strip */}
       {!user && (
-        <div className="bg-orange-500 rounded-2xl p-4 mb-8 flex items-center justify-between gap-3">
+        <div className="bg-flame-700 rounded-fiche p-4 mb-8">
           <div>
             <p className="font-semibold text-white text-sm">Vous avez trouvé un portefeuille ?</p>
             <p className="text-orange-100 text-meta mt-0.5">Inscrivez-vous et aidez quelqu'un à retrouver ses pièces.</p>
           </div>
-          <button onClick={() => navigate('/register')} className="shrink-0 bg-white text-orange-500 font-semibold text-sm px-3 py-2 rounded-xl flex items-center gap-1">
-            Signaler <ArrowRight size={14} />
-          </button>
+          <div className="border-t border-dashed border-white/25 mt-3 pt-3 flex justify-end">
+            <button onClick={() => navigate('/register')} className="shrink-0 bg-white text-flame-700 font-semibold text-sm px-3 py-2 rounded-xl flex items-center gap-1">
+              Signaler <ArrowRight size={14} />
+            </button>
+          </div>
         </div>
       )}
 
-      {/* How it works */}
+      {/* How it works — poids croissant vers l'étape 3 (fonctionnalité de confiance) */}
       <div className="grid grid-cols-3 gap-3 mb-8">
         {[
-          { icon: <Wallet size={20} className="text-orange-500" />, title: "Quelqu'un signale", desc: "Le retrouveur publie l'annonce avec les infos partielles du portefeuille." },
-          { icon: <Search size={20} className="text-orange-500" />, title: 'Le proprio cherche', desc: 'Il tape son nom et trouve l\'annonce correspondante.' },
-          { icon: <Shield size={20} className="text-orange-500" />, title: 'Contact sécurisé', desc: 'Un selfie vérifie l\'identité avant d\'ouvrir le chat.' },
+          { icon: <Wallet size={20} className="text-ink-400" />, title: "Quelqu'un signale", desc: "Le retrouveur publie l'annonce avec les infos partielles du portefeuille.", accent: false },
+          { icon: <Search size={20} className="text-ink-400" />, title: 'Le proprio cherche', desc: 'Il tape son nom et trouve l\'annonce correspondante.', accent: false },
+          { icon: <Shield size={20} className="text-flame-500" />, title: 'Contact sécurisé', desc: 'Un selfie vérifie l\'identité avant d\'ouvrir le chat.', accent: true },
         ].map((step, i) => (
-          <div key={i} className="card text-center p-3">
+          <div key={i} className={`card text-center p-3 ${step.accent ? 'bg-flame-50 border-flame-500/30' : ''}`}>
             <div className="flex justify-center mb-2">{step.icon}</div>
             <p className="font-semibold text-meta text-gray-800 mb-1">{step.title}</p>
             <p className="text-meta text-gray-500 leading-relaxed">{step.desc}</p>
@@ -144,10 +146,10 @@ export default function Home() {
           </div>
         )}
 
-        {/* Spinner on search */}
+        {/* Skeleton pendant la recherche — cohérent avec le chargement initial */}
         {loading && !initialLoading && (
-          <div className="flex items-center justify-center gap-2 py-8 text-gray-400 text-sm">
-            <Spinner size={18} className="text-orange-400" /> Recherche en cours...
+          <div className="flex flex-col gap-3">
+            {[1, 2, 3].map(n => <SkeletonCard key={n} />)}
           </div>
         )}
 

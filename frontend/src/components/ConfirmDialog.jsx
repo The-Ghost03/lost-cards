@@ -1,4 +1,4 @@
-import { createContext, useContext, useRef, useState } from 'react'
+import { createContext, useContext, useEffect, useRef, useState } from 'react'
 import { AlertTriangle, HelpCircle } from 'lucide-react'
 
 const ConfirmContext = createContext(null)
@@ -6,6 +6,9 @@ const ConfirmContext = createContext(null)
 export function ConfirmProvider({ children }) {
   const [state, setState]   = useState(null)
   const resolverRef         = useRef(null)
+  // Empêche un double déclenchement quand la fermeture "normale" (clic) consomme
+  // elle-même l'entrée d'historique factice, ce qui redéclenche `popstate`.
+  const closedRef           = useRef(false)
 
   const confirm = (options = {}) =>
     new Promise((resolve) => {
@@ -25,6 +28,29 @@ export function ConfirmProvider({ children }) {
     resolverRef.current = null
   }
 
+  // Fermeture déclenchée par une action utilisateur normale (clic backdrop /
+  // bouton) : on répond puis on consomme l'entrée d'historique factice.
+  const close = (result) => {
+    if (closedRef.current) return
+    closedRef.current = true
+    answer(result)
+    window.history.back()
+  }
+
+  // Bouton retour Android (popstate) : la modale se ferme comme une annulation.
+  useEffect(() => {
+    if (!state) return
+    closedRef.current = false
+    window.history.pushState({ modal: true }, '')
+    const handlePopState = () => {
+      if (closedRef.current) return
+      closedRef.current = true
+      answer(false)
+    }
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [state])
+
   return (
     <ConfirmContext.Provider value={confirm}>
       {children}
@@ -34,7 +60,7 @@ export function ConfirmProvider({ children }) {
           {/* Backdrop */}
           <div
             className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-            onClick={() => answer(false)}
+            onClick={() => close(false)}
           />
 
           {/* Sheet */}
@@ -57,14 +83,14 @@ export function ConfirmProvider({ children }) {
 
             <div className="flex gap-2">
               <button
-                onClick={() => answer(false)}
+                onClick={() => close(false)}
                 className="flex-1 btn-secondary text-sm py-2.5"
               >
                 {state.cancelLabel}
               </button>
               <button
-                onClick={() => answer(true)}
-                className={`flex-1 text-sm font-semibold py-2.5 px-4 rounded-xl transition-colors ${
+                onClick={() => close(true)}
+                className={`flex-1 text-sm font-semibold py-2.5 px-4 rounded-xl transition-colors active:scale-95 transition-transform duration-100 ${
                   state.danger
                     ? 'bg-red-500 hover:bg-red-600 text-white'
                     : 'bg-orange-500 hover:bg-orange-600 text-white'

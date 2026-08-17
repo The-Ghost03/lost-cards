@@ -1,5 +1,5 @@
 import { usePageMeta } from '../lib/usePageMeta'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { getPost, submitContact, approveContact, rejectContact, getContactRequests, markRecovered, getSelfie, deletePost } from '../api/posts'
 import { getMessages, sendMessage } from '../api/messages'
@@ -13,6 +13,7 @@ import { fr } from 'date-fns/locale'
 import { t } from '../lib/toast'
 import { useAsyncAction } from '../lib/useAsyncAction'
 import { useConfirm } from '../components/ConfirmDialog'
+import { ficheRef } from '../lib/ficheRef'
 
 const DOC_LABELS = {
   cni: 'CNI', permis: 'Permis', bancaire: 'Carte bancaire',
@@ -59,6 +60,30 @@ export default function PostDetail() {
     }).catch(() => t.error('Annonce introuvable'))
      .finally(() => setLoading(false))
   }, [id, user])
+
+  // Bouton retour Android (popstate) : ferme la lightbox au lieu de quitter la page.
+  const lightboxClosedRef = useRef(false)
+  useEffect(() => {
+    if (!enlargedSelfie) return
+    lightboxClosedRef.current = false
+    window.history.pushState({ modal: true }, '')
+    const handlePopState = () => {
+      if (lightboxClosedRef.current) return
+      lightboxClosedRef.current = true
+      setEnlargedSelfie(null)
+    }
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [enlargedSelfie])
+
+  // Fermeture "normale" (clic backdrop / croix) : ferme puis consomme
+  // l'entrée d'historique factice poussée à l'ouverture.
+  const closeLightbox = () => {
+    if (lightboxClosedRef.current) return
+    lightboxClosedRef.current = true
+    setEnlargedSelfie(null)
+    window.history.back()
+  }
 
   const handleSelfieCapture = (file, previewUrl) => {
     setSelfie(file)
@@ -166,7 +191,7 @@ export default function PostDetail() {
 
   return (
     <div className="pt-6">
-      <Link to="/" className="flex items-center gap-1 text-gray-500 text-sm mb-4 hover:text-gray-700">
+      <Link to="/" className="flex items-center gap-1 text-gray-500 text-sm mb-4 hover:text-gray-700 active:opacity-60 transition-opacity duration-100">
         <ChevronLeft size={16} /> Toutes les annonces
       </Link>
 
@@ -184,7 +209,7 @@ export default function PostDetail() {
                   src={photo.url}
                   alt="Photo de l'annonce"
                   loading="lazy"
-                  className="w-full h-full object-cover hover:scale-105 transition-transform"
+                  className="w-full h-full object-cover hover:scale-105 active:scale-95 transition-transform"
                 />
               </button>
             ))}
@@ -197,6 +222,7 @@ export default function PostDetail() {
         <div className="flex items-start justify-between mb-3 gap-2">
           <div className="min-w-0">
             <h1 className="text-xl font-bold text-gray-900">{post.name_partial}</h1>
+            <p className="font-mono text-ref text-ink-400 uppercase tracking-[0.06em] mt-0.5">FICHE {ficheRef(post.id)}</p>
             <p className="text-meta text-gray-400 flex items-center gap-1 mt-1">
               <MapPin size={12} /> {post.location}
               <span className="ml-3"><Calendar size={12} className="inline mr-1" />
@@ -210,7 +236,7 @@ export default function PostDetail() {
             )}
             <button
               onClick={() => sharePost(post)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-orange-900/50 transition-colors text-meta font-semibold"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-orange-900/50 transition-colors active:scale-95 transition-transform duration-100 text-meta font-semibold"
               aria-label="Partager cette annonce"
             >
               <Share2 size={14} />
@@ -245,7 +271,8 @@ export default function PostDetail() {
 
       {/* ── Admin panel (read-only view for admin who is not the post owner) ── */}
       {isAdminViewer && (
-        <div className="card mb-4 border border-red-200 bg-red-50/50 dark:bg-red-950/20 dark:border-red-900">
+        <div className="card mb-4 border border-ink-200 bg-ink-100">
+          <p className="font-mono text-ref text-ink-400 uppercase tracking-[0.06em] mb-2">ADMIN · LECTURE SEULE</p>
           {/* Header */}
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-semibold text-sm flex items-center gap-2 text-red-700 dark:text-red-400">
@@ -290,7 +317,7 @@ export default function PostDetail() {
           {/* Messages — read only, no send form */}
           <div>
             <p className="text-meta font-semibold text-gray-400 uppercase tracking-wide mb-2">Messagerie</p>
-            <div className="flex flex-col gap-2 max-h-72 overflow-y-auto">
+            <div className="flex flex-col gap-2 max-h-72 overflow-y-auto overscroll-contain">
               {messages.length === 0 && (
                 <p className="text-meta text-gray-400 text-center py-4">Aucun message sur cette annonce</p>
               )}
@@ -377,12 +404,12 @@ export default function PostDetail() {
                     ? <img
                         src={selfieUrls[req.id]}
                         alt="Selfie"
-                        className="w-20 h-20 object-cover rounded-xl border border-gray-200 cursor-zoom-in hover:opacity-90 transition-opacity"
+                        className="w-20 h-20 object-cover rounded-xl border border-gray-200 cursor-zoom-in hover:opacity-90 active:opacity-70 transition-opacity"
                         onClick={() => setEnlargedSelfie(selfieUrls[req.id])}
                       />
                     : <button
                         onClick={() => loadSelfie(req.id)}
-                        className="text-meta bg-orange-50 border border-orange-300 text-orange-700 font-medium px-3 py-1.5 rounded-lg hover:bg-orange-100 transition-colors"
+                        className="text-meta bg-orange-50 border border-orange-300 text-orange-700 font-medium px-3 py-1.5 rounded-lg hover:bg-orange-100 transition-colors active:scale-95 transition-transform duration-100"
                       >
                         Voir le selfie
                       </button>
@@ -420,7 +447,7 @@ export default function PostDetail() {
               Approuvez une demande ci-dessus pour pouvoir envoyer des messages.
             </div>
           )}
-          <div className="flex flex-col gap-2 max-h-64 overflow-y-auto mb-3 pr-1">
+          <div className="flex flex-col gap-2 max-h-64 overflow-y-auto overscroll-contain mb-3 pr-1">
             {messages.length === 0 && (
               <p className="text-meta text-gray-400 text-center py-4">Démarrez la conversation</p>
             )}
@@ -429,7 +456,7 @@ export default function PostDetail() {
               return (
                 <div key={msg.id} className={`flex ${mine ? 'justify-end' : 'justify-start'}`}>
                   <div className={`max-w-[75%] px-3 py-2 rounded-2xl text-sm ${
-                    mine ? 'bg-orange-500 text-white' : 'bg-gray-100 text-gray-800'
+                    mine ? 'bg-flame-700 text-white' : 'bg-ink-100 text-ink-950'
                   }`}>
                     {msg.content}
                   </div>
@@ -464,7 +491,7 @@ export default function PostDetail() {
       {enlargedSelfie && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
-          onClick={() => setEnlargedSelfie(null)}
+          onClick={closeLightbox}
         >
           <div className="relative max-w-sm w-full" onClick={e => e.stopPropagation()}>
             <img
@@ -473,8 +500,8 @@ export default function PostDetail() {
               className="w-full rounded-2xl shadow-2xl"
             />
             <button
-              onClick={() => setEnlargedSelfie(null)}
-              className="absolute -top-3 -right-3 w-8 h-8 rounded-full bg-white text-gray-800 font-bold text-lg flex items-center justify-center shadow-float hover:bg-gray-100"
+              onClick={closeLightbox}
+              className="absolute -top-3 -right-3 w-8 h-8 rounded-full bg-white text-gray-800 font-bold text-lg flex items-center justify-center shadow-float hover:bg-gray-100 active:scale-95 transition-transform duration-100"
               aria-label="Fermer l'image agrandie"
             >
               ×

@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from 'react'
 import toast from 'react-hot-toast'
-import { RefreshCw } from 'lucide-react'
+import { RefreshCw, RotateCcw, Camera } from 'lucide-react'
 
 export default function SelfieCapture({ onCapture, preview }) {
   const videoRef  = useRef(null)
@@ -74,12 +74,12 @@ export default function SelfieCapture({ onCapture, preview }) {
           onClick={flipCamera}
           aria-label="Retourner la caméra"
           title="Retourner la caméra"
-          className="absolute top-3 right-3 w-10 h-10 rounded-full bg-black/60 hover:bg-black/80 text-white flex items-center justify-center backdrop-blur-sm transition-all active:scale-95"
+          className="absolute top-3 right-3 w-10 h-10 rounded-full bg-night-950/70 hover:bg-night-950/90 text-white flex items-center justify-center transition-all active:scale-95"
         >
           <RefreshCw size={18} />
         </button>
-        <span className="absolute bottom-3 left-3 text-[10px] font-semibold text-white bg-black/60 px-2 py-1 rounded-full backdrop-blur-sm">
-          {facingMode === 'user' ? '🤳 Caméra avant' : '📷 Caméra arrière'}
+        <span className="absolute bottom-3 left-3 flex items-center gap-1 text-[10px] font-semibold text-white bg-night-950/70 px-2 py-1 rounded-full">
+          <Camera size={11} /> {facingMode === 'user' ? 'Caméra avant' : 'Caméra arrière'}
         </span>
       </div>
 
@@ -97,9 +97,9 @@ export default function SelfieCapture({ onCapture, preview }) {
         <button
           type="button"
           onClick={startCamera}
-          className="w-full py-3 px-4 rounded-xl border-2 border-orange-400 text-orange-700 font-semibold text-sm bg-orange-50 hover:bg-orange-100 transition-colors flex items-center justify-center gap-2"
+          className="w-full py-3 px-4 rounded-xl border-2 border-orange-400 text-orange-700 font-semibold text-sm bg-orange-50 hover:bg-orange-100 transition-colors active:scale-95 transition-transform duration-100 flex items-center justify-center gap-2"
         >
-          <span className="text-lg">🤳</span> Activer la caméra
+          <Camera size={18} /> Activer la caméra
         </button>
       )}
 
@@ -109,7 +109,7 @@ export default function SelfieCapture({ onCapture, preview }) {
           onClick={capture}
           className="btn-primary w-full flex items-center justify-center gap-2 py-3"
         >
-          📸 Prendre la photo
+          <Camera size={18} /> Prendre la photo
         </button>
       )}
 
@@ -117,9 +117,9 @@ export default function SelfieCapture({ onCapture, preview }) {
         <button
           type="button"
           onClick={retake}
-          className="w-full py-2 px-4 rounded-xl border border-orange-300 text-orange-600 text-sm hover:bg-orange-50 transition-colors"
+          className="w-full py-2 px-4 rounded-xl border border-orange-300 text-orange-600 text-sm hover:bg-orange-50 transition-colors active:scale-95 transition-transform duration-100 flex items-center justify-center gap-2"
         >
-          🔄 Reprendre la photo
+          <RotateCcw size={16} /> Reprendre la photo
         </button>
       )}
     </div>

@@ -174,7 +174,7 @@ export default function Chat() {
       <div className="flex-none flex items-center gap-3 px-4 py-3 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 shadow-sm">
         <button
           onClick={() => navigate('/messages')}
-          className="p-1 text-gray-500 hover:text-gray-700 transition-colors"
+          className="p-1 text-gray-500 hover:text-gray-700 transition-colors active:opacity-60"
           aria-label="Retour aux conversations"
         >
           <ChevronLeft size={22} />
@@ -261,7 +261,7 @@ export default function Chat() {
           <button
             onClick={handleSend}
             disabled={!text.trim() || sending}
-            className="shrink-0 w-11 h-11 rounded-xl bg-orange-500 hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed text-white flex items-center justify-center transition-colors"
+            className="shrink-0 w-11 h-11 rounded-xl bg-orange-500 hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed text-white flex items-center justify-center transition-colors active:scale-95 transition-transform duration-100"
             aria-label="Envoyer le message"
           >
             {sending ? <Spinner size={16} /> : <Send size={18} />}

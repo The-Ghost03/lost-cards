@@ -1,10 +1,34 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { CheckCircle, Copy, Check, Share2, X } from 'lucide-react'
 import { sharePost, copyPostUrl } from '../lib/share'
 
 /** Modal de partage qui apparaît après publication d'une annonce */
 export default function SharePostModal({ post, onClose }) {
   const [copied, setCopied] = useState(false)
+  // Empêche un double déclenchement popstate/clic (cf. ConfirmDialog).
+  const closedRef = useRef(false)
+
+  // Bouton retour Android (popstate) : ferme la modale comme un clic sur le backdrop.
+  useEffect(() => {
+    closedRef.current = false
+    window.history.pushState({ modal: true }, '')
+    const handlePopState = () => {
+      if (closedRef.current) return
+      closedRef.current = true
+      onClose()
+    }
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [])
+
+  // Fermeture "normale" (backdrop, croix, bouton) : ferme puis consomme
+  // l'entrée d'historique factice poussée à l'ouverture.
+  const handleClose = () => {
+    if (closedRef.current) return
+    closedRef.current = true
+    onClose()
+    window.history.back()
+  }
 
   const url = `${window.location.origin}/posts/${post.id}`
   const text = `Portefeuille trouvé pour ${post.name_partial || post.name_on_cards} à ${post.location}. Vérifie sur LostCards si ça correspond à toi ou à un proche.`
@@ -40,15 +64,15 @@ export default function SharePostModal({ post, onClose }) {
   return (
     <div
       className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 p-4 animate-fade-in"
-      onClick={onClose}
+      onClick={handleClose}
     >
       <div
         className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md p-5 animate-slide-up relative"
         onClick={e => e.stopPropagation()}
       >
         <button
-          onClick={onClose}
-          className="absolute top-3 right-3 p-1 text-gray-400 hover:text-gray-600 transition-colors"
+          onClick={handleClose}
+          className="absolute top-3 right-3 p-1 text-gray-400 hover:text-gray-600 transition-colors active:opacity-60"
           aria-label="Fermer"
         >
           <X size={18} />
@@ -147,7 +171,7 @@ export default function SharePostModal({ post, onClose }) {
         </div>
 
         <button
-          onClick={onClose}
+          onClick={handleClose}
           className="btn-secondary w-full text-sm"
         >
           Plus tard

@@ -55,8 +55,8 @@ export default function Profile() {
     <div className="pt-6 pb-10 space-y-5">
       {/* ── Header ────────────────────────────────────────────────── */}
       <div className="flex items-center gap-4">
-        <div className="w-14 h-14 rounded-full bg-orange-100 flex items-center justify-center">
-          <User size={28} className="text-orange-500" />
+        <div className="w-14 h-14 rounded-full bg-ink-100 flex items-center justify-center">
+          <User size={28} className="text-ink-600" />
         </div>
         <div>
           <p className="font-bold text-gray-900">{user?.name}</p>
@@ -197,13 +197,7 @@ export default function Profile() {
                 onChange={e => setDeletePassword(e.target.value)}
                 className="input text-sm"
               />
-              <div className="flex gap-2">
-                <button
-                  onClick={() => { setShowDeleteForm(false); setDeletePassword('') }}
-                  className="flex-1 btn-secondary text-sm py-2.5"
-                >
-                  Annuler
-                </button>
+              <div className="flex items-center gap-3">
                 <button
                   onClick={confirmDelete}
                   disabled={!deletePassword || deleteLoading}
@@ -211,6 +205,12 @@ export default function Profile() {
                 >
                   <Trash2 size={14} />
                   {deleteLoading ? 'Suppression...' : 'Supprimer'}
+                </button>
+                <button
+                  onClick={() => { setShowDeleteForm(false); setDeletePassword('') }}
+                  className="text-sm text-ink-600 hover:text-ink-950 font-medium shrink-0 px-1"
+                >
+                  Annuler
                 </button>
               </div>
             </div>

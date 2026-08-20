@@ -48,10 +48,7 @@ export default function Alerts() {
 
   return (
     <div className="pt-6">
-      <div className="flex items-center gap-2 mb-1">
-        <Bell size={20} className="text-orange-500" />
-        <h1 className="text-xl font-bold text-gray-900">Mes alertes</h1>
-      </div>
+      <h1 className="text-xl font-bold text-gray-900 mb-1">Mes alertes</h1>
       <p className="text-gray-500 text-sm mb-6">
         Vous serez notifié par email si quelqu'un signale un portefeuille avec ce nom.
       </p>
@@ -88,8 +85,8 @@ export default function Alerts() {
           {alerts.map(alert => (
             <div key={alert.id} className="card flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="bg-orange-100 rounded-full p-2">
-                  <Bell size={14} className="text-orange-500" />
+                <div className="bg-ink-100 rounded-full p-2">
+                  <Bell size={14} className="text-ink-600" />
                 </div>
                 <div>
                   <p className="font-semibold text-gray-800 text-sm">{alert.name}</p>

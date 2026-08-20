@@ -2,7 +2,7 @@ import { usePageMeta } from '../lib/usePageMeta'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { createPost } from '../api/posts'
-import { MapPin, FileText, Phone, CheckSquare, Square, Camera, X, ImagePlus } from 'lucide-react'
+import { CheckSquare, Square, X, ImagePlus } from 'lucide-react'
 import { Spinner } from '../components/Spinner'
 import { useAsyncAction } from '../lib/useAsyncAction'
 import { t } from '../lib/toast'
@@ -96,8 +96,8 @@ export default function PostCreate() {
       <form onSubmit={handleSubmit} className="flex flex-col gap-5">
         {/* Nom sur les cartes */}
         <div className="card">
-          <label htmlFor="post-name-on-cards" className="flex items-center gap-2 text-sm font-semibold text-gray-800 mb-3">
-            <FileText size={16} className="text-orange-500" /> Nom sur les cartes
+          <label htmlFor="post-name-on-cards" className="text-sm font-semibold text-gray-800 mb-3 block">
+            Nom sur les cartes
           </label>
           <input
             id="post-name-on-cards"
@@ -112,8 +112,8 @@ export default function PostCreate() {
 
         {/* Lieu */}
         <div className="card">
-          <label htmlFor="post-location" className="flex items-center gap-2 text-sm font-semibold text-gray-800 mb-3">
-            <MapPin size={16} className="text-orange-500" /> Commune / Lieu de trouvaille
+          <label htmlFor="post-location" className="text-sm font-semibold text-gray-800 mb-3 block">
+            Commune / Lieu de trouvaille
           </label>
           <select id="post-location" className="input" value={form.location} onChange={set('location')} required>
             <option value="">Choisir une commune...</option>
@@ -124,8 +124,8 @@ export default function PostCreate() {
         {/* Documents */}
         <div className="card">
           {/* En-tête de groupe (pas un <label> : il ne référence pas un champ unique) */}
-          <p className="flex items-center gap-2 text-sm font-semibold text-gray-800 mb-3">
-            <FileText size={16} className="text-orange-500" /> Documents trouvés dans le portefeuille
+          <p className="text-sm font-semibold text-gray-800 mb-3">
+            Documents trouvés dans le portefeuille
           </p>
           <div className="grid grid-cols-2 gap-2">
             {DOCUMENTS.map(doc => {
@@ -152,8 +152,8 @@ export default function PostCreate() {
         {/* Photos (optionnel, max 5) */}
         <div className="card">
           {/* En-tête de groupe (le vrai <label> du champ fichier est plus bas) */}
-          <p className="flex items-center gap-2 text-sm font-semibold text-gray-800 mb-1">
-            <Camera size={16} className="text-orange-500" /> Photos du portefeuille (optionnel)
+          <p className="text-sm font-semibold text-gray-800 mb-1">
+            Photos du portefeuille (optionnel)
           </p>
           <p className="text-meta text-gray-400 mb-3">
             Ajoutez des photos floutées des pièces ou du portefeuille pour aider à l'identification ({photos.length}/{MAX_PHOTOS}).
@@ -197,8 +197,8 @@ export default function PostCreate() {
 
         {/* Adresse de récupération */}
         <div className="card">
-          <label htmlFor="post-pickup-address" className="flex items-center gap-2 text-sm font-semibold text-gray-800 mb-3">
-            <Phone size={16} className="text-orange-500" /> Adresse pour la récupération
+          <label htmlFor="post-pickup-address" className="text-sm font-semibold text-gray-800 mb-3 block">
+            Adresse pour la récupération
           </label>
           <input
             id="post-pickup-address"

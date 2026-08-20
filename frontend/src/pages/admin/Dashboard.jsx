@@ -80,7 +80,7 @@ export default function AdminDashboard() {
   }
 
   if (loading) return (
-    <div className="flex justify-center pt-20 text-orange-500">
+    <div className="flex justify-center pt-20 text-flame-700">
       <Spinner size={32} />
     </div>
   )
@@ -88,18 +88,18 @@ export default function AdminDashboard() {
   return (
     <div className="pt-6 page-enter">
       <div className="flex items-center gap-2 mb-5 animate-slide-down">
-        <Shield size={20} className="text-orange-500" />
-        <h1 className="text-xl font-bold text-gray-900">Administration</h1>
+        <Shield size={20} className="text-flame-700" />
+        <h1 className="text-xl font-bold text-ink-950">Administration</h1>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 mb-5 bg-gray-100 p-1 rounded-xl animate-slide-up">
+      <div className="flex gap-1 mb-5 bg-ink-100 p-1 rounded-xl animate-slide-up">
         {TABS.map(({ key, label, icon: Icon }) => (
           <button
             key={key}
             onClick={() => setTab(key)}
             className={`flex-1 flex items-center justify-center gap-1.5 text-meta sm:text-sm font-medium py-2 px-2 rounded-lg transition-all ${
-              tab === key ? 'bg-white text-orange-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'
+              tab === key ? 'bg-white text-flame-700 shadow-sm' : 'text-ink-400 hover:text-ink-600'
             }`}
           >
             <Icon size={14} /> <span className="hidden sm:inline">{label}</span>
@@ -111,50 +111,50 @@ export default function AdminDashboard() {
         <div className="space-y-4 animate-fade-in">
           {/* 7 derniers jours */}
           <div className="card">
-            <h2 className="font-semibold text-sm text-gray-800 mb-3 flex items-center gap-1.5">
-              <TrendingUp size={15} className="text-orange-500" /> 7 derniers jours
+            <h2 className="font-semibold text-sm text-ink-950 mb-3 flex items-center gap-1.5">
+              <TrendingUp size={15} className="text-ink-400" /> 7 derniers jours
             </h2>
             <div className="grid grid-cols-3 gap-2 text-center">
-              <Metric label="Nv. annonces" value={stats.last_7_days.new_posts} color="text-orange-500" />
-              <Metric label="Nv. comptes"  value={stats.last_7_days.new_users} color="text-blue-500" />
-              <Metric label="Récupérés"    value={stats.last_7_days.recoveries} color="text-green-500" />
+              <Metric label="Nv. annonces" value={stats.last_7_days.new_posts} />
+              <Metric label="Nv. comptes"  value={stats.last_7_days.new_users} />
+              <Metric label="Récupérés"    value={stats.last_7_days.recoveries} />
             </div>
           </div>
 
           {/* Totaux annonces */}
           <div className="card">
-            <h2 className="font-semibold text-sm text-gray-800 mb-3 flex items-center gap-1.5">
-              <FileText size={15} className="text-orange-500" /> Annonces
+            <h2 className="font-semibold text-sm text-ink-950 mb-3 flex items-center gap-1.5">
+              <FileText size={15} className="text-ink-400" /> Annonces
             </h2>
             <div className="grid grid-cols-3 gap-2 text-center">
-              <Metric label="Total"     value={stats.totals.posts} color="text-gray-700" />
-              <Metric label="Actives"   value={stats.totals.posts_active} color="text-green-500" />
-              <Metric label="Récupérées" value={stats.totals.posts_recovered} color="text-blue-500" />
+              <Metric label="Total"     value={stats.totals.posts} />
+              <Metric label="Actives"   value={stats.totals.posts_active} />
+              <Metric label="Récupérées" value={stats.totals.posts_recovered} />
             </div>
           </div>
 
           {/* Utilisateurs */}
           <div className="card">
-            <h2 className="font-semibold text-sm text-gray-800 mb-3 flex items-center gap-1.5">
-              <Users size={15} className="text-orange-500" /> Utilisateurs
+            <h2 className="font-semibold text-sm text-ink-950 mb-3 flex items-center gap-1.5">
+              <Users size={15} className="text-ink-400" /> Utilisateurs
             </h2>
             <div className="grid grid-cols-3 gap-2 text-center">
-              <Metric label="Total"      value={stats.totals.users} color="text-gray-700" />
-              <Metric label="Chercheurs" value={stats.totals.users_chercheur} color="text-blue-500" />
-              <Metric label="Retrouveurs" value={stats.totals.users_retrouveur} color="text-green-500" />
+              <Metric label="Total"      value={stats.totals.users} />
+              <Metric label="Chercheurs" value={stats.totals.users_chercheur} />
+              <Metric label="Retrouveurs" value={stats.totals.users_retrouveur} />
             </div>
           </div>
 
           {/* Engagement */}
           <div className="card">
-            <h2 className="font-semibold text-sm text-gray-800 mb-3 flex items-center gap-1.5">
-              <MessageSquare size={15} className="text-orange-500" /> Engagement
+            <h2 className="font-semibold text-sm text-ink-950 mb-3 flex items-center gap-1.5">
+              <MessageSquare size={15} className="text-ink-400" /> Engagement
             </h2>
             <div className="grid grid-cols-2 gap-2 text-center">
-              <Metric label="Vérifications" value={stats.totals.contact_requests} color="text-purple-500" />
-              <Metric label="Approuvées"    value={stats.totals.contact_approved} color="text-green-500" />
-              <Metric label="Messages"      value={stats.totals.messages} color="text-blue-500" />
-              <Metric label="Alertes"       value={stats.totals.alerts} color="text-orange-500" />
+              <Metric label="Vérifications" value={stats.totals.contact_requests} />
+              <Metric label="Approuvées"    value={stats.totals.contact_approved} />
+              <Metric label="Messages"      value={stats.totals.messages} />
+              <Metric label="Alertes"       value={stats.totals.alerts} />
             </div>
           </div>
         </div>
@@ -164,13 +164,13 @@ export default function AdminDashboard() {
       {tab === 'analytics' && (
         <div className="space-y-4 animate-fade-in">
           {/* Period selector */}
-          <div className="flex gap-1 bg-gray-100 p-1 rounded-xl">
+          <div className="flex gap-1 bg-ink-100 p-1 rounded-xl">
             {[7, 30, 90].map(d => (
               <button
                 key={d}
                 onClick={() => { setAnalyticsDays(d); loadAnalytics(d) }}
                 className={`flex-1 text-meta font-semibold py-1.5 rounded-lg transition-all ${
-                  analyticsDays === d ? 'bg-white text-orange-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'
+                  analyticsDays === d ? 'bg-white text-flame-700 shadow-sm' : 'text-ink-400 hover:text-ink-600'
                 }`}
               >
                 {d === 7 ? '7 jours' : d === 30 ? '30 jours' : '90 jours'}
@@ -179,7 +179,7 @@ export default function AdminDashboard() {
           </div>
 
           {analyticsLoading && (
-            <div className="flex justify-center py-10 text-orange-500">
+            <div className="flex justify-center py-10 text-flame-700">
               <Spinner size={32} />
             </div>
           )}
@@ -188,21 +188,21 @@ export default function AdminDashboard() {
             <>
               {/* KPI cards */}
               <div className="grid grid-cols-2 gap-3">
-                <KpiCard label="Pages vues"        value={analytics.total_views.toLocaleString('fr')}   color="text-orange-500" icon="👁" />
-                <KpiCard label="Visiteurs uniques" value={analytics.unique_visitors.toLocaleString('fr')} color="text-blue-500"   icon="👤" />
-                <KpiCard label="Durée moy."        value={fmtDuration(analytics.avg_duration_seconds)}   color="text-purple-500"  icon="⏱" />
-                <KpiCard label="Taux de rebond"    value={`${analytics.bounce_rate}%`}                   color="text-red-400"     icon="↩" />
+                <KpiCard label="Pages vues"        value={analytics.total_views.toLocaleString('fr')}   icon="👁" />
+                <KpiCard label="Visiteurs uniques" value={analytics.unique_visitors.toLocaleString('fr')} icon="👤" />
+                <KpiCard label="Durée moy."        value={fmtDuration(analytics.avg_duration_seconds)}   icon="⏱" />
+                <KpiCard label="Taux de rebond"    value={`${analytics.bounce_rate}%`}                   icon="↩" />
               </div>
 
               {/* Sparkline chart */}
               <div className="card">
-                <h3 className="font-semibold text-sm text-gray-800 mb-3 flex items-center gap-1.5">
-                  <TrendingUp size={14} className="text-orange-500" /> Évolution ({analyticsDays} jours)
+                <h3 className="font-semibold text-sm text-ink-950 mb-3 flex items-center gap-1.5">
+                  <TrendingUp size={14} className="text-ink-400" /> Évolution ({analyticsDays} jours)
                 </h3>
                 <Sparkline data={analytics.daily} />
-                <div className="flex items-center gap-4 mt-2 text-meta text-gray-500 justify-center">
-                  <span className="flex items-center gap-1"><span className="inline-block w-3 h-0.5 bg-orange-400 rounded" /> Pages vues</span>
-                  <span className="flex items-center gap-1"><span className="inline-block w-3 h-0.5 bg-blue-400 rounded" /> Visiteurs</span>
+                <div className="flex items-center gap-4 mt-2 text-meta text-ink-400 justify-center">
+                  <span className="flex items-center gap-1"><span className="inline-block w-3 h-0.5 bg-flame-500 rounded" /> Pages vues</span>
+                  <span className="flex items-center gap-1"><span className="inline-block w-3 h-0.5 bg-ink-400 rounded" /> Visiteurs</span>
                 </div>
               </div>
 
@@ -210,18 +210,18 @@ export default function AdminDashboard() {
               <div className="grid grid-cols-1 gap-3">
                 {/* Top pages */}
                 <div className="card">
-                  <h3 className="font-semibold text-sm text-gray-800 mb-3 flex items-center gap-1.5">
-                    <FileText size={14} className="text-orange-500" /> Pages les plus visitées
+                  <h3 className="font-semibold text-sm text-ink-950 mb-3 flex items-center gap-1.5">
+                    <FileText size={14} className="text-ink-400" /> Pages les plus visitées
                   </h3>
                   {analytics.top_pages.length === 0
-                    ? <p className="text-meta text-gray-400 text-center py-3">Aucune donnée</p>
+                    ? <p className="text-meta text-ink-400 text-center py-3">Aucune donnée</p>
                     : <div className="flex flex-col gap-1.5">
                         {analytics.top_pages.map((p, i) => (
                           <div key={i} className="flex items-center gap-2 text-meta">
-                            <span className="w-4 text-gray-400 text-center shrink-0">{i + 1}</span>
-                            <span className="flex-1 text-gray-700 font-mono truncate">{p.path}</span>
-                            <span className="shrink-0 font-semibold text-orange-500">{p.views} vues</span>
-                            <span className="shrink-0 text-gray-400">{p.visitors} vis.</span>
+                            <span className="w-4 text-ink-400 text-center shrink-0">{i + 1}</span>
+                            <span className="flex-1 text-ink-600 font-mono truncate">{p.path}</span>
+                            <span className="shrink-0 font-semibold text-ink-950">{p.views} vues</span>
+                            <span className="shrink-0 text-ink-400">{p.visitors} vis.</span>
                           </div>
                         ))}
                       </div>
@@ -230,11 +230,11 @@ export default function AdminDashboard() {
 
                 {/* Traffic sources */}
                 <div className="card">
-                  <h3 className="font-semibold text-sm text-gray-800 mb-3 flex items-center gap-1.5">
-                    <Bell size={14} className="text-orange-500" /> Sources de trafic
+                  <h3 className="font-semibold text-sm text-ink-950 mb-3 flex items-center gap-1.5">
+                    <Bell size={14} className="text-ink-400" /> Sources de trafic
                   </h3>
                   {analytics.sources.length === 0
-                    ? <p className="text-meta text-gray-400 text-center py-3">Aucune donnée</p>
+                    ? <p className="text-meta text-ink-400 text-center py-3">Aucune donnée</p>
                     : <BarList
                         items={analytics.sources.map(s => ({
                           label: SOURCE_LABELS[s.source] ?? s.source ?? 'Inconnu',
@@ -248,12 +248,12 @@ export default function AdminDashboard() {
                 {/* Referrers */}
                 {analytics.referrers.length > 0 && (
                   <div className="card">
-                    <h3 className="font-semibold text-sm text-gray-800 mb-3">🔗 Sites référents</h3>
+                    <h3 className="font-semibold text-sm text-ink-950 mb-3">🔗 Sites référents</h3>
                     <div className="flex flex-col gap-1.5">
                       {analytics.referrers.map((r, i) => (
                         <div key={i} className="flex items-center justify-between text-meta">
-                          <span className="text-gray-700 truncate flex-1">{r.domain}</span>
-                          <span className="shrink-0 font-semibold text-blue-500 ml-2">{r.visitors} vis.</span>
+                          <span className="text-ink-600 truncate flex-1">{r.domain}</span>
+                          <span className="shrink-0 font-semibold text-ink-950 ml-2">{r.visitors} vis.</span>
                         </div>
                       ))}
                     </div>
@@ -263,7 +263,7 @@ export default function AdminDashboard() {
                 {/* Devices */}
                 <div className="grid grid-cols-2 gap-3">
                   <div className="card">
-                    <h3 className="font-semibold text-sm text-gray-800 mb-3">📱 Appareils</h3>
+                    <h3 className="font-semibold text-sm text-ink-950 mb-3">📱 Appareils</h3>
                     <BarList
                       items={analytics.devices.map(d => ({
                         label: d.device_type === 'mobile' ? '📱 Mobile' : d.device_type === 'tablet' ? '📟 Tablette' : '💻 Desktop',
@@ -273,7 +273,7 @@ export default function AdminDashboard() {
                     />
                   </div>
                   <div className="card">
-                    <h3 className="font-semibold text-sm text-gray-800 mb-3">🖥 Systèmes</h3>
+                    <h3 className="font-semibold text-sm text-ink-950 mb-3">🖥 Systèmes</h3>
                     <BarList
                       items={analytics.os.map(o => ({ label: o.os ?? 'Inconnu', value: o.visitors }))}
                       total={analytics.unique_visitors}
@@ -288,17 +288,17 @@ export default function AdminDashboard() {
 
       {tab === 'posts' && (
         <div className="flex flex-col gap-2 animate-fade-in">
-          {posts.length === 0 && <div className="card text-center py-8 text-sm text-gray-500">Aucune annonce</div>}
+          {posts.length === 0 && <div className="card text-center py-8 text-sm text-ink-400">Aucune annonce</div>}
           {posts.map((post, i) => (
             <div key={post.id} className="card animate-slide-up" style={{ animationDelay: `${i * 30}ms` }}>
               <div className="flex items-start justify-between mb-2">
                 <div className="min-w-0">
-                  <p className="font-semibold text-gray-800 text-sm truncate">{post.name_on_cards}</p>
-                  <p className="text-meta text-gray-400">
+                  <p className="font-semibold text-ink-950 text-sm truncate">{post.name_on_cards}</p>
+                  <p className="text-meta text-ink-400">
                     {post.location} · par {post.user?.name} · {formatDistanceToNow(new Date(post.created_at), { addSuffix: true, locale: fr })}
                   </p>
                 </div>
-                <span className={`badge shrink-0 ${post.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                <span className={`badge shrink-0 ${post.status === 'active' ? 'bg-ink-100 text-ink-600' : 'bg-signal-50 text-signal-600'}`}>
                   {post.status === 'active' ? 'Active' : 'Récupéré'}
                 </span>
               </div>
@@ -307,11 +307,11 @@ export default function AdminDashboard() {
                   <Eye size={12} /> Voir
                 </button>
                 {post.status === 'active' && (
-                  <button onClick={() => handleRecover(post.id)} className="btn-secondary text-meta flex items-center gap-1 text-green-600 border-green-200">
+                  <button onClick={() => handleRecover(post.id)} className="btn-secondary text-meta flex items-center gap-1 text-signal-600 border-signal-600/30">
                     <CheckCircle size={12} /> Récupéré
                   </button>
                 )}
-                <button onClick={() => handleDeletePost(post.id)} className="btn-secondary text-meta flex items-center gap-1 text-red-500 border-red-100">
+                <button onClick={() => handleDeletePost(post.id)} className="btn-secondary text-meta flex items-center gap-1 text-alert-700 border-alert-700/20">
                   <Trash2 size={12} /> Supprimer
                 </button>
               </div>
@@ -327,7 +327,7 @@ export default function AdminDashboard() {
         <div className="animate-fade-in">
           {/* Search */}
           <div className="relative mb-3">
-            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-400 pointer-events-none" />
             <input
               type="text"
               placeholder="Rechercher (nom, email, téléphone)..."
@@ -396,7 +396,7 @@ export default function AdminDashboard() {
             {hasActiveFilter && (
               <button
                 onClick={() => setUserFilters({ role: 'all', status: 'all', latent: 'all', device: 'all', os: 'all', activity: 'all', login: 'all' })}
-                className="text-meta text-orange-500 font-medium hover:underline mt-1"
+                className="text-meta text-flame-700 font-medium hover:underline mt-1"
               >
                 ↻ Réinitialiser les filtres
               </button>
@@ -404,50 +404,50 @@ export default function AdminDashboard() {
           </div>
 
           {/* Count */}
-          <p className="text-meta text-gray-500 mb-2 px-1">
+          <p className="text-meta text-ink-400 mb-2 px-1">
             {filtered.length} utilisateur{filtered.length > 1 ? 's' : ''}
             {(hasActiveFilter || userQ) && users.length !== filtered.length && (
-              <span className="text-gray-400"> · {users.length} au total</span>
+              <span className="text-ink-400"> · {users.length} au total</span>
             )}
           </p>
 
           <div className="flex flex-col gap-2">
-            {filtered.length === 0 && <div className="card text-center py-8 text-sm text-gray-500">Aucun utilisateur ne correspond</div>}
+            {filtered.length === 0 && <div className="card text-center py-8 text-sm text-ink-400">Aucun utilisateur ne correspond</div>}
             {filtered.map((u, i) => (
               <div key={u.id} className="card animate-slide-up" style={{ animationDelay: `${i * 30}ms` }}>
                 {/* Header row */}
                 <div className="flex items-start justify-between gap-2 mb-2">
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <p className="font-semibold text-gray-800 text-sm truncate">{u.name}</p>
+                      <p className="font-semibold text-ink-950 text-sm truncate">{u.name}</p>
                       {u.role === 'admin' && (
-                        <span className="badge bg-red-100 text-red-700"><Shield size={9} /> Admin</span>
+                        <span className="badge bg-ink-950 text-white"><Shield size={9} /> Admin</span>
                       )}
-                      <span className={`badge ${u.status === 'chercheur' ? 'bg-blue-50 text-blue-600' : 'bg-green-50 text-green-600'}`}>
+                      <span className="badge bg-ink-100 text-ink-600">
                         {u.status === 'chercheur' ? 'Chercheur' : 'Retrouveur'}
                       </span>
                       {u.latent_at && (
-                        <span className="badge bg-yellow-100 text-yellow-700" title={`Latent depuis ${format(new Date(u.latent_at), 'd MMM', { locale: fr })}`}>
+                        <span className="badge bg-pending-50 text-pending-700" title={`Latent depuis ${format(new Date(u.latent_at), 'd MMM', { locale: fr })}`}>
                           💤 Latent
                         </span>
                       )}
                     </div>
-                    <p className="text-meta text-gray-400 truncate">{u.email}</p>
-                    <p className="text-meta text-gray-400">{u.phone}</p>
+                    <p className="text-meta text-ink-400 truncate">{u.email}</p>
+                    <p className="text-meta text-ink-400">{u.phone}</p>
                   </div>
                   {/* Device icon */}
                   <DeviceIcon type={u.device_type} />
                 </div>
 
                 {/* Activity counts */}
-                <div className="flex gap-3 text-meta text-gray-500 mb-2.5 flex-wrap">
-                  <span><span className="font-semibold text-gray-700">{u.posts_count}</span> annonce(s)</span>
-                  <span><span className="font-semibold text-gray-700">{u.contact_requests_count}</span> demande(s)</span>
-                  <span><span className="font-semibold text-gray-700">{u.alert_subscriptions_count}</span> alerte(s)</span>
+                <div className="flex gap-3 text-meta text-ink-400 mb-2.5 flex-wrap">
+                  <span><span className="font-semibold text-ink-600">{u.posts_count}</span> annonce(s)</span>
+                  <span><span className="font-semibold text-ink-600">{u.contact_requests_count}</span> demande(s)</span>
+                  <span><span className="font-semibold text-ink-600">{u.alert_subscriptions_count}</span> alerte(s)</span>
                 </div>
 
                 {/* Device / connection info */}
-                <div className="bg-gray-50 dark:bg-gray-900 rounded-xl px-3 py-2 mb-3 grid grid-cols-2 gap-x-4 gap-y-1 text-meta">
+                <div className="bg-ink-100 rounded-xl px-3 py-2 mb-3 grid grid-cols-2 gap-x-4 gap-y-1 text-meta">
                   <InfoRow label="OS"       value={<OsBadge os={u.device_os} />} />
                   <InfoRow label="Navigateur" value={u.device_browser || '—'} />
                   <InfoRow label="Dernière connexion" value={
@@ -458,7 +458,7 @@ export default function AdminDashboard() {
                   <InfoRow label="Inscrit le" value={format(new Date(u.created_at), 'd MMM yyyy', { locale: fr })} />
                   <InfoRow label="IP" value={
                     u.last_ip
-                      ? <span className="font-mono text-gray-600">{u.last_ip}</span>
+                      ? <span className="font-mono text-ink-600">{u.last_ip}</span>
                       : '—'
                   } />
                   <InfoRow label="Appareil" value={
@@ -474,7 +474,7 @@ export default function AdminDashboard() {
                   <button onClick={() => toggleRole(u)} className="btn-secondary text-meta flex items-center gap-1">
                     <UserCog size={12} /> {u.role === 'admin' ? 'Retirer admin' : 'Promouvoir admin'}
                   </button>
-                  <button onClick={() => handleDeleteUser(u.id, u.name)} className="btn-secondary text-meta flex items-center gap-1 text-red-500 border-red-100" disabled={u.role === 'admin'}>
+                  <button onClick={() => handleDeleteUser(u.id, u.name)} className="btn-secondary text-meta flex items-center gap-1 text-alert-700 border-alert-700/20" disabled={u.role === 'admin'}>
                     <Trash2 size={12} /> Supprimer
                   </button>
                 </div>
@@ -527,7 +527,7 @@ function applyUserFilters(users, f) {
 function FilterRow({ label, value, onChange, options }) {
   return (
     <div className="flex items-center gap-2">
-      <span className="text-meta font-semibold text-gray-500 w-20 shrink-0">{label}</span>
+      <span className="text-meta font-semibold text-ink-400 w-20 shrink-0">{label}</span>
       <div className="flex gap-1 overflow-x-auto flex-1 pb-0.5 -mb-0.5">
         {options.map(opt => (
           <button
@@ -535,8 +535,8 @@ function FilterRow({ label, value, onChange, options }) {
             onClick={() => onChange(opt.v)}
             className={`shrink-0 text-meta px-2.5 py-1 rounded-full border transition-all whitespace-nowrap ${
               value === opt.v
-                ? 'bg-orange-500 text-white border-orange-500 font-semibold'
-                : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:border-gray-300'
+                ? 'bg-flame-700 text-white border-flame-700 font-semibold'
+                : 'bg-white dark:bg-gray-800 text-ink-600 dark:text-gray-300 border-ink-200 dark:border-gray-700 hover:border-ink-400'
             }`}
           >
             {opt.l}
@@ -547,34 +547,41 @@ function FilterRow({ label, value, onChange, options }) {
   )
 }
 
-function Metric({ label, value, color }) {
+// Chiffres de KPI uniformes en ink-950 : les teintes décoratives par métrique
+// (une couleur Tailwind différente par ligne, sans rapport avec un vrai statut)
+// ont été retirées — cf. audit craft 08/2026, Dashboard.jsx §Constat n°1.
+function Metric({ label, value }) {
   return (
     <div className="p-2">
-      <p className={`text-2xl font-bold ${color}`}>{value}</p>
-      <p className="text-meta text-gray-500 mt-0.5">{label}</p>
+      <p className="text-2xl font-bold text-ink-950">{value}</p>
+      <p className="text-meta text-ink-400 mt-0.5">{label}</p>
     </div>
   )
 }
 
+// Icônes purement décoratives (type d'appareil, sans lien avec un statut réel)
+// → une seule teinte neutre, au lieu d'une couleur par type.
 function DeviceIcon({ type }) {
-  if (type === 'mobile')  return <Smartphone size={18} className="text-blue-400 shrink-0 mt-0.5" />
-  if (type === 'tablet')  return <Tablet      size={18} className="text-purple-400 shrink-0 mt-0.5" />
-  if (type === 'desktop') return <Monitor     size={18} className="text-gray-400 shrink-0 mt-0.5" />
+  if (type === 'mobile')  return <Smartphone size={18} className="text-ink-400 shrink-0 mt-0.5" />
+  if (type === 'tablet')  return <Tablet      size={18} className="text-ink-400 shrink-0 mt-0.5" />
+  if (type === 'desktop') return <Monitor     size={18} className="text-ink-400 shrink-0 mt-0.5" />
   return null
 }
 
+// OS : catégorisation sans signification de statut (même principe que les
+// badges de type de document dans PostCard.jsx) → une seule teinte neutre.
 function OsBadge({ os }) {
   const map = {
-    'iOS':     { emoji: '🍎', cls: 'bg-gray-100 text-gray-700' },
-    'Android': { emoji: '🤖', cls: 'bg-green-50 text-green-700' },
-    'Windows': { emoji: '🪟', cls: 'bg-blue-50 text-blue-700' },
-    'macOS':   { emoji: '🍎', cls: 'bg-gray-100 text-gray-700' },
-    'Linux':   { emoji: '🐧', cls: 'bg-yellow-50 text-yellow-700' },
+    'iOS':     { emoji: '🍎' },
+    'Android': { emoji: '🤖' },
+    'Windows': { emoji: '🪟' },
+    'macOS':   { emoji: '🍎' },
+    'Linux':   { emoji: '🐧' },
   }
-  if (!os || !map[os]) return <span className="text-gray-400">—</span>
-  const { emoji, cls } = map[os]
+  if (!os || !map[os]) return <span className="text-ink-400">—</span>
+  const { emoji } = map[os]
   return (
-    <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-meta font-medium ${cls}`}>
+    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-meta font-medium bg-ink-100 text-ink-600">
       {emoji} {os}
     </span>
   )
@@ -583,8 +590,8 @@ function OsBadge({ os }) {
 function InfoRow({ label, value }) {
   return (
     <>
-      <span className="text-gray-400">{label}</span>
-      <span className="text-gray-700 truncate">{value}</span>
+      <span className="text-ink-400">{label}</span>
+      <span className="text-ink-600 truncate">{value}</span>
     </>
   )
 }
@@ -606,7 +613,8 @@ function fmtDuration(sec) {
   return `${m}m ${s}s`
 }
 
-/** Simple inline SVG sparkline showing views (orange) and visitors (blue) */
+/** Simple inline SVG sparkline showing views (flame-500, la métrique principale)
+ *  et visiteurs (ink-600, série secondaire neutre). */
 function Sparkline({ data }) {
   if (!data || data.length === 0) return null
 
@@ -632,13 +640,13 @@ function Sparkline({ data }) {
         {/* Grid lines */}
         {[0, 0.5, 1].map(t => (
           <line key={t} x1={PAD} x2={W - PAD} y1={py(maxY * t)} y2={py(maxY * t)}
-            stroke="#e5e7eb" strokeWidth="1" strokeDasharray="4,4" />
+            stroke="#E7E2DB" strokeWidth="1" strokeDasharray="4,4" />
         ))}
-        {polyline('views',    '#f97316')}
-        {polyline('visitors', '#60a5fa')}
+        {polyline('views',    '#E85D04')}
+        {polyline('visitors', '#4A423B')}
       </svg>
       {/* X-axis labels */}
-      <div className="flex justify-between text-meta text-gray-400 mt-1 px-1">
+      <div className="flex justify-between text-meta text-ink-400 mt-1 px-1">
         {labelIdxs.map(i => (
           <span key={i}>{new Date(data[i]?.date).toLocaleDateString('fr', { day: 'numeric', month: 'short' })}</span>
         ))}
@@ -655,14 +663,14 @@ function BarList({ items, total }) {
       {items.map((item, i) => (
         <div key={i}>
           <div className="flex justify-between text-meta mb-0.5">
-            <span className="text-gray-700 truncate flex-1">{item.label}</span>
-            <span className="text-gray-500 ml-2 shrink-0">
-              {item.value} <span className="text-gray-400">({total ? Math.round(item.value / total * 100) : 0}%)</span>
+            <span className="text-ink-600 truncate flex-1">{item.label}</span>
+            <span className="text-ink-400 ml-2 shrink-0">
+              {item.value} <span className="text-ink-400">({total ? Math.round(item.value / total * 100) : 0}%)</span>
             </span>
           </div>
-          <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+          <div className="h-1.5 bg-ink-100 rounded-full overflow-hidden">
             <div
-              className="h-full bg-orange-400 rounded-full transition-all duration-500"
+              className="h-full bg-flame-500 rounded-full transition-all duration-500"
               style={{ width: `${(item.value / max) * 100}%` }}
             />
           </div>
@@ -672,12 +680,14 @@ function BarList({ items, total }) {
   )
 }
 
-function KpiCard({ label, value, color, icon }) {
+// Chiffres de KPI uniformes en ink-950 (cf. Metric ci-dessus) — les 4 teintes
+// décoratives par carte (orange/bleu/violet/rouge) ne portaient aucun statut réel.
+function KpiCard({ label, value, icon }) {
   return (
     <div className="card text-center py-3">
       <p className="text-lg mb-0.5">{icon}</p>
-      <p className={`text-xl font-bold ${color}`}>{value}</p>
-      <p className="text-meta text-gray-400 mt-0.5 leading-tight">{label}</p>
+      <p className="text-xl font-bold text-ink-950">{value}</p>
+      <p className="text-meta text-ink-400 mt-0.5 leading-tight">{label}</p>
     </div>
   )
 }

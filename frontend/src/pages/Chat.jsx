@@ -156,7 +156,7 @@ export default function Chat() {
   /* ── Render ───────────────────────────────────────────────────────*/
   if (loading) {
     return (
-      <div className="flex justify-center pt-20 text-orange-500">
+      <div className="flex justify-center pt-20 text-flame-700">
         <Spinner size={32} />
       </div>
     )
@@ -167,34 +167,36 @@ export default function Chat() {
        → header et input bar restent toujours visibles, seul le centre scrolle.
     */
     <div
-      className="fixed left-0 right-0 flex flex-col bg-white dark:bg-gray-950 z-20"
+      className="fixed left-0 right-0 flex flex-col bg-white dark:bg-night-950 z-20"
       style={{ top: '3.5rem', bottom: '4rem' }}
     >
       {/* ── Chat header (sticky en haut du conteneur) ──────────── */}
-      <div className="flex-none flex items-center gap-3 px-4 py-3 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 shadow-sm">
+      <div className="flex-none flex items-center gap-3 px-4 py-3 bg-white dark:bg-night-900 border-b border-ink-200 dark:border-night-700 shadow-sm">
+        {/* Bouton retour — déjà traité (fermeture au retour Android), inchangé ici */}
         <button
           onClick={() => navigate('/messages')}
-          className="p-1 text-gray-500 hover:text-gray-700 transition-colors active:opacity-60"
+          className="p-1 text-ink-400 hover:text-ink-600 transition-colors active:opacity-60"
           aria-label="Retour aux conversations"
         >
           <ChevronLeft size={22} />
         </button>
 
-        <div className="w-9 h-9 rounded-full bg-orange-100 flex items-center justify-center shrink-0">
-          <Wallet size={16} className="text-orange-500" />
+        <div className="w-9 h-9 rounded-full bg-ink-100 flex items-center justify-center shrink-0">
+          <Wallet size={16} className="text-ink-400" />
         </div>
 
         <div className="flex-1 min-w-0">
-          <p className="font-semibold text-gray-800 text-sm leading-tight truncate">
+          <p className="font-semibold text-ink-950 text-sm leading-tight truncate">
             {post?.name_partial}
           </p>
-          <p className="text-meta text-gray-400 truncate">{post?.location}</p>
+          <p className="text-meta text-ink-400 truncate">{post?.location}</p>
         </div>
 
+        {/* Statut réel de la conversation — seul badge coloré de l'écran */}
         <span className={`shrink-0 text-meta font-medium px-2 py-0.5 rounded-full flex items-center gap-1 ${
           post?.status === 'recovered'
-            ? 'bg-gray-100 text-gray-500'
-            : 'bg-green-100 text-green-700'
+            ? 'bg-ink-100 text-ink-600'
+            : 'bg-signal-50 text-signal-600'
         }`}>
           {post?.status === 'recovered'
             ? 'Clôturé'
@@ -207,10 +209,10 @@ export default function Chat() {
       <div
         ref={scrollContainerRef}
         onScroll={handleScroll}
-        className="flex-1 overflow-y-auto overscroll-contain px-4 py-4 bg-gray-50 dark:bg-gray-950 space-y-1"
+        className="flex-1 overflow-y-auto overscroll-contain px-4 py-4 bg-paper dark:bg-night-950 space-y-1"
       >
         {messages.length === 0 && (
-          <p className="text-center text-gray-400 text-sm pt-10">
+          <p className="text-center text-ink-400 text-sm pt-10">
             Démarrez la conversation
           </p>
         )}
@@ -222,7 +224,7 @@ export default function Chat() {
           return (
             <div key={msg.id}>
               {showSep && (
-                <p className="text-center text-meta text-gray-400 py-3">
+                <p className="text-center text-meta text-ink-400 py-3">
                   {fmtTime(msg.created_at)}
                 </p>
               )}
@@ -231,8 +233,8 @@ export default function Chat() {
                 <div
                   className={`max-w-[78%] px-3.5 py-2.5 text-sm leading-relaxed transition-opacity ${
                     mine
-                      ? 'bg-orange-500 text-white rounded-2xl rounded-br-sm'
-                      : 'bg-white text-gray-800 shadow-sm rounded-2xl rounded-bl-sm'
+                      ? 'bg-flame-700 text-white rounded-2xl rounded-br-sm'
+                      : 'bg-white text-ink-950 shadow-sm rounded-2xl rounded-bl-sm'
                   } ${msg._pending ? 'opacity-70' : ''}`}
                 >
                   {msg.content}
@@ -246,7 +248,7 @@ export default function Chat() {
       </div>
 
       {/* ── Input bar (sticky en bas du conteneur) ──────────────── */}
-      <div className="flex-none px-4 py-3 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800">
+      <div className="flex-none px-4 py-3 bg-white dark:bg-night-900 border-t border-ink-200 dark:border-night-700">
         <div className="flex items-end gap-2">
           <textarea
             ref={textareaRef}
@@ -258,10 +260,11 @@ export default function Chat() {
             className="flex-1 input resize-none py-2.5 text-sm overflow-hidden"
             style={{ minHeight: '44px', maxHeight: '120px' }}
           />
+          {/* Seule action primaire de l'écran — envoi du message */}
           <button
             onClick={handleSend}
             disabled={!text.trim() || sending}
-            className="shrink-0 w-11 h-11 rounded-xl bg-orange-500 hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed text-white flex items-center justify-center transition-colors active:scale-95 transition-transform duration-100"
+            className="shrink-0 w-11 h-11 rounded-xl bg-flame-700 hover:bg-flame-700/90 disabled:opacity-40 disabled:cursor-not-allowed text-white flex items-center justify-center transition-colors active:scale-95 transition-transform duration-100"
             aria-label="Envoyer le message"
           >
             {sending ? <Spinner size={16} /> : <Send size={18} />}

@@ -73,7 +73,9 @@ export default function Home() {
     <div>
       {/* Hero */}
       <div className="py-10">
-        <p className="inline-flex items-center gap-1.5 text-orange-600 text-meta font-semibold mb-2">
+        {/* Pretexte de localisation : accent décoratif, ne porte aucune action —
+            neutralisé pour laisser le flame à la seule action de l'écran. */}
+        <p className="inline-flex items-center gap-1.5 text-ink-600 text-meta font-semibold mb-2">
           🇨🇮 Abidjan, Côte d'Ivoire
         </p>
         <h1 className="text-3xl font-bold text-gray-900 mb-3 leading-tight text-left">

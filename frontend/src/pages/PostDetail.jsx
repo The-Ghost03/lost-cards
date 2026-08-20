@@ -417,14 +417,15 @@ export default function PostDetail() {
                 </div>
               )}
 
-              {/* Actions */}
+              {/* Actions — liens texte : « Marquer comme récupéré » reste l'unique
+                  bouton plein de la vue propriétaire (voir plus haut). */}
               {req.status !== 'approved' && (
-                <div className="flex gap-2">
-                  <button onClick={() => handleApprove(req.id)} disabled={approving || rejecting} className="btn-primary text-meta py-1 px-3 flex-1">
+                <div className="flex items-center gap-4">
+                  <button onClick={() => handleApprove(req.id)} disabled={approving || rejecting} className="text-meta font-medium text-flame-700 hover:text-flame-700/80 disabled:opacity-50 transition-colors">
                     {approving ? '...' : <><CheckCircle size={12} className="inline mr-1" /> C'est bien lui / elle</>}
                   </button>
                   {req.status === 'pending' && (
-                    <button onClick={() => handleReject(req.id)} disabled={approving || rejecting} className="text-meta py-1 px-3 flex-1 rounded-xl border border-red-300 text-red-600 hover:bg-red-50 disabled:opacity-50 transition-colors active:scale-95">
+                    <button onClick={() => handleReject(req.id)} disabled={approving || rejecting} className="text-meta text-ink-600 underline disabled:opacity-50 transition-colors">
                       {rejecting ? '...' : <><XCircle size={12} className="inline mr-1" /> Pas le bon</>}
                     </button>
                   )}

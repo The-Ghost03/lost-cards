@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { MapPin, Calendar, FileText, CheckCircle, ArrowRight, Share2 } from 'lucide-react'
+import { MapPin, CheckCircle, Share2 } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { sharePost } from '../lib/share'
@@ -28,14 +28,26 @@ export default function PostCard({ post }) {
   // rendu) si le composant est re-rendu plus tard avec une valeur différente.
   // eslint-disable-next-line react-hooks/purity
   const isFresh = Date.now() - createdAt.getTime() < DAY_MS
+  // Vignette de couverture : seule la première photo compte, l'annonce sans
+  // photo garde une mise en page texte-only (pas de placeholder gris).
+  const coverPhoto = post.photos && post.photos.length > 0 ? post.photos[0] : null
 
   return (
     <Link
       to={`/posts/${post.id}`}
-      className={`card-hover block group ${
+      className={`card-hover block group overflow-hidden ${
         isFresh ? 'border-y border-r border-ink-200 border-l-2 border-l-flame-500' : ''
       }`}
     >
+      {coverPhoto && (
+        <img
+          src={coverPhoto.url}
+          alt=""
+          loading="lazy"
+          className="w-[calc(100%+2rem)] max-w-none aspect-video object-cover -mx-4 -mt-4 mb-3 rounded-t-fiche"
+        />
+      )}
+
       <div className="flex items-start justify-between gap-2 mb-3">
         <div className="min-w-0">
           <p className="font-semibold text-ink-950 text-base group-hover:text-flame-700 transition-colors">{post.name_partial}</p>
@@ -44,26 +56,23 @@ export default function PostCard({ post }) {
             <MapPin size={11} /> {post.location}
           </p>
         </div>
-        {post.status === 'recovered'
-          ? <span className="badge bg-signal-50 text-signal-600 shrink-0">
-              <CheckCircle size={11} /> Récupéré
-            </span>
-          : <ArrowRight size={16} className="text-ink-200 group-hover:text-flame-500 group-hover:translate-x-1 transition-all shrink-0 mt-1" />
-        }
+        {post.status === 'recovered' && (
+          <span className="badge bg-signal-50 text-signal-600 shrink-0">
+            <CheckCircle size={11} /> Récupéré
+          </span>
+        )}
       </div>
 
       <div className="flex flex-wrap gap-1.5 mb-3">
         {post.documents.map(doc => (
           <span key={doc} className="badge bg-ink-100 text-ink-600">
-            <FileText size={10} /> {DOC_LABELS[doc] || DOC_LABELS.autre}
+            {DOC_LABELS[doc] || DOC_LABELS.autre}
           </span>
         ))}
       </div>
 
       <div className="flex items-center justify-between gap-2">
-        <p className="text-meta text-ink-400 flex items-center gap-1">
-          <Calendar size={11} /> Trouvé {age}
-        </p>
+        <p className="text-meta text-ink-400">Trouvé {age}</p>
         <button
           type="button"
           onClick={(e) => { e.preventDefault(); e.stopPropagation(); sharePost(post) }}

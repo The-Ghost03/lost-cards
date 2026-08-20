@@ -17,7 +17,9 @@ class PostController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Post::with('user:id,name,phone')
+        // 'photos' chargée pour la vignette de couverture des cartes (liste) —
+        // même relation que show(), évite un N+1 par annonce paginée.
+        $query = Post::with('user:id,name,phone', 'photos')
             ->orderByDesc('created_at');
 
         if ($request->filled('name')) {

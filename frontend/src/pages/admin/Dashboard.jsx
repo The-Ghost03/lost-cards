@@ -642,7 +642,7 @@ function Sparkline({ data }) {
           <line key={t} x1={PAD} x2={W - PAD} y1={py(maxY * t)} y2={py(maxY * t)}
             stroke="#E7E2DB" strokeWidth="1" strokeDasharray="4,4" />
         ))}
-        {polyline('views',    '#E85D04')}
+        {polyline('views',    '#6B60AF')}
         {polyline('visitors', '#4A423B')}
       </svg>
       {/* X-axis labels */}

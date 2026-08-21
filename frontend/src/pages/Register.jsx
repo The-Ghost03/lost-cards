@@ -40,7 +40,7 @@ export default function Register() {
   return (
     <div className="max-w-sm mx-auto pt-10 pb-16">
       <div className="text-center mb-8">
-        <div className="inline-flex items-center gap-2 text-orange-500 font-bold text-xl mb-1">
+        <div className="inline-flex items-center gap-2 text-flame-700 font-bold text-xl mb-1">
           <Wallet size={24} /> LostCards
         </div>
         <h1 className="text-2xl font-bold text-gray-900">Créer un compte</h1>
@@ -63,11 +63,11 @@ export default function Register() {
                 onClick={() => setForm({ ...form, status: key })}
                 className={`p-3 rounded-xl border-2 text-center transition-all active:scale-95 ${
                   form.status === key
-                    ? 'border-orange-400 bg-orange-50 text-orange-700'
+                    ? 'border-flame-700 bg-flame-50 text-flame-700'
                     : 'border-gray-200 text-gray-500 hover:border-gray-300'
                 }`}
               >
-                <Icon size={26} className={`mx-auto mb-1.5 ${form.status === key ? 'text-orange-500' : 'text-gray-400'}`} />
+                <Icon size={26} className={`mx-auto mb-1.5 ${form.status === key ? 'text-flame-500' : 'text-gray-400'}`} />
                 <p className="font-semibold text-sm">{label}</p>
                 <p className="text-meta opacity-70 mt-0.5">{desc}</p>
               </button>
@@ -105,7 +105,7 @@ export default function Register() {
 
       <p className="text-center text-sm text-gray-500 mt-4">
         Déjà inscrit ?{' '}
-        <Link to="/login" className="text-orange-500 font-medium">Se connecter</Link>
+        <Link to="/login" className="text-flame-700 font-medium">Se connecter</Link>
       </p>
     </div>
   )

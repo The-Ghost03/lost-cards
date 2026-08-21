@@ -42,8 +42,8 @@ export default function ForgotPassword() {
         </Link>
 
         <div className="card">
-          <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mb-4">
-            <Mail size={24} className="text-orange-500" />
+          <div className="w-12 h-12 bg-flame-50 rounded-xl flex items-center justify-center mb-4">
+            <Mail size={24} className="text-flame-500" />
           </div>
           <h1 className="text-lg font-bold text-gray-900 mb-1">Mot de passe oublié</h1>
           <p className="text-sm text-gray-500 mb-5">

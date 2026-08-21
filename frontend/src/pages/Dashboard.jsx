@@ -109,7 +109,7 @@ export default function Dashboard() {
           <div className="flex items-center gap-2 mb-1">
             <h1 className="text-xl font-bold text-gray-900">Bonjour, {firstName}</h1>
           </div>
-          <div className="inline-flex items-center gap-1.5 text-meta bg-orange-100 text-orange-600 font-semibold px-3 py-1 rounded-full">
+          <div className="inline-flex items-center gap-1.5 text-meta bg-flame-50 text-flame-700 font-semibold px-3 py-1 rounded-full">
             <Search size={12} /> Mode Chercheur
           </div>
         </div>
@@ -160,9 +160,9 @@ export default function Dashboard() {
         </div>
 
         {/* Info card */}
-        <div className="bg-orange-50 border border-orange-100 rounded-2xl p-4">
-          <p className="text-sm font-semibold text-orange-700 mb-1">Comment retrouver votre portefeuille ?</p>
-          <ol className="text-meta text-orange-600 space-y-1 list-decimal list-inside leading-relaxed">
+        <div className="bg-flame-50 border border-flame-500/30 rounded-2xl p-4">
+          <p className="text-sm font-semibold text-flame-700 mb-1">Comment retrouver votre portefeuille ?</p>
+          <ol className="text-meta text-flame-700 space-y-1 list-decimal list-inside leading-relaxed">
             <li>Recherchez votre nom dans la barre de recherche</li>
             <li>Créez une alerte pour être prévenu automatiquement</li>
             <li>Contactez le retrouveur via la messagerie sécurisée</li>
@@ -312,7 +312,7 @@ function ContactCard({ contact, navigate }) {
               {statusMeta.icon} {statusMeta.label}
             </span>
             {contact.unread > 0 && (
-              <span className="badge bg-orange-500 text-white">
+              <span className="badge bg-flame-700 text-white">
                 {contact.unread} nouveau{contact.unread > 1 ? 'x' : ''}
               </span>
             )}

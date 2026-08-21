@@ -33,7 +33,7 @@ export default function Login() {
   return (
     <div className="max-w-sm mx-auto pt-10 page-enter">
       <div className="text-center mb-8 animate-slide-down">
-        <div className="inline-flex items-center gap-2 text-orange-500 font-bold text-xl mb-1">
+        <div className="inline-flex items-center gap-2 text-flame-700 font-bold text-xl mb-1">
           <Wallet size={24} /> LostCards
         </div>
         <h1 className="text-2xl font-bold text-gray-900">Content de vous revoir</h1>
@@ -51,7 +51,7 @@ export default function Login() {
         <div>
           <div className="flex items-center justify-between mb-1">
             <label htmlFor="login-password" className="text-meta font-medium text-gray-700">Mot de passe</label>
-            <Link to="/forgot-password" className="text-meta text-orange-500 hover:underline">Oublié ?</Link>
+            <Link to="/forgot-password" className="text-meta text-flame-700 hover:underline">Oublié ?</Link>
           </div>
           <div className="relative">
             <Lock size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
@@ -65,7 +65,7 @@ export default function Login() {
 
       <p className="text-center text-sm text-gray-500 mt-4">
         Pas encore de compte ?{' '}
-        <Link to="/register" className="text-orange-500 font-medium">S'inscrire</Link>
+        <Link to="/register" className="text-flame-700 font-medium">S'inscrire</Link>
       </p>
     </div>
   )

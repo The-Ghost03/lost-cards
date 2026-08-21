@@ -76,7 +76,7 @@ export default function PostCard({ post }) {
         <button
           type="button"
           onClick={(e) => { e.preventDefault(); e.stopPropagation(); sharePost(post) }}
-          className="flex items-center gap-1 px-2.5 py-1 rounded-control bg-flame-50 dark:bg-orange-950/40 text-flame-700 dark:text-orange-400 hover:bg-flame-50/70 dark:hover:bg-orange-900/50 transition-colors active:scale-95 transition-transform duration-100 text-meta font-semibold"
+          className="flex items-center gap-1 px-2.5 py-1 rounded-control bg-flame-50 text-flame-700 hover:bg-flame-50/70 transition-colors active:scale-95 transition-transform duration-100 text-meta font-semibold"
           aria-label="Partager cette annonce"
         >
           <Share2 size={12} />

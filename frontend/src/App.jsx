@@ -32,7 +32,7 @@ const AdminDash      = lazy(() => import('./pages/admin/Dashboard'))
 /* Fallback affiché pendant le chargement d'un chunk de page */
 function PageFallback() {
   return (
-    <div className="flex justify-center pt-20 text-orange-500">
+    <div className="flex justify-center pt-20 text-flame-700">
       <Spinner size={32} />
     </div>
   )

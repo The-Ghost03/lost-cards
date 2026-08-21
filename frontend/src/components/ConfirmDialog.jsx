@@ -68,11 +68,11 @@ export function ConfirmProvider({ children }) {
                style={{ animation: 'slideUp 0.22s ease' }}>
             <div className="flex gap-3 mb-4">
               <div className={`shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
-                state.danger ? 'bg-red-100' : 'bg-orange-100'
+                state.danger ? 'bg-red-100' : 'bg-flame-50'
               }`}>
                 {state.danger
                   ? <AlertTriangle size={20} className="text-red-500" />
-                  : <HelpCircle    size={20} className="text-orange-500" />
+                  : <HelpCircle    size={20} className="text-flame-700" />
                 }
               </div>
               <div>
@@ -93,7 +93,7 @@ export function ConfirmProvider({ children }) {
                 className={`flex-1 text-sm font-semibold py-2.5 px-4 rounded-xl transition-colors active:scale-95 transition-transform duration-100 ${
                   state.danger
                     ? 'bg-red-500 hover:bg-red-600 text-white'
-                    : 'bg-orange-500 hover:bg-orange-600 text-white'
+                    : 'bg-flame-700 hover:bg-flame-700/90 text-white'
                 }`}
               >
                 {state.confirmLabel}

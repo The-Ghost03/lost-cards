@@ -137,7 +137,7 @@ export default function PostCreate() {
                   onClick={() => toggleDoc(doc.key)}
                   className={`flex items-center gap-2 text-left text-meta px-3 py-2.5 rounded-xl border transition-colors ${
                     checked
-                      ? 'border-orange-400 bg-orange-50 text-orange-700 font-medium'
+                      ? 'border-flame-700 bg-flame-50 text-flame-700 font-medium'
                       : 'border-gray-200 text-gray-600 hover:border-gray-300'
                   }`}
                 >
@@ -188,7 +188,7 @@ export default function PostCreate() {
                 className="hidden"
                 onChange={e => { addPhotos(e.target.files); e.target.value = '' }}
               />
-              <span className="flex items-center justify-center gap-2 w-full py-3 rounded-xl border-2 border-dashed border-orange-200 text-orange-600 text-sm font-medium cursor-pointer hover:bg-orange-50 hover:border-orange-300 transition-colors">
+              <span className="flex items-center justify-center gap-2 w-full py-3 rounded-xl border-2 border-dashed border-flame-500/30 text-flame-700 text-sm font-medium cursor-pointer hover:bg-flame-50 hover:border-flame-500 transition-colors">
                 <ImagePlus size={16} /> Ajouter des photos
               </span>
             </label>

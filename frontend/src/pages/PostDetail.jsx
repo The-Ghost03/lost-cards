@@ -180,7 +180,7 @@ export default function PostDetail() {
     }
   })
 
-  if (loading) return <div className="flex justify-center pt-20 text-orange-500"><Spinner size={32} /></div>
+  if (loading) return <div className="flex justify-center pt-20 text-flame-700"><Spinner size={32} /></div>
   if (!post)   return <div className="pt-10 text-center text-gray-500">Annonce introuvable</div>
 
   const isOwner       = user?.id === post.user_id
@@ -236,7 +236,7 @@ export default function PostDetail() {
             )}
             <button
               onClick={() => sharePost(post)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-orange-900/50 transition-colors active:scale-95 transition-transform duration-100 text-meta font-semibold"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-flame-50 text-flame-700 hover:bg-flame-50/70 transition-colors active:scale-95 transition-transform duration-100 text-meta font-semibold"
               aria-label="Partager cette annonce"
             >
               <Share2 size={14} />
@@ -247,7 +247,7 @@ export default function PostDetail() {
 
         <div className="flex flex-wrap gap-1.5 mb-4">
           {post.documents.map(doc => (
-            <span key={doc} className="badge bg-orange-50 text-orange-700">
+            <span key={doc} className="badge bg-flame-50 text-flame-700">
               <FileText size={11} /> {DOC_LABELS[doc] || doc}
             </span>
           ))}
@@ -338,13 +338,13 @@ export default function PostDetail() {
       {!isOwner && !isAdminViewer && user && post.status !== 'recovered' && (
         <div className="card mb-4">
           <h2 className="font-semibold text-gray-800 text-sm mb-3 flex items-center gap-2">
-            <HelpCircle size={16} className="text-orange-500" /> Réclamez ce portefeuille
+            <HelpCircle size={16} className="text-flame-700" /> Réclamez ce portefeuille
           </h2>
 
           {!myRequest && (
             <form onSubmit={submitContactRequest} className="flex flex-col gap-3">
-              <div className="bg-orange-50 p-3 rounded-xl text-meta text-gray-600">
-                <p className="font-semibold text-orange-700 mb-1 flex items-center gap-1.5"><Camera size={14} /> Vérification par selfie</p>
+              <div className="bg-flame-50 p-3 rounded-xl text-meta text-gray-600">
+                <p className="font-semibold text-flame-700 mb-1 flex items-center gap-1.5"><Camera size={14} /> Vérification par selfie</p>
                 <p>Prenez un selfie de votre visage. Le retrouveur le comparera avec la photo sur vos pièces d'identité trouvées.</p>
               </div>
 
@@ -409,7 +409,7 @@ export default function PostDetail() {
                       />
                     : <button
                         onClick={() => loadSelfie(req.id)}
-                        className="text-meta bg-orange-50 border border-orange-300 text-orange-700 font-medium px-3 py-1.5 rounded-lg hover:bg-orange-100 transition-colors active:scale-95 transition-transform duration-100"
+                        className="text-meta bg-flame-50 border border-flame-700 text-flame-700 font-medium px-3 py-1.5 rounded-lg hover:bg-flame-50/70 transition-colors active:scale-95 transition-transform duration-100"
                       >
                         Voir le selfie
                       </button>
@@ -440,7 +440,7 @@ export default function PostDetail() {
       {canChat && (
         <div className="card">
           <h2 className="font-semibold text-gray-800 text-sm mb-3 flex items-center gap-2">
-            <MessageCircle size={16} className="text-orange-500" /> Messagerie
+            <MessageCircle size={16} className="text-flame-700" /> Messagerie
           </h2>
 
           {isOwner && !requests.some(r => r.status === 'approved') && (

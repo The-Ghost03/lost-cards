@@ -50,8 +50,8 @@ export default function ResetPassword() {
     <div className="min-h-[60vh] flex items-center justify-center">
       <div className="w-full max-w-sm">
         <div className="card">
-          <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mb-4">
-            <KeyRound size={24} className="text-orange-500" />
+          <div className="w-12 h-12 bg-flame-50 rounded-xl flex items-center justify-center mb-4">
+            <KeyRound size={24} className="text-flame-500" />
           </div>
           <h1 className="text-lg font-bold text-gray-900 mb-1">Nouveau mot de passe</h1>
           <p className="text-sm text-gray-500 mb-5">Choisissez un mot de passe sécurisé.</p>

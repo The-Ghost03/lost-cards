@@ -85,18 +85,18 @@ export default function Profile() {
               disabled={statusLoading}
               className={`relative flex flex-col items-start gap-1.5 p-4 rounded-xl border-2 transition-all text-left ${
                 isChercheur
-                  ? 'border-orange-400 bg-orange-50'
+                  ? 'border-flame-700 bg-flame-50'
                   : 'border-gray-200 bg-white hover:border-gray-300'
               }`}
             >
               {isChercheur && (
                 <CheckCircle
                   size={16}
-                  className="absolute top-2 right-2 text-orange-500"
+                  className="absolute top-2 right-2 text-flame-700"
                 />
               )}
-              <Search size={22} className={isChercheur ? 'text-orange-500' : 'text-gray-400'} />
-              <span className={`font-semibold text-sm ${isChercheur ? 'text-orange-700' : 'text-gray-700'}`}>
+              <Search size={22} className={isChercheur ? 'text-flame-500' : 'text-gray-400'} />
+              <span className={`font-semibold text-sm ${isChercheur ? 'text-flame-700' : 'text-gray-700'}`}>
                 Chercheur
               </span>
               <span className="text-meta text-gray-500 leading-snug">
@@ -147,7 +147,7 @@ export default function Profile() {
 
         <button
           onClick={() => navigate('/forgot-password')}
-          className="w-full flex items-center justify-between py-2.5 text-sm text-gray-700 hover:text-orange-500 transition-colors"
+          className="w-full flex items-center justify-between py-2.5 text-sm text-gray-700 hover:text-flame-700 transition-colors"
         >
           <span className="flex items-center gap-2.5">
             <KeyRound size={17} className="text-gray-400" />
@@ -159,7 +159,7 @@ export default function Profile() {
         {isAdmin && (
           <button
             onClick={() => navigate('/admin')}
-            className="w-full flex items-center justify-between py-2.5 text-sm text-gray-700 hover:text-orange-500 transition-colors border-t border-gray-50"
+            className="w-full flex items-center justify-between py-2.5 text-sm text-gray-700 hover:text-flame-700 transition-colors border-t border-gray-50"
           >
             <span className="flex items-center gap-2.5">
               <Shield size={17} className="text-gray-400" />

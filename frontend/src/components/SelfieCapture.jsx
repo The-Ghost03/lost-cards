@@ -88,7 +88,7 @@ export default function SelfieCapture({ onCapture, preview }) {
         <img
           src={preview}
           alt="Votre selfie"
-          className="w-36 h-36 object-cover rounded-full border-4 border-orange-400 mx-auto shadow"
+          className="w-36 h-36 object-cover rounded-full border-4 border-flame-500 mx-auto shadow"
         />
       )}
 
@@ -97,7 +97,7 @@ export default function SelfieCapture({ onCapture, preview }) {
         <button
           type="button"
           onClick={startCamera}
-          className="w-full py-3 px-4 rounded-xl border-2 border-orange-400 text-orange-700 font-semibold text-sm bg-orange-50 hover:bg-orange-100 transition-colors active:scale-95 transition-transform duration-100 flex items-center justify-center gap-2"
+          className="w-full py-3 px-4 rounded-xl border-2 border-flame-700 text-flame-700 font-semibold text-sm bg-flame-50 hover:bg-flame-50/70 transition-colors active:scale-95 transition-transform duration-100 flex items-center justify-center gap-2"
         >
           <Camera size={18} /> Activer la caméra
         </button>
@@ -117,7 +117,7 @@ export default function SelfieCapture({ onCapture, preview }) {
         <button
           type="button"
           onClick={retake}
-          className="w-full py-2 px-4 rounded-xl border border-orange-300 text-orange-600 text-sm hover:bg-orange-50 transition-colors active:scale-95 transition-transform duration-100 flex items-center justify-center gap-2"
+          className="w-full py-2 px-4 rounded-xl border border-flame-500/40 text-flame-700 text-sm hover:bg-flame-50 transition-colors active:scale-95 transition-transform duration-100 flex items-center justify-center gap-2"
         >
           <RotateCcw size={16} /> Reprendre la photo
         </button>

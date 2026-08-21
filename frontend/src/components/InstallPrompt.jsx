@@ -53,8 +53,8 @@ export default function InstallPrompt() {
 
   return (
     <div className="fixed bottom-4 left-4 right-4 z-50 max-w-md mx-auto animate-slide-up">
-      <div className="bg-white border-2 border-orange-300 shadow-2xl rounded-2xl p-4 flex items-center gap-3">
-        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 text-white flex items-center justify-center text-xl shrink-0 animate-float">
+      <div className="bg-white border-2 border-flame-500 shadow-2xl rounded-2xl p-4 flex items-center gap-3">
+        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-flame-500 to-flame-700 text-white flex items-center justify-center text-xl shrink-0 animate-float">
           📱
         </div>
         <div className="flex-1 min-w-0">

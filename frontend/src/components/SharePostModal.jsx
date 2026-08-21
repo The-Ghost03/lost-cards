@@ -154,7 +154,7 @@ export default function SharePostModal({ post, onClose }) {
           <ShareIcon
             label="Autres"
             onClick={handleNative}
-            bg="bg-orange-500"
+            bg="bg-flame-700"
             icon={<Share2 size={18} className="text-white" />}
           />
           <ShareIcon

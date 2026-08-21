@@ -19,16 +19,20 @@ export default {
         paper:   '#FAF8F5', // fond de page   ← remplace bg-gray-50
         surface: '#FFFFFF',
 
-        // Action — l'orange, encré
+        // Action — violet chaleureux, calibré sur hofa-ci.org (#6b60af) —
+        // pivot demandé le 20/08/2026 (ton "humanitaire/solidarité" plutôt que
+        // "document officiel"). Le nom du token reste `flame` (continuité,
+        // évite de renommer des centaines d'usages) mais la teinte change.
         flame: {
-          50:  '#FDF0E4',
-          500: '#E85D04', // marque, icônes, remplissages larges (3,30:1 ≥ 3:1 UI)
-          700: '#B4400A', // fonds de bouton + texte blanc (5,71:1) ET texte orange sur paper (5,24:1)
-          300: '#FF9A5C', // dark mode uniquement
+          50:  '#F1EFFA',
+          500: '#8A7FC4', // icônes, remplissages larges — plus clair, décoratif
+          700: '#6B60AF', // fonds de bouton + texte sur paper (5,57:1 — AA)
+          300: '#B9AEE0', // dark mode uniquement
         },
 
-        // Statuts — 3 couleurs sémantiques (remplacent les 8 badges pastel, P1)
-        signal:  { 50: '#E4F2EA', 600: '#0B7A4B' }, // validé
+        // Statuts — vert recalibré dans le même ton (remplace le vert brut
+        // #00cd00 de la référence, trop saturé pour du texte/fond de bouton)
+        signal:  { 50: '#EAF6E2', 600: '#3F7A28' }, // validé — 5,41:1 sur paper
         pending: { 50: '#FBF1D6', 700: '#8A5A00' }, // en attente
         alert:   { 50: '#FBE9E7', 700: '#B42318' }, // refusé / erreur
 

@@ -71,17 +71,20 @@ export default function Home() {
 
   return (
     <div>
-      {/* Hero */}
+      {/* Hero — plus de présence visuelle (ton chaleureux/solidaire, cf. calibrage 20/08/2026) */}
       <div className="py-10">
-        {/* Pretexte de localisation : accent décoratif, ne porte aucune action —
-            neutralisé pour laisser le flame à la seule action de l'écran. */}
-        <p className="inline-flex items-center gap-1.5 text-ink-600 text-meta font-semibold mb-2">
-          🇨🇮 Abidjan, Côte d'Ivoire
-        </p>
-        <h1 className="text-3xl font-bold text-gray-900 mb-3 leading-tight text-left">
+        <div className="flex items-center gap-2 mb-4">
+          <span className="flex items-center justify-center w-9 h-9 rounded-full bg-flame-50 shrink-0">
+            <Wallet size={18} className="text-flame-700" />
+          </span>
+          <p className="text-ink-600 text-meta font-semibold">
+            🇨🇮 Abidjan, Côte d'Ivoire
+          </p>
+        </div>
+        <h1 className="text-display text-gray-900 mb-3 leading-tight text-left">
           Vous avez perdu<br />votre portefeuille ?
         </h1>
-        <p className="text-gray-500 text-sm mb-8 max-w-sm text-left">
+        <p className="text-gray-500 text-lead mb-8 max-w-sm text-left">
           Cherchez ici si quelqu'un l'a retrouvé et signalé sur la plateforme.
           CNI, permis, cartes bancaires — on vous aide à les récupérer.
         </p>
@@ -110,7 +113,7 @@ export default function Home() {
         <div className="bg-flame-700 rounded-fiche p-4 mb-8">
           <div>
             <p className="font-semibold text-white text-sm">Vous avez trouvé un portefeuille ?</p>
-            <p className="text-orange-100 text-meta mt-0.5">Inscrivez-vous et aidez quelqu'un à retrouver ses pièces.</p>
+            <p className="text-white/80 text-meta mt-0.5">Inscrivez-vous et aidez quelqu'un à retrouver ses pièces.</p>
           </div>
           <div className="border-t border-dashed border-white/25 mt-3 pt-3 flex justify-end">
             <button onClick={() => navigate('/register')} className="shrink-0 bg-white text-flame-700 font-semibold text-sm px-3 py-2 rounded-xl flex items-center gap-1">
@@ -120,15 +123,15 @@ export default function Home() {
         </div>
       )}
 
-      {/* How it works — poids croissant vers l'étape 3 (fonctionnalité de confiance) */}
+      {/* Comment ça marche — badges d'impact colorés (violet/vert), ton chaleureux */}
       <div className="grid grid-cols-3 gap-3 mb-8">
         {[
-          { icon: <Wallet size={20} className="text-ink-400" />, title: "Quelqu'un signale", desc: "Le retrouveur publie l'annonce avec les infos partielles du portefeuille.", accent: false },
-          { icon: <Search size={20} className="text-ink-400" />, title: 'Le proprio cherche', desc: 'Il tape son nom et trouve l\'annonce correspondante.', accent: false },
-          { icon: <Shield size={20} className="text-flame-500" />, title: 'Contact sécurisé', desc: 'Un selfie vérifie l\'identité avant d\'ouvrir le chat.', accent: true },
+          { icon: <Wallet size={20} className="text-signal-600" />, badge: 'bg-signal-50', title: "Quelqu'un signale", desc: "Le retrouveur publie l'annonce avec les infos partielles du portefeuille." },
+          { icon: <Search size={20} className="text-flame-700" />, badge: 'bg-flame-50', title: 'Le proprio cherche', desc: 'Il tape son nom et trouve l\'annonce correspondante.' },
+          { icon: <Shield size={20} className="text-white" />, badge: 'bg-flame-700', title: 'Contact sécurisé', desc: 'Un selfie vérifie l\'identité avant d\'ouvrir le chat.' },
         ].map((step, i) => (
-          <div key={i} className={`card text-center p-3 ${step.accent ? 'bg-flame-50 border-flame-500/30' : ''}`}>
-            <div className="flex justify-center mb-2">{step.icon}</div>
+          <div key={i} className="card text-center p-3">
+            <div className={`flex items-center justify-center w-11 h-11 rounded-full mx-auto mb-2 ${step.badge}`}>{step.icon}</div>
             <p className="font-semibold text-meta text-gray-800 mb-1">{step.title}</p>
             <p className="text-meta text-gray-500 leading-relaxed">{step.desc}</p>
           </div>

@@ -92,7 +92,7 @@
            transition-colors duration-200;
   }
   .input:focus {
-    border-color: #E85D04;
+    border-color: #6B60AF; /* flame.700 */
   }
 
   /* ── Card ────────────────────────────────────────────────────────── */
@@ -131,8 +131,8 @@
 .dark .border-ink-200 { border-color: #2A2521; } /* night.700 — filet de carte */
 .dark .border-ink-400 { border-color: #6E655D; } /* contour de champ, inchangé : déjà visible */
 .dark .bg-ink-100    { background-color: #1B1815; } /* night.900 */
-.dark .bg-flame-50   { background-color: rgba(232, 93, 4, 0.14); }
-.dark .text-flame-700 { color: #FF9A5C; } /* flame.300 — flame-700 est illisible sur fond sombre */
+.dark .bg-flame-50   { background-color: rgba(138, 127, 196, 0.16); } /* flame.500 en tinte */
+.dark .text-flame-700 { color: #B9AEE0; } /* flame.300 — flame-700 est illisible sur fond sombre */
 
 /* Neutral text */
 .dark .text-gray-900 { color: #f9fafb; }
